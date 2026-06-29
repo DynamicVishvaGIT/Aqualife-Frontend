@@ -2,7 +2,7 @@ import { useRef } from "react";
 
 const VARIANTS = {
   primary: {
-    base: "bg-[#155DFC] text-white px-7 py-2.5 rounded-full hover:shadow-[0_0_24px_rgba(21,93,252,0.45)]",
+    base: "bg-[#155DFC] text-white px-6 py-2 rounded-full hover:shadow-[0_0_24px_rgba(21,93,252,0.45)]",
     fill: "bg-[#0061C2]",        // darker blue — visible against #155DFC
     wave: "rgba(10,50,160,0.95)", // even darker wave crest
 }}

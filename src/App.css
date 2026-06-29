@@ -175,3 +175,9 @@
   60%  { transform: scale(1.3) rotate(5deg); }
   100% { transform: scale(1) rotate(0deg); }
 }
+
+/* Add this to your CSS targeting the wave image */
+.wave-image-class {
+  object-fit: cover;
+  object-position: center bottom; /* Anchors the water to the bottom, pushing the gap up */
+}

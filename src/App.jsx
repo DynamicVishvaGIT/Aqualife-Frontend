@@ -10,12 +10,15 @@ import WaterSofteners from "./pages/WaterSofteners";
 import ROPlant from "./pages/ROPlant";
 import ContactUs from "./pages/ContactUs";
 import {Footer} from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
 
 import "./App.css";
 
 function App() {
   return (
     <>
+      <ScrollToTop />
+      
       <Navbar />
 
       <Routes>

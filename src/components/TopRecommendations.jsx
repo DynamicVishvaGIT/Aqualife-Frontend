@@ -108,7 +108,7 @@ function ProductCard({ product }) {
           <WaterButton variant="primary">
             Book Demo
           </WaterButton>
-          <button className="text-slate-500 cursor-pointer hover:text-blue-600 text-sm font-medium transition-colors px-2 py-2.5">
+          <button className="text-slate-500 text-[14px] border-1 border-[#F0F3F6] rounded-full rounded-full cursor-pointer hover:text-blue-600 text-sm font-medium transition-colors px-5 py-2">
             Buy Now
           </button>
         </div>
