@@ -22,7 +22,7 @@ stage('Pull Code') {
     steps {
         withCredentials([string(credentialsId: 'github_token_for_ETI', variable: 'GHTOKEN')]) {
             sh """
-                sudo -u growfarm-website GHTOKEN=${GHTOKEN} bash << 'EOF'
+                sudo -u aqualife GHTOKEN=${GHTOKEN} bash << 'EOF'
                 set -e
                 cd "${params.PROJECT_DIR}"
                 
