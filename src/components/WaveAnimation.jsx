@@ -15,47 +15,48 @@ export default function WaveAnimation({
   fullBleed   = false,
   className   = "",
   style       = {},
-  scrollScrub = 1.2,
   scrollStart = "top 60%",
-  scrollEnd   = "top 50%",
 }) {
   const sentinelRef = useRef(null);
   const canvasRef   = useRef(null);
 
-  // ── GSAP ScrollTrigger: slow fade-in ────────────────────────────────────
-// ── GSAP ScrollTrigger: slow fade-in ────────────────────────────────────
-useEffect(() => {
-  const sentinel = sentinelRef.current;   // ← use sentinelRef, NOT sectionRef
-  const canvas = canvasRef.current;
+  // ── GSAP: one-time slide-in entrance ────────────────────────────────────
+  // Previously this used pin + scrub tied to scroll position. That's wrong
+  // for an above-the-fold hero: on load (scrollY 0) the "center center"
+  // trigger condition is often already satisfied, so GSAP initializes the
+  // timeline mid-scrub instead of at 0% — the canvas gets stuck half
+  // off-screen, which looks like a layout overflow (image left, blank right).
+  // A play-once tween avoids that: it fires immediately if already in view
+  // on load, or once when scrolled into view further down the page — either
+  // way it always runs to completion instead of freezing mid-transform.
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    const canvas = canvasRef.current;
+    if (!sentinel || !canvas) return;
 
-  if (!sentinel || !canvas) return;
+    gsap.set(canvas, {
+      xPercent: -100,
+      opacity: 0.8258,
+    });
 
-  gsap.set(canvas, {
-    xPercent: -100,
-    opacity: 0.8258,
-  });
+    const tween = gsap.to(canvas, {
+      xPercent: 0,
+      opacity: 1,
+      duration: 1.2,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: sentinel,
+        start: scrollStart,
+        toggleActions: "play none none none",
+        once: true,
+      },
+    });
 
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: sentinel,          // ← sentinel, not sectionRef.current
-      start: "center center",
-      end: "+=1200",
-      scrub: 3,
-      pin: true,
-      anticipatePin: 1,
-    },
-  });
-
-  tl.to(canvas, {
-    xPercent: 0,
-    ease: "none",
-  });
-
-  return () => {
-    tl.scrollTrigger?.kill();
-    tl.kill();
-  };
-}, []);
+    return () => {
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
+  }, [scrollStart]);
 
   // ── Three.js renderer ────────────────────────────────────────────────────
   useEffect(() => {
@@ -163,20 +164,20 @@ useEffect(() => {
     };
 
     // Cover UV: fills the plane exactly, no stretching, no empty strips
-   const applyCoverUV = (planeW, planeH) => {
-  if (!imageAspect) return;
-  const planeAspect = planeW / planeH;
+    const applyCoverUV = (planeW, planeH) => {
+      if (!imageAspect) return;
+      const planeAspect = planeW / planeH;
 
-  if (imageAspect > planeAspect) {
-    // Image is wider than plane → crop sides, AND shift up to cut white bottom
-    texture.repeat.set(planeAspect / imageAspect, 1);
-    texture.offset.set((1 - texture.repeat.x) / 2, 0.55); // ← 0.55 shifts up, shows wave not white gap
-  } else {
-    texture.repeat.set(1, imageAspect / planeAspect);
-    texture.offset.set(0, (1 - texture.repeat.y) / 2);
-  }
-  texture.needsUpdate = true;
-};
+      if (imageAspect > planeAspect) {
+        // Image is wider than plane → crop sides, AND shift up to cut white bottom
+        texture.repeat.set(planeAspect / imageAspect, 1);
+        texture.offset.set((1 - texture.repeat.x) / 2, 0.55); // ← 0.55 shifts up, shows wave not white gap
+      } else {
+        texture.repeat.set(1, imageAspect / planeAspect);
+        texture.offset.set(0, (1 - texture.repeat.y) / 2);
+      }
+      texture.needsUpdate = true;
+    };
 
     const buildMesh = () => {
       if (mesh) { scene.remove(mesh); geometry.dispose(); }

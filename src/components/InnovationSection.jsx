@@ -59,8 +59,8 @@ export default function InnovationSection() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "center 20%",
-          end: "start 30%",
+          start: "start 20%",
+          end: "center 30%",
           scrub: false,   // fire once, not scrubbed — matches CSS animation feel
           toggleActions: "play none none none",
         },
