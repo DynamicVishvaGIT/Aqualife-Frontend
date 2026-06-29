@@ -1,0 +1,222 @@
+/* =============================================
+   AppLoader.css — Water-drop loading screen
+   ============================================= */
+
+/* ---------- Overlay ---------- */
+.loader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #0d1f2d;
+  cursor: pointer;
+  overflow: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+  opacity: 1;
+  visibility: visible;
+  user-select: none;
+}
+
+.loader-overlay--out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ---------- Ripple on click ---------- */
+.loader-ripple {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(55, 214, 207, 0.35);
+  transform: translate(-50%, -50%) scale(0);
+  animation: ripple-expand 0.7s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes ripple-expand {
+  to {
+    transform: translate(-50%, -50%) scale(28);
+    opacity: 0;
+  }
+}
+
+/* ---------- Drop wrapper ---------- */
+.loader-drop-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 8px 32px rgba(55, 214, 207, 0.25));
+}
+
+.loader-drop {
+  overflow: visible;
+}
+
+/* ---------- Drop shell ---------- */
+.loader-drop-outline {
+  fill: none;
+  stroke: rgba(55, 214, 207, 0.55);
+  stroke-width: 2.5;
+}
+
+.loader-drop-glow {
+  fill: none;
+  stroke: rgba(55, 214, 207, 0.15);
+  stroke-width: 6;
+  pointer-events: none;
+}
+
+.loader-drop-empty {
+  fill: rgba(13, 31, 45, 0.85);
+}
+
+/* ---------- Liquid fill ---------- */
+.loader-fill {
+  transition: transform 0.25s linear;
+}
+
+/* ---------- Waves ---------- */
+.loader-wave {
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+.loader-wave--back {
+  opacity: 0.75;
+  animation-name: wave-back;
+  animation-duration: 3.2s;
+}
+
+.loader-wave--front {
+  opacity: 1;
+  animation-name: wave-front;
+  animation-duration: 2.4s;
+}
+
+@keyframes wave-front {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-100px); }
+}
+
+@keyframes wave-back {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(100px); }
+}
+
+/* ---------- Bubbles ---------- */
+.loader-bubble {
+  fill: rgba(255, 255, 255, 0.45);
+  animation-name: bubble-rise;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+}
+
+@keyframes bubble-rise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  80% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-175px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* ---------- Percentage readout ---------- */
+.loader-readout {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  margin-top: 28px;
+}
+
+.loader-percent {
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #37d6cf;
+  line-height: 1;
+  letter-spacing: -2px;
+  transition: color 0.2s;
+}
+
+.loader-percent-sign {
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: rgba(55, 214, 207, 0.6);
+  line-height: 1;
+}
+
+/* ---------- Label ---------- */
+.loader-label {
+  margin: 8px 0 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* ---------- Skip button ---------- */
+.loader-skip {
+  position: absolute;
+  bottom: 32px;
+  right: 32px;
+  background: transparent;
+  border: 1px solid rgba(55, 214, 207, 0.4);
+  color: rgba(55, 214, 207, 0.8);
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  animation: fade-in-up 0.4s ease forwards;
+}
+
+.loader-skip:hover {
+  background: rgba(55, 214, 207, 0.12);
+  border-color: rgba(55, 214, 207, 0.8);
+  color: #37d6cf;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .loader-wave,
+  .loader-bubble,
+  .loader-ripple {
+    animation: none;
+  }
+
+  .loader-fill {
+    transition: none;
+  }
+
+  .loader-overlay--out {
+    transition: none;
+  }
+}

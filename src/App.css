@@ -1,0 +1,177 @@
+@import "tailwindcss";
+
+
+/* =========================
+   ROOT VARIABLES
+========================= */
+
+:root {
+  --primary-blue: #0061C2;
+  --text_white: #ffffff;
+  --foreground: #0f172a;
+  --section-space: clamp(70px, 8vw, 140px);
+  --container-width: 1400px;
+  --container-padding: clamp(16px, 3vw, 40px);
+  --radius-primary: 24px;
+  --transition-primary: 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+     font-family: "Inter", sans-serif;
+  }
+}
+
+.heading {
+  font-family: "Montserrat", sans-serif;
+}
+
+
+
+/* =========================
+   COMMON CLASSES
+========================= */
+
+/* Global Container — single source of horizontal page gutters */
+.primary-container {
+  width: min(
+    calc(100% - (var(--container-padding) * 2)),
+    var(--container-width)
+  );
+
+  margin-inline: auto;
+}
+
+/*
+  Use .primary-container for left/right alignment sitewide.
+  Do not add extra px-* on sections that already wrap this class
+  (that doubles the side spacing).
+*/
+
+.heading-sm {
+  font-size: clamp(25px, 1.5vw, 25px);
+  /* line-height: 1; */
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.heading-lg {
+  font-size: clamp(32px, 4vw, 64px);
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.heading-md {
+  font-size: clamp(24px, 3vw, 40px);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.text-lg {
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 1.7;
+}
+
+.card-blur {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.transition-primary {
+  transition: all var(--transition-primary);
+}
+
+/* =========================
+   CUSTOM SCROLLBAR
+========================= */
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 100px;
+}
+
+
+@keyframes pulse-ring {
+  0%   { transform: scale(1);    opacity: 0.8; }
+  100% { transform: scale(1.55); opacity: 0;   }
+}
+
+
+
+/* button */
+/* ── Water Button — global ── */
+.w-btn {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  outline: none;
+  transition: transform 0.15s ease, box-shadow 0.25s ease;
+}
+.w-btn:active { transform: scale(0.96); }
+
+.w-btn .water-fill {
+  position: absolute;
+  bottom: -110%;
+  left: 0;
+  width: 100%;
+  height: 220%;
+  transition: bottom 0.55s cubic-bezier(0.22, 0.8, 0.36, 1);
+  pointer-events: none;
+}
+.w-btn:hover .water-fill { bottom: -10%; }
+
+.w-btn .water-fill svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  animation: wave-slide 1.8s linear infinite;
+}
+
+@keyframes wave-slide {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.w-btn .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(0);
+  animation: ripple-out 0.6s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes ripple-out {
+  to { transform: scale(4); opacity: 0; }
+}
+.w-btn span { position: relative; z-index: 1; }
+
+
+
+@keyframes badge-pop {
+  0%   { transform: scale(0) rotate(-10deg); }
+  60%  { transform: scale(1.3) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
