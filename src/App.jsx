@@ -11,6 +11,7 @@ import ROPlant from "./pages/ROPlant";
 import ContactUs from "./pages/ContactUs";
 import {Footer} from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
+import ProductDetail from "./components/ProductDetails";
 
 import "./App.css";
 
@@ -29,6 +30,7 @@ function App() {
         <Route path="/water-softeners" element={<WaterSofteners />} />
         <Route path="/ro-plant" element={<ROPlant />} />
         <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/product-details" element={<ProductDetail />} />
       </Routes>
 
       <Footer />

@@ -1,14 +1,11 @@
 import { useState } from "react";
-import {
-  SlidersHorizontal,
-  ChevronDown,
-  ChevronRight,
-} from "lucide-react";
+import { SlidersHorizontal, ChevronDown, ChevronRight } from "lucide-react";
 import product1 from "../assets/Purifier_1.png";
 import product2 from "../assets/Purifier_2.png";
 import product3 from "../assets/Purifier_3.png";
 import product4 from "../assets/Purifier_4.png";
 import { WaterButton } from "../components/WaterButton";
+import { useNavigate } from "react-router-dom";
 
 /* ── Category tabs ── */
 const CATEGORIES = [
@@ -75,54 +72,65 @@ const PRODUCTS = [
 
 /* ── Product card ── */
 function ProductCard({ product }) {
+  const navigate = useNavigate();
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-3 sm:p-5 flex flex-col h-full select-none justify-between">
-      <div>
-        <div className="relative bg-white rounded-xl flex items-center justify-center h-25 sm:h-52 mb-3 sm:mb-4 overflow-hidden">
-          {product.badge && (
-            <span className="absolute top-1.5 left-1.5 z-10 bg-slate-100 text-slate-500 text-[10px] sm:text-[11px] font-medium px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
-              {product.badge}
-            </span>
-          )}
-          <img
-            src={product.image}
-            alt={product.name}
-            className="h-full w-full object-contain mix-blend-multiply"
-            draggable={false}
-          />
-        </div>
+    <div
+      className="bg-white cursor-pointer rounded-2xl border border-slate-100 p-3 sm:p-5 flex flex-col h-full select-none justify-between"
+      onClick={() => navigate("/product-details")}
+    >
+      <div className="relative  bg-white rounded-xl flex items-center justify-center h-25 sm:h-52 mb-3 sm:mb-4 overflow-hidden">
+        {product.badge && (
+          <span className="absolute top-1.5 left-1.5 z-10 bg-slate-100 text-slate-500 text-[10px] sm:text-[11px] font-medium px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
+            {product.badge}
+          </span>
+        )}
+        <img
+          src={product.image}
+          alt={product.name}
+          className="h-full w-full object-contain mix-blend-multiply"
+          draggable={false}
+        />
+      </div>
 
-        <div className="flex flex-col flex-1">
-          <h3 className="text-[14px] sm:text-[15px] font-bold text-slate-900 leading-tight">
-            {product.name}
-          </h3>
-          <p className="text-slate-400 text-[11px] sm:text-[13px] mt-0.5 mb-2 sm:mb-3 line-clamp-2">
-            {product.description}
+      <div className="flex flex-col flex-1">
+        <h3 className="text-[14px] sm:text-[15px] font-bold text-slate-900 leading-tight">
+          {product.name}
+        </h3>
+        <p className="text-slate-400 text-[11px] sm:text-[13px] mt-0.5 mb-2 sm:mb-3 line-clamp-2">
+          {product.description}
+        </p>
+
+        <div className="mb-3 sm:mb-4">
+          <p className="text-lg sm:text-[22px] font-bold text-slate-900 leading-none mb-1">
+            ₹{product.price.toLocaleString("en-IN")}
           </p>
-
-          <div className="mb-3 sm:mb-4">
-            <p className="text-lg sm:text-[22px] font-bold text-slate-900 leading-none mb-1">
-              ₹{product.price.toLocaleString("en-IN")}
-            </p>
-            <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-[11px] sm:text-[13px]">
-              <span className="text-slate-400">MRP</span>
-              <span className="text-slate-400 line-through">
-                ₹{product.mrp.toLocaleString("en-IN")}
-              </span>
-              <span className="text-green-500 font-semibold whitespace-nowrap">
-                ({product.discount}% OFF)
-              </span>
-            </div>
+          <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-[11px] sm:text-[13px]">
+            <span className="text-slate-400">MRP</span>
+            <span className="text-slate-400 line-through">
+              ₹{product.mrp.toLocaleString("en-IN")}
+            </span>
+            <span className="text-green-500 font-semibold whitespace-nowrap">
+              ({product.discount}% OFF)
+            </span>
           </div>
         </div>
       </div>
 
       {/* Action row — optimized touch target sizing on mobile */}
-      <div className="flex  sm:flex-row gap-2 mt-auto">
-        <WaterButton variant="primary" className="w-full sm:flex-1 py-2 sm:py-2 text-xs sm:text-sm">
+      <div className="flex gap-2 mt-auto">
+        <WaterButton
+          variant="primary"
+          className="flex-1 py-1 px-2 sm:py-2.5 text-[11px] sm:text-sm"
+        >
           Book Demo
         </WaterButton>
-        <button className="w-full sm:flex-1 text-slate-500 text-xs sm:text-sm border border-[#F0F3F6] rounded-full cursor-pointer hover:text-blue-600 font-medium transition-colors py-2 sm:py-2.5 px-3">
+
+        <button
+          className="flex-1 text-slate-500 text-[10px] sm:text-sm border border-[#F0F3F6]
+          rounded-full cursor-pointer hover:text-blue-600 hover:border-[#155DFC] font-medium transition-colors
+          py-1 sm:py-2.5 px-2 sm:px-3"
+        >
           Buy Now
         </button>
       </div>
@@ -135,11 +143,11 @@ export default function WaterPurifierListing() {
   const [activeCategory, setActiveCategory] = useState("All");
 
   return (
-    <div className="min-h-screen bg-[#F6FAFF] font-sans pb-12">
+    <div className="min-h-screen bg-[#F6FAFF]">
       {/* ── Category tabs ── */}
       <div className="bg-white border-b border-slate-100 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-end gap-3 sm:gap-8 overflow-x-auto scrollbar-hide unique-scroll-container">
+        <div className="primary-container max-w-7xl m-auto">
+          <div className="flex items-end  justify-start sm:justify-center gap-3 sm:gap-8 overflow-x-auto scrollbar-hide unique-scroll-container">
             {CATEGORIES.map((cat) => {
               const active = activeCategory === cat.label;
               return (
@@ -174,7 +182,7 @@ export default function WaterPurifierListing() {
       </div>
 
       {/* ── Page content ── */}
-      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-12">
+      <div className="primary-container py-6 sm:py-12">
         {/* Heading */}
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-xl sm:text-[2rem] font-semibold text-slate-900 tracking-tight leading-tight">
@@ -229,7 +237,6 @@ export default function WaterPurifierListing() {
           </button>
         </div>
       </div>
-
       {/* Scoped CSS Fallback */}
       <style>{`
         .scrollbar-hide {

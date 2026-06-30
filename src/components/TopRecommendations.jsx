@@ -105,10 +105,14 @@ function ProductCard({ product }) {
         </div>
 
         <div className="flex items-center gap-3 mt-auto">
-          <WaterButton variant="primary">
+          <WaterButton variant="primary" 
+          textClassName="text-[13px] sm:text-[9px] lg:text-[14px]"
+          className="py-2 text-[18px] px-6 lg:px-4 lg:py-2.5 sm:py-2 sm:text-sm">
             Book Demo
           </WaterButton>
-          <button className="text-slate-500 text-[14px] border-1 border-[#F0F3F6] rounded-full rounded-full cursor-pointer hover:text-blue-600 text-sm font-medium transition-colors px-5 py-2">
+          <button className="text-slate-500 text-[14px] sm:text-sm border border-[#F0F3F6]
+    rounded-full cursor-pointer hover:text-blue-600 hover:border-[#155DFC] font-medium transition-colors
+     py-2 px-7 sm:py-2.5 lg:px-6 px-2 sm:px-3">
             Buy Now
           </button>
         </div>
