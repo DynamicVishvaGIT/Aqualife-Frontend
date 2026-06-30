@@ -226,49 +226,74 @@
 //     </>
 //   );
 // }
+
 import { useEffect, useRef } from "react";
 import { Droplets } from "lucide-react";
 
 export default function AppLoader({ onComplete }) {
-  const wrapRef      = useRef(null);
-  const iconBoxRef   = useRef(null);
-  const iconRef      = useRef(null);
-  const pctRef       = useRef(null);
-  const fillCircleRef= useRef(null);   // ← circle stroke ref
-  const hintRef      = useRef(null);
-  const iconWrapRef  = useRef(null);
-  const progressRef  = useRef(0);
-  const doneRef      = useRef(false);
-  const rafRef       = useRef(null);
+  const wrapRef       = useRef(null);
+  const iconBoxRef    = useRef(null);
+  const iconRef       = useRef(null);
+  const pctRef        = useRef(null);
+  const fillCircleRef = useRef(null);
+  const hintRef       = useRef(null);
+  const iconWrapRef   = useRef(null);
+  const progressRef   = useRef(0);
+  const doneRef       = useRef(false);
+  const rafRef        = useRef(null);
 
-  const RADIUS       = 45;
-  const CIRCUMFERENCE= 2 * Math.PI * RADIUS;   // ≈ 282.7
+  const RADIUS        = 45;
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
   useEffect(() => {
     /* ── particles container ── */
     const ptContainer = document.createElement("div");
     Object.assign(ptContainer.style, {
-      position:"absolute", inset:"0", pointerEvents:"none", overflow:"hidden",
+      position: "absolute", inset: "0",
+      pointerEvents: "none", overflow: "hidden",
     });
     wrapRef.current?.appendChild(ptContainer);
 
-    /* ── spawn particles ── */
+    /* ── spawn floating particles ── */
     const ptTimer = setInterval(() => {
       if (doneRef.current) return;
-      const p = document.createElement("div");
-      const sz  = 2 + Math.random() * 5;
-      const dur = 2 + Math.random() * 2;
+      const p   = document.createElement("div");
+      const sz  = 3 + Math.random() * 5;
+      const dur = 4 + Math.random() * 2;
       Object.assign(p.style, {
-        position:"absolute", borderRadius:"50%", background:"#1b9e9a",
-        width:`${sz}px`, height:`${sz}px`,
-        left:`${25 + Math.random() * 50}%`,
-        bottom:`${5 + Math.random() * 30}%`,
-        opacity:"0",
-        animation:`ptFloat ${dur}s ease-out forwards`,
+        position: "absolute", borderRadius: "50%", background: "#0061C2",
+        width: `${sz}px`, height: `${sz}px`,
+        left: `${25 + Math.random() * 50}%`,
+        bottom: `${5 + Math.random() * 30}%`,
+        opacity: "0",
+        animation: `ptFloat ${dur}s ease-out forwards`,
       });
       ptContainer.appendChild(p);
       setTimeout(() => p.remove(), dur * 1000 + 100);
     }, 350);
+
+    /* ── spawn bubbles (small + big, varying sizes) ── */
+    const bubbleSizes = [6, 10, 14, 8, 18, 5, 12, 16, 7, 20];
+    const bubbleTimer = setInterval(() => {
+      if (doneRef.current) return;
+      const b   = document.createElement("div");
+      const sz  = bubbleSizes[Math.floor(Math.random() * bubbleSizes.length)];
+      const dur = 3 + Math.random() * 3;
+      const opacity = 0.15 + Math.random() * 0.35;
+      Object.assign(b.style, {
+        position: "absolute",
+        borderRadius: "50%",
+        width:  `${sz}px`,
+        height: `${sz}px`,
+        left:   `${10 + Math.random() * 80}%`,
+        bottom: `${Math.random() * 15}%`,
+        background: `rgba(0, 97, 194, ${opacity})`,
+        border: `1px solid rgba(0, 97, 194, ${opacity + 0.15})`,
+        animation: `bubbleRise ${dur}s ease-out forwards`,
+      });
+      ptContainer.appendChild(b);
+      setTimeout(() => b.remove(), dur * 1000 + 100);
+    }, 220);
 
     /* ── set progress ── */
     function setProgress(p) {
@@ -293,10 +318,10 @@ export default function AppLoader({ onComplete }) {
     function burstRing() {
       const r = document.createElement("div");
       Object.assign(r.style, {
-        position:"absolute", top:"50%", left:"50%",
-        width:"80px", height:"80px", borderRadius:"50%",
-        border:"1.5px solid #1b9e9a", pointerEvents:"none",
-        animation:"burst .5s ease-out forwards",
+        position: "absolute", top: "50%", left: "50%",
+        width: "80px", height: "80px", borderRadius: "50%",
+        border: "1.5px solid #0061C2", pointerEvents: "none",
+        animation: "burst .5s ease-out forwards",
       });
       iconWrapRef.current?.appendChild(r);
       setTimeout(() => r.remove(), 550);
@@ -309,6 +334,7 @@ export default function AppLoader({ onComplete }) {
       clearTimeout(loadTimer);
       cancelAnimationFrame(rafRef.current);
       clearInterval(ptTimer);
+      clearInterval(bubbleTimer);
       setProgress(100);
       if (hintRef.current) hintRef.current.style.opacity = "0";
 
@@ -339,7 +365,7 @@ export default function AppLoader({ onComplete }) {
       const start = progressRef.current, t0 = performance.now(), dur = 1000;
       function finishFill(now) {
         const t = Math.min((now - t0) / dur, 1);
-        const e = t < .5 ? 2*t*t : -1+(4-2*t)*t;
+        const e = t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
         progressRef.current = start + (100 - start) * e;
         setProgress(progressRef.current);
         t < 1 ? requestAnimationFrame(finishFill) : finish();
@@ -367,12 +393,15 @@ export default function AppLoader({ onComplete }) {
 
     const el = iconWrapRef.current;
     el?.addEventListener("click", onTap);
-    el?.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") onTap(); });
+    el?.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") onTap();
+    });
     setProgress(0);
 
     return () => {
       clearTimeout(loadTimer);
       clearInterval(ptTimer);
+      clearInterval(bubbleTimer);
       cancelAnimationFrame(rafRef.current);
       el?.removeEventListener("click", onTap);
     };
@@ -382,77 +411,99 @@ export default function AppLoader({ onComplete }) {
     <>
       <style>{`
         @keyframes ptFloat {
-          0%   { transform: translateY(0) scale(1); opacity: .5 }
+          0%   { transform: translateY(0) scale(1);  opacity: .5 }
           100% { transform: translateY(-160px) scale(.2); opacity: 0 }
         }
+        @keyframes bubbleRise {
+          0%   { transform: translateY(0)    scale(1);    opacity: .55 }
+          40%  { transform: translateY(-60px) scale(1.05); opacity: .4  }
+          100% { transform: translateY(-180px) scale(.4); opacity: 0   }
+        }
         @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50%       { transform: scale(1.1); }
+          0%, 100% { transform: scale(1);   }
+          50%       { transform: scale(1.08); }
         }
         @keyframes ringPop {
-          0%   { transform: scale(.6); opacity: .6 }
-          100% { transform: scale(2.2); opacity: 0 }
+          0%   { transform: scale(.6); opacity: .5 }
+          100% { transform: scale(2.4); opacity: 0 }
         }
         @keyframes burst {
-          0%   { transform: translate(-50%,-50%) scale(0); opacity: .6 }
-          100% { transform: translate(-50%,-50%) scale(3.2); opacity: 0 }
+          0%   { transform: translate(-50%,-50%) scale(0);   opacity: .6 }
+          100% { transform: translate(-50%,-50%) scale(3.2); opacity: 0  }
         }
       `}</style>
 
       <div ref={wrapRef} style={{
-        position:"fixed", inset:0, zIndex:9999,
-        background:"#f7fafa",
-        display:"flex", flexDirection:"column",
-        alignItems:"center", justifyContent:"center",
-        overflow:"hidden",
+        position: "fixed", inset: 0, zIndex: 9999,
+        background: "#f0f6ff",
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        overflow: "hidden",
       }}>
 
         {/* icon + circle progress ring */}
         <div ref={iconWrapRef}
-          style={{ position:"relative", width:110, height:110,
-            display:"flex", alignItems:"center", justifyContent:"center",
-            cursor:"pointer", outline:"none" }}
+          style={{
+            position: "relative", width: 110, height: 110,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", outline: "none",
+          }}
           role="button" tabIndex={0} aria-label="Loading, tap to speed up"
         >
-          {/* SVG circle progress — rotated so it starts at top */}
+          {/* SVG circle progress */}
           <svg viewBox="0 0 110 110"
-            style={{ position:"absolute", inset:0, width:110, height:110, transform:"rotate(-90deg)" }}>
-            {/* track (background ring) */}
+            style={{ position: "absolute", inset: 0, width: 110, height: 110, transform: "rotate(-90deg)" }}>
             <circle cx="55" cy="55" r={RADIUS}
-              fill="none" stroke="#d0eceb" strokeWidth="3"/>
-            {/* fill ring */}
+              fill="none" stroke="#ccdff7" strokeWidth="3" />
             <circle ref={fillCircleRef} cx="55" cy="55" r={RADIUS}
-              fill="none" stroke="#1b9e9a" strokeWidth="3"
+              fill="none" stroke="#0061C2" strokeWidth="3"
               strokeLinecap="round"
               strokeDasharray={CIRCUMFERENCE}
               strokeDashoffset={CIRCUMFERENCE}
-              style={{ transition:"stroke-dashoffset .12s linear" }}
+              style={{ transition: "stroke-dashoffset .12s linear" }}
             />
           </svg>
 
           {/* pulsing ambient rings */}
           {[0, 0.9].map((delay, i) => (
             <div key={i} style={{
-              position:"absolute", inset:0, borderRadius:"50%",
-              border:"1.5px solid #1b9e9a",
-              animation:`ringPop 2s ease-out ${delay}s infinite`,
-            }}/>
+              position: "absolute", inset: 0, borderRadius: "50%",
+              border: "1.5px solid rgba(0, 97, 194, 0.4)",
+              animation: `ringPop 2s ease-out ${delay}s infinite`,
+            }} />
           ))}
 
           {/* icon circle */}
           <div ref={iconBoxRef} style={{
-            width:72, height:72, borderRadius:"50%",
-            background:"#e4f6f5",
-            display:"flex", alignItems:"center", justifyContent:"center",
-            animation:"pulse 2s ease-in-out infinite",
-            position:"relative", zIndex:1,
+            width: 72, height: 72, borderRadius: "50%",
+            background: "#0061C2",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            animation: "pulse 2s ease-in-out infinite",
+            position: "relative", zIndex: 1,
           }}>
             <div ref={iconRef}>
-              <Droplets size={30} color="#1b9e9a" />
+              <Droplets size={40} color="#fff" />
             </div>
           </div>
         </div>
 
+        {/* percentage */}
+        <p ref={pctRef} className="heading" style={{
+           fontSize: 26, fontWeight: 600,
+          color: "#0061C2", marginTop: 20, letterSpacing: 1,
+        }}>
+          0%
+        </p>
+
+      
+        {/* hint */}
+        <p ref={hintRef} style={{
+          fontSize: 10, color: "#6699cc", marginTop: 16,
+          letterSpacing: 1, textTransform: "uppercase", opacity: 0.6,
+          transition: "opacity .3s",
+        }}>
+          tap to boost
+        </p>
 
       </div>
     </>

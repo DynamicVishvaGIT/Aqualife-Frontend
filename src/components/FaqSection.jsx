@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
 
-const FAQS = [
+// Default FAQs (used only if no `faqs` prop is passed)
+const DEFAULT_FAQS = [
   {
     id: 1,
     question: "Why do I need a water purifier?",
@@ -72,29 +73,42 @@ function FaqItem({ faq, isOpen, onToggle }) {
   );
 }
 
-export default function FaqSection() {
-  const [openId, setOpenId] = useState(FAQS[0].id);
+export default function FaqSection({
+  className = "",
+  faqs = DEFAULT_FAQS,
+  title = "FAQs",
+  subtitle = "Choose Water Purifier that best suits your needs & budget",
+  defaultOpenIndex = 0,
+}) {
+  const initialOpenId =
+    faqs.length > 0 && faqs[defaultOpenIndex]
+      ? faqs[defaultOpenIndex].id
+      : null;
+
+  const [openId, setOpenId] = useState(initialOpenId);
 
   const toggle = (id) => setOpenId((prev) => (prev === id ? null : id));
 
+  if (!faqs || faqs.length === 0) return null;
+
   return (
-    <section className="bg-white py-10 sm:py-16">
+    <section className={`bg-white ${className}`}>
       <div className="primary-container max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-10">
           <h2 className="text-2xl sm:text-[2rem] font-semibold heading text-slate-900 leading-tight mb-1.5">
-            FAQs
+            {title}
           </h2>
-          <p className="text-slate-500 text-xs sm:text-sm">
-            Choose Water Purifier that best suits your needs &amp; budget
-          </p>
+          {subtitle && (
+            <p className="text-slate-500 text-xs sm:text-sm">{subtitle}</p>
+          )}
         </div>
 
         {/* Accordion */}
         <div className="divide-y-0">
           {/* Top border */}
           <div className="border-t border-slate-200" />
-          {FAQS.map((faq) => (
+          {faqs.map((faq) => (
             <FaqItem
               key={faq.id}
               faq={faq}

@@ -181,3 +181,38 @@
   object-fit: cover;
   object-position: center bottom; /* Anchors the water to the bottom, pushing the gap up */
 }
+
+.rcf-info-image {
+  position: sticky;
+  top: 100px;
+}
+
+.rcf-info-image img {
+  width: 100%;
+  border-radius: 12px;
+  display: block;
+}
+
+@media (max-width: 991px) {
+  .rcf-info-layout {
+    grid-template-columns: 1fr 260px;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .rcf-info-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .rcf-info-image {
+    position: static;
+    order: -1;
+  }
+
+  .rcf-info-image img {
+    max-width: 260px;
+    margin: 0 auto;
+  }
+}

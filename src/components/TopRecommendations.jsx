@@ -3,8 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import "swiper/css";
-import {WaterButton} from "../components/WaterButton"
-
+import { WaterButton } from "../components/WaterButton";
 
 import product1 from "../assets/Purifier_1.png";
 import product2 from "../assets/Purifier_2.png";
@@ -105,14 +104,18 @@ function ProductCard({ product }) {
         </div>
 
         <div className="flex items-center gap-3 mt-auto">
-          <WaterButton variant="primary" 
-          textClassName="text-[13px] sm:text-[9px] lg:text-[14px]"
-          className="py-2 text-[18px] px-6 lg:px-4 lg:py-2.5 sm:py-2 sm:text-sm">
+          <WaterButton
+            variant="primary"
+            textClassName="text-[13px] sm:text-[9px] lg:text-[14px]"
+            className="py-2 text-[18px] px-6 lg:px-4 lg:py-2.5 sm:py-2 sm:text-sm"
+          >
             Book Demo
           </WaterButton>
-          <button className="text-slate-500 text-[14px] sm:text-sm border border-[#F0F3F6]
+          <button
+            className="text-slate-500 text-[14px] sm:text-sm border border-[#F0F3F6]
     rounded-full cursor-pointer hover:text-blue-600 hover:border-[#155DFC] font-medium transition-colors
-     py-2 px-7 sm:py-2.5 lg:px-6 px-2 sm:px-3">
+     py-2 px-7 sm:py-2.5 lg:px-6 px-2 sm:px-3"
+          >
             Buy Now
           </button>
         </div>
@@ -141,9 +144,9 @@ export default function TopRecommendations() {
   return (
     <section className="bg-[#EEF3F8] py-10 sm:py-14 lg:py-16">
       <div className="primary-container">
-
         <h2 className="text-2xl sm:text-3xl heading lg:text-4xl font-semibold text-slate-900 mb-6 sm:mb-8">
-          <span className="text-[#0061C2]">Top Recommendations</span> - Water Purifiers
+          <span className="text-[#0061C2]">Top Recommendations</span> - Water
+          Purifiers
         </h2>
 
         <Swiper
@@ -155,10 +158,10 @@ export default function TopRecommendations() {
           slidesPerView={1}
           spaceBetween={16}
           breakpoints={{
-            480:  { slidesPerView: 1.4, spaceBetween: 16 },
-            640:  { slidesPerView: 2,   spaceBetween: 20 },
-            900:  { slidesPerView: 3,   spaceBetween: 20 },
-            1100: { slidesPerView: 4,   spaceBetween: 24 },
+            480: { slidesPerView: 1.4, spaceBetween: 16 },
+            640: { slidesPerView: 2, spaceBetween: 20 },
+            900: { slidesPerView: 3, spaceBetween: 20 },
+            1100: { slidesPerView: 4, spaceBetween: 24 },
           }}
           className="!pb-2"
         >
@@ -193,7 +196,6 @@ export default function TopRecommendations() {
             <ArrowRight size={20} />
           </button>
         </div>
-
       </div>
     </section>
   );

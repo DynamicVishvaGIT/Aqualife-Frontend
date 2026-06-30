@@ -9,27 +9,27 @@ import user1 from "../assets/user_1.png";
 import user2 from "../assets/user_2.png";
 
 const TESTIMONIALS = [
-  {
-    id: 1,
-    image: user1,
-    text: "We faced a lot of throat issues with corporation water, but after switching to Aqualife there are no health issues. It is hassle free with easy subscription, customer support and tracking in app.",
-    name: "Priya Sharma",
-    location: "Mumbai",
-  },
-  {
-    id: 2,
-    image: user2,
-    text: "We faced a lot of throat issues with corporation water, but after switching to Aqualife there are no health issues. It is hassle free with easy subscription, customer support and tracking in app.",
-    name: "Karthik Reddy",
-    location: "Mumbai",
-  },
-  {
-    id: 3,
-    image: user1,
-    text: "We faced a lot of throat issues with corporation water, but after switching to Aqualife there are no health issues. It is hassle free with easy subscription, customer support and tracking in app.",
-    name: "Anita Patel",
-    location: "Delhi",
-  },
+{
+  id: 1,
+  image: user1,
+  text: "We faced a lot of throat issues with corporation water, but after switching to Aqualife there are no health issues. It is hassle free with easy subscription, customer support and tracking in app.",
+  name: "Priya Sharma",
+  location: "Mumbai",
+},
+{
+  id: 2,
+  image: user2,
+  text: "We faced a lot of throat issues with corporation water, but after switching to Aqualife there are no health issues. It is hassle free with easy subscription, customer support and tracking in app.",
+  name: "Karthik Reddy",
+  location: "Mumbai",
+},
+{
+  id: 3,
+  image: user1,
+  text: "We faced a lot of throat issues with corporation water, but after switching to Aqualife there are no health issues. It is hassle free with easy subscription, customer support and tracking in app.",
+  name: "Anita Patel",
+  location: "Delhi",
+},
 ];
 
 export function CommunitySection() {
