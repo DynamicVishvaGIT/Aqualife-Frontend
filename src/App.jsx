@@ -12,8 +12,8 @@ import ContactUs from "./pages/ContactUs";
 import {Footer} from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import ProductDetail from "./components/ProductDetails";
+import Signup from "./components/Signup";
 import Cart from "./pages/Cart";
-import SignUp from "./pages/SignUp";
 
 import "./App.css";
 
