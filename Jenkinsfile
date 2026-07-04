@@ -94,14 +94,29 @@ stage('Build & Deploy') {
             sh "sudo -u aqualife bash -c 'cd ${params.PROJECT_DIR} && if [ \"\$PREVIOUS_COMMIT\" != \"none\" ]; then git reset --hard \$PREVIOUS_COMMIT; fi'"
         }
         success {
-            mail to: "${params.NOTIFY_EMAIL}",
-                 subject: "🟢 SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "React deployment successful 🚀\n\n${env.BUILD_URL}"
-        }
-        failure {
-            mail to: "${params.NOTIFY_EMAIL}",
-                 subject: "❌ FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Pipeline failed.\n\n${env.BUILD_URL}"
-        }
+    emailext(
+        to: params.NOTIFY_EMAIL,
+        subject: "🟢 SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+        body: """
+React deployment successful 🚀
+
+Build URL:
+${env.BUILD_URL}
+"""
+    )
+}
+
+failure {
+    emailext(
+        to: params.NOTIFY_EMAIL,
+        subject: "❌ FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+        body: """
+Pipeline failed.
+
+Build URL:
+${env.BUILD_URL}
+"""
+    )
+}
     }
 }
