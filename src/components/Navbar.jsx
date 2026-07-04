@@ -207,7 +207,7 @@ export default function Navbar({ cartCount = 0 }) {
                 ref={(el) => (utilItemsRef.current[0] = el)}
                 to="mailto:info@aqualifeever.com"
                 className={`flex items-center gap-1.5 transition-colors duration-200 ${
-                  isWhiteText ? "hover:text-blue-200" : "hover:text-blue-600"
+                  isWhiteText ? "hover:text-blue-200" : "hover:text-[#0061C2]"
                 }`}
               >
                 <Mail size={13} />
@@ -217,7 +217,7 @@ export default function Navbar({ cartCount = 0 }) {
                 ref={(el) => (utilItemsRef.current[1] = el)}
                 to="tel:18005701000"
                 className={`flex items-center gap-1.5 transition-colors duration-200 ${
-                  isWhiteText ? "hover:text-blue-200" : "hover:text-blue-600"
+                  isWhiteText ? "hover:text-blue-200" : "hover:text-[#0061C2]"
                 }`}
               >
                 <Phone size={13} />
@@ -227,7 +227,7 @@ export default function Navbar({ cartCount = 0 }) {
                 ref={(el) => (utilItemsRef.current[2] = el)}
                 to="/contact-us"
                 className={`transition-colors duration-200 ${
-                  isWhiteText ? "hover:text-blue-200" : "hover:text-blue-600"
+                  isWhiteText ? "hover:text-blue-200" : "hover:text-[#0061C2]"
                 }`}   
               >
                 Contact Us
@@ -274,8 +274,8 @@ export default function Navbar({ cartCount = 0 }) {
                             ? "text-white"
                             : "text-white/75 hover:text-white"
                           : isActive
-                            ? "text-blue-600"
-                            : "text-slate-700 hover:text-blue-600"
+                            ? "text-[#0061C2]"
+                            : "text-slate-700 hover:text-[#0061C2]"
                       }`}
                     >
                       {link.label}
@@ -283,7 +283,7 @@ export default function Navbar({ cartCount = 0 }) {
                       <span
                         className={`absolute -bottom-0.5 h-[2px] rounded-full
                           transition-all duration-300 ease-out
-                          ${isWhiteText ? "bg-white" : "bg-blue-600"}
+                          ${isWhiteText ? "bg-white" : "bg-[#0061C2]"}
                           ${
                             isActive
                               ? "left-0 right-0"
@@ -311,7 +311,7 @@ export default function Navbar({ cartCount = 0 }) {
                   ${
                     isWhiteText
                       ? "hover:text-white hover:bg-white/10"
-                      : "hover:text-blue-600 hover:bg-blue-50"
+                      : "hover:text-[#0061C2] hover:bg-blue-50"
                   }`}
               >
                 <Search size={18} />
@@ -329,7 +329,7 @@ export default function Navbar({ cartCount = 0 }) {
       ${
         isWhiteText
           ? "hover:text-white hover:bg-white/10"
-          : "hover:text-blue-600 hover:bg-blue-50"
+          : "hover:text-[#0061C2] hover:bg-blue-50"
       }`}
                 >
                   <User size={20} />
@@ -351,14 +351,14 @@ export default function Navbar({ cartCount = 0 }) {
       ${
         isWhiteText
           ? "hover:text-white hover:bg-white/10"
-          : "hover:text-blue-600 hover:bg-blue-50"
+          : "hover:text-[#0061C2] hover:bg-blue-50"
       }`}
                 >
                   <ShoppingCart size={20} />
                   <span
                     key={cartCount}
-                    className="absolute -top-1 -right-3 bg-blue-600 text-white text-[11px]
-        leading-none w-5 h-5 rounded-full flex items-center justify-center
+                    className="absolute -top-2 -right-4 bg-[#0061C2] text-white text-[12px]
+        leading-none w-6 h-6 rounded-full flex items-center justify-center
         font-medium animate-[badge-pop_0.4s_cubic-bezier(0.36,0.07,0.19,0.97)]"
                   >
                     {cartCount}
@@ -386,7 +386,7 @@ export default function Navbar({ cartCount = 0 }) {
               >
                 <ShoppingCart size={20} />
                 <span
-                  className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px]
+                  className="absolute -top-2 -right-2 bg-[#0061C2] text-white text-[10px]
                   leading-none w-4 h-4 rounded-full flex items-center justify-center"
                 >
                   {cartCount}
@@ -459,20 +459,20 @@ export default function Navbar({ cartCount = 0 }) {
                         font-medium transition-all duration-200 group hover:pl-6
                         ${
                           isActive
-                            ? "text-blue-600 bg-blue-50/60"
-                            : "text-slate-800 hover:text-blue-600 hover:bg-blue-50/40"
+                            ? "text-[#0061C2] bg-blue-50/60"
+                            : "text-slate-800 hover:text-[#0061C2] hover:bg-blue-50/40"
                         }`}
                     >
                       <span className="flex items-center gap-2.5">
                         {isActive && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#0061C2] shrink-0" />
                         )}
                         {link.label}
                       </span>
                       <ChevronRight
                         size={16}
                         className={`transition-all duration-200 group-hover:translate-x-1
-                          ${isActive ? "text-blue-400" : "text-slate-300 group-hover:text-blue-300"}`}
+                          ${isActive ? "text-blue-400" : "text-slate-300 group-hover:text-[#0061C2]"}`}
                       />
                     </Link>
                   </li>
@@ -487,14 +487,14 @@ export default function Navbar({ cartCount = 0 }) {
             >
               <Link
                 to="mailto:info@aqualifeever.com"
-                className="flex items-center gap-2 hover:text-blue-600 transition-colors duration-200"
+                className="flex items-center gap-2 hover:text-[#0061C2] transition-colors duration-200"
               >
                 <Mail size={14} />
                 info@aqualifeever.com
               </Link>
               <Link
                 to="tel:18005701000"
-                className="flex items-center gap-2 hover:text-blue-600 transition-colors duration-200"
+                className="flex items-center gap-2 hover:text-[#0061C2] transition-colors duration-200"
               >
                 <Phone size={14} />
                 1800-570-1000

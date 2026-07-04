@@ -7,12 +7,18 @@ import {
   ChevronDown,
   Zap,
   Plus as PlusIcon,
+  ShoppingCart,
 } from "lucide-react";
 import gsap from "gsap";
 import Breadcrumb from "../components/Breadcrumb";
 
 const BRAND = "#0061C2";
 const BRAND_DARK = "#004f9e";
+
+import product1 from "../assets/Purifier_1.png";
+import product2 from "../assets/Purifier_2.png";
+import product3 from "../assets/Purifier_3.png";
+import product4 from "../assets/Purifier_4.png";
 
 const initialItems = [
   {
@@ -23,8 +29,7 @@ const initialItems = [
     mrp: 23000,
     price: 12599,
     qty: 1,
-    image:
-      "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200&h=200&fit=crop",
+    image: product1,
   },
   {
     id: 2,
@@ -34,8 +39,7 @@ const initialItems = [
     mrp: 23000,
     price: 12599,
     qty: 1,
-    image:
-      "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200&h=200&fit=crop",
+    image: product2,
   },
   {
     id: 3,
@@ -45,10 +49,9 @@ const initialItems = [
     mrp: 23000,
     price: 12599,
     qty: 1,
-    image:
-      "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200&h=200&fit=crop",
+    image: product3,
   },
-]; 
+];
 
 // Extra items revealed by the "View More" toggle
 const extraItems = [
@@ -60,8 +63,7 @@ const extraItems = [
     mrp: 23000,
     price: 12599,
     qty: 1,
-    image:
-      "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200&h=200&fit=crop",
+    image: product4,
   },
   {
     id: 5,
@@ -71,8 +73,7 @@ const extraItems = [
     mrp: 21000,
     price: 12999,
     qty: 1,
-    image:
-      "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200&h=200&fit=crop",
+    image: product1,
   },
 ];
 
@@ -271,9 +272,9 @@ export default function CartComponent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4 sm:pt-44 ">
+    <div className="min-h-screen bg-gray-50 pt-34 py-4 sm:pt-44 ">
       {/* Breadcrumb */}
-      <div className="absolute top-2 lg:top-34 left-0 w-full z-10">
+      <div className="absolute top-24 lg:top-34 left-0 w-full z-10">
         <div className="primary-container">
           <Breadcrumb />
         </div>
@@ -288,19 +289,18 @@ export default function CartComponent() {
           {/* Header */}
           <button
             onClick={() => setExpanded((e) => !e)}
-            className="w-full flex items-center justify-between px-4 sm:px-5 py-4 border-b border-gray-100"
+            className="w-full flex items-center justify-between px-4 sm:px-12 py-4 border-b border-gray-100"
           >
             <div className="flex items-center gap-3">
               <span className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                🛒
+                <ShoppingCart size={20} />
               </span>
               <span className="font-medium text-gray-900 text-sm sm:text-base">
                 Item in your cart
               </span>
               <span
                 ref={badgeRef}
-                className="w-5 h-5 rounded-full text-white text-xs flex items-center justify-center font-medium"
-                style={{ backgroundColor: BRAND }}
+                className="w-8 h-8 rounded-full bg-gray-100 text-[#0061C2] text-sm flex items-center justify-center font-medium"
               >
                 {allItems.length}
               </span>
@@ -313,7 +313,7 @@ export default function CartComponent() {
           </button>
 
           {expanded && (
-            <div className="px-4 sm:px-5 py-4">
+            <div className="px-4 sm:px-12  py-4">
               {allItems.map((item) => (
                 <div
                   key={item.id}
@@ -323,72 +323,72 @@ export default function CartComponent() {
                   className="cart-item-card border border-gray-200 rounded-xl overflow-hidden mb-4"
                 >
                   <div className="flex gap-3 p-3 sm:p-4">
-                    {/* Image */}
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-md bg-black overflow-hidden shrink-0">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover opacity-90"
-                      />
-                    </div>
+  {/* Image */}
+  <div className="w-20 h-24 sm:w-28 sm:h-32 shrink-0 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
+    <img
+      src={item.image}
+      alt={item.name}
+      className="w-full h-full object-contain"
+    />
+  </div>
 
-                    {/* Details */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-sm sm:text-[15px] font-medium text-gray-900 truncate">
-                            {item.name}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            Color: {item.color}
-                          </p>
-                          <p className="text-xs text-green-600 font-medium mt-1">
-                            ({item.discount})
-                          </p>
-                        </div>
+  {/* Details */}
+  <div className="flex-1 min-w-0 flex flex-col gap-1.5">
 
-                        {/* Qty stepper */}
-                        <div className="flex items-center border border-gray-300 rounded-md overflow-hidden shrink-0 h-7">
-                          <button
-                            onClick={() => updateQty(item.id, -1)}
-                            className="w-7 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50"
-                          >
-                            <Minus className="w-3 h-3" />
-                          </button>
-                          <span
-                            ref={(el) => {
-                              if (el) qtyRefs.current[item.id] = el;
-                            }}
-                            className="w-6 text-center text-xs font-medium inline-block"
-                          >
-                            {item.qty}
-                          </span>
-                          <button
-                            onClick={() => updateQty(item.id, 1)}
-                            className="w-7 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50"
-                          >
-                            <Plus className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </div>
+    {/* Row 1: name + stepper */}
+    <div className="flex  lg:flex  items-start justify-between gap-2">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-gray-900 leading-snug line-clamp-2">
+          {item.name}
+        </p>
+        <p className="text-xs text-gray-500 mt-0.5">Color: {item.color}</p>
+        <p className="text-xs text-green-600 font-medium mt-0.5">
+          ({item.discount})
+        </p>
+      </div>
 
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className="text-xs text-gray-400 line-through">
-                          {formatINR(item.mrp)}
-                        </span>
-                        <span className="text-sm sm:text-[15px] font-semibold text-gray-900">
-                          {formatINR(item.price)}
-                        </span>
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="ml-auto text-red-400 hover:text-red-500"
-                          aria-label="Remove item"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+      {/* Qty stepper — top-right, never wraps */}
+      <div className="inline-flex items-center border border-gray-300 rounded-md overflow-hidden shrink-0">
+        <button
+          onClick={() => updateQty(item.id, -1)}
+          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
+        >
+          <Minus className="w-3.5 h-3.5" />
+        </button>
+        <span
+          ref={(el) => { if (el) qtyRefs.current[item.id] = el; }}
+          className="w-9 h-8 flex items-center justify-center border-x border-gray-300 text-sm font-semibold text-gray-900 select-none"
+        >
+          {item.qty}
+        </span>
+        <button
+          onClick={() => updateQty(item.id, 1)}
+          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
+        >
+          <Plus className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </div>
+
+    {/* Row 2: price + delete */}
+    <div className="flex items-center gap-2 mt-auto pt-1">
+      <span className="text-xs text-gray-400 line-through">
+        {formatINR(item.mrp)}
+      </span>
+      <span className="text-sm font-semibold text-gray-900">
+        {formatINR(item.price)}
+      </span>
+      <button
+        onClick={() => removeItem(item.id)}
+        className="ml-auto text-red-400 hover:text-red-500 p-1"
+        aria-label="Remove item"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </div>
+
+  </div>
+</div>
 
                   <button
                     onClick={bounceButton}
@@ -439,8 +439,9 @@ export default function CartComponent() {
             Delivery to: Address 1 - 703, Gayatridham Towers, Gayatridham Tower,
             Dadar, Mumbai.
           </p>
+          <hr className="w-full border-gray-100 mt-3" />
 
-          <div className="mt-4 border border-gray-200 rounded-lg p-4 space-y-3">
+          <div className="mt-4 border border-gray-200 rounded-lg p-4 space-y-3 bg-gray-50/60">
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600">MRP</span>
               <span className="text-gray-400 line-through">
@@ -454,7 +455,7 @@ export default function CartComponent() {
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Shiping Worth</span>
+              <span className="text-gray-600">Shipping Worth</span>
               <span className="text-green-600">
                 <span className="line-through text-gray-400 mr-1">₹0</span>
                 Free
@@ -468,7 +469,7 @@ export default function CartComponent() {
               </span>
             </div>
 
-            <div className="border-t border-gray-200 pt-3 flex items-start justify-between">
+            <div className="border-t border-gray-300 pt-3 flex items-start justify-between">
               <div>
                 <p className="font-semibold text-gray-900 text-sm">
                   Bill Summary

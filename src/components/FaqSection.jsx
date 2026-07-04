@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Plus, Minus } from "lucide-react";
+import gsap from "gsap";
 
-// Default FAQs (used only if no `faqs` prop is passed)
 const DEFAULT_FAQS = [
   {
     id: 1,
@@ -41,31 +41,137 @@ const DEFAULT_FAQS = [
   },
 ];
 
-function FaqItem({ faq, isOpen, onToggle }) {
+/* ─────────────────────────────────────────
+   FaqItem — GSAP-powered accordion row
+───────────────────────────────────────── */
+function FaqItem({ faq, isOpen, onToggle, animIndex }) {
+  const rowRef     = useRef(null);
+  const bodyRef    = useRef(null);
+  const iconRef    = useRef(null);
+  const questionRef = useRef(null);
+  const didMount   = useRef(false);   // skip first-render close animation
+
+  /* entrance stagger (triggered by parent) */
+  useEffect(() => {
+    gsap.from(rowRef.current, {
+      y: 24,
+      opacity: 0,
+      duration: 0.55,
+      ease: "power3.out",
+      delay: animIndex * 0.07,
+    });
+  }, []);
+
+/* open / close accordion */
+useEffect(() => {
+  if (!bodyRef.current) return;
+  const el = bodyRef.current;
+
+  if (!didMount.current) {
+    if (isOpen) {
+      // initialise open immediately — no animation
+      gsap.set(el, { height: "auto", opacity: 1, paddingBottom: 20 });
+    } else {
+      // initialise closed — no animation
+      gsap.set(el, { height: 0, opacity: 0, paddingBottom: 0 });
+    }
+    didMount.current = true;
+    return;
+  }
+
+  if (isOpen) {
+    gsap.set(el, { height: "auto", opacity: 1, paddingBottom: "20px" });
+    const h = el.offsetHeight;
+    gsap.from(el, {
+      height: 0,
+      opacity: 0,
+      paddingBottom: 0,
+      duration: 0.38,
+      ease: "power3.out",
+    });
+    gsap.to(el, { height: h, opacity: 1, paddingBottom: 20, duration: 0.38, ease: "power3.out" });
+  } else {
+    gsap.to(el, {
+      height: 0,
+      opacity: 0,
+      paddingBottom: 0,
+      duration: 0.3,
+      ease: "power2.in",
+    });
+  }
+}, [isOpen]);
+
+  /* icon rotation */
+useEffect(() => {
+  if (!iconRef.current) return;
+  // set immediately on mount (no didMount guard), animate on subsequent changes
+  if (!didMount.current) {
+    gsap.set(iconRef.current, { rotation: isOpen ? 180 : 0 });
+    return;
+  }
+
+  gsap.to(iconRef.current, {
+    rotation: isOpen ? 180 : 0,
+    duration: 0.3,
+    ease: "power2.inOut",
+  });
+}, [isOpen]);
+
+  /* hover micro-interactions */
+  const onEnter = () => {
+    if (isOpen) return;
+    gsap.to(questionRef.current, { x: 4, duration: 0.2, ease: "power1.out" });
+    gsap.to(iconRef.current,     { scale: 1.15, duration: 0.2, ease: "power1.out" });
+};
+
+  const onLeave = () => {
+    gsap.to(questionRef.current, { x: 0, duration: 0.2, ease: "power1.in" });
+    gsap.to(iconRef.current,     { scale: 1, duration: 0.2, ease: "power1.in" });
+  };
+
+  /* click ripple on the button */
+  const onPress = () => {
+    gsap.timeline()
+      .to(rowRef.current, { scaleX: 0.995, duration: 0.08, ease: "power1.in" })
+      .to(rowRef.current, { scaleX: 1,     duration: 0.25, ease: "elastic.out(1,0.5)" });
+  };
+
   return (
-    <div className="border-b border-slate-200">
+    <div ref={rowRef} className="border-b border-slate-200 origin-left">
       <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between gap-4 py-5 sm:py-6 text-left cursor-pointer group"
+        onClick={() => { onPress(); onToggle(); }}
+        onMouseEnter={onEnter}
+        onMouseLeave={onLeave}
+        className="w-full flex items-center justify-between gap-4 py-5 sm:py-6 text-left cursor-pointer"
       >
         <span
+          ref={questionRef}
           className={`text-sm sm:text-[15px] heading font-semibold leading-snug transition-colors duration-200 ${
-            isOpen ? "text-slate-900" : "text-slate-800 group-hover:text-slate-900"
+            isOpen ? "text-slate-900" : "text-slate-700"
           }`}
+          style={{ color: isOpen ? "#1A6FC4" : undefined }}
         >
           {faq.question}
         </span>
-        <span className="shrink-0 text-[#155DFC]">
-          {isOpen ? <Minus size={18} /> : <Plus size={18} />}
+
+        <span
+          ref={iconRef}
+          className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-colors duration-200"
+          style={{
+            backgroundColor: isOpen ? "#EFF6FC" : "#F1F5F9",
+            color: isOpen ? "#1A6FC4" : "#64748B",
+          }}
+        >
+          {isOpen ? <Minus size={15} /> : <Plus size={15} />}
         </span>
       </button>
 
+      {/* answer body — height animated by GSAP, overflow hidden always */}
       <div
-        className={`overflow-hidden max-w-[1100px] transition-all duration-300 ease-in-out ${
-          isOpen ? "max-h-96 pb-5 sm:pb-6 " : "max-h-0"
-        }`}
+        ref={bodyRef}
+        style={{ overflow: "hidden", height: 0, opacity: 0 }}
       >
-        <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
+        <p className="text-slate-500 text-xs sm:text-sm leading-relaxed max-w-[860px]">
           {faq.answer}
         </p>
       </div>
@@ -73,6 +179,9 @@ function FaqItem({ faq, isOpen, onToggle }) {
   );
 }
 
+/* ─────────────────────────────────────────
+   FaqSection
+───────────────────────────────────────── */
 export default function FaqSection({
   className = "",
   faqs = DEFAULT_FAQS,
@@ -81,21 +190,40 @@ export default function FaqSection({
   defaultOpenIndex = 0,
 }) {
   const initialOpenId =
-    faqs.length > 0 && faqs[defaultOpenIndex]
-      ? faqs[defaultOpenIndex].id
-      : null;
+    faqs.length > 0 && faqs[defaultOpenIndex] ? faqs[defaultOpenIndex].id : null;
 
   const [openId, setOpenId] = useState(initialOpenId);
 
-  const toggle = (id) => setOpenId((prev) => (prev === id ? null : id));
+  const headerRef  = useRef(null);
+  const sectionRef = useRef(null);
+
+  /* header entrance */
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(headerRef.current.children, {
+        y: 20,
+        opacity: 0,
+        stagger: 0.1,
+        duration: 0.55,
+        ease: "power3.out",
+      });
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
+  const toggle = useCallback(
+    (id) => setOpenId((prev) => (prev === id ? null : id)),
+    []
+  );
 
   if (!faqs || faqs.length === 0) return null;
 
   return (
-    <section className={`bg-white ${className}`}>
+    <section ref={sectionRef} className={`bg-white ${className}`}>
       <div className="primary-container max-w-7xl mx-auto">
+
         {/* Header */}
-        <div className="mb-6 sm:mb-10">
+        <div ref={headerRef} className="mb-6 sm:mb-10">
           <h2 className="text-2xl sm:text-[2rem] font-semibold heading text-slate-900 leading-tight mb-1.5">
             {title}
           </h2>
@@ -105,15 +233,15 @@ export default function FaqSection({
         </div>
 
         {/* Accordion */}
-        <div className="divide-y-0">
-          {/* Top border */}
+        <div>
           <div className="border-t border-slate-200" />
-          {faqs.map((faq) => (
+          {faqs.map((faq, idx) => (
             <FaqItem
               key={faq.id}
               faq={faq}
               isOpen={openId === faq.id}
               onToggle={() => toggle(faq.id)}
+              animIndex={idx}
             />
           ))}
         </div>

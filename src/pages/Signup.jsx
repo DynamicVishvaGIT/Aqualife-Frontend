@@ -124,7 +124,7 @@ export default function SignUp() {
       On mobile → column card scrolls naturally
       On desktop → card is fixed height, internal form scrolls if needed
     */
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center pt-14 sm:p-6 lg:pt-30">
+    <div className="min-h-screen bg-[#FBFBFB] flex items-center justify-center pt-14 sm:p-6 lg:pt-30">
 
       {/*
         CARD
@@ -135,10 +135,9 @@ export default function SignUp() {
       <div
         ref={containerRef}
        className="
-  w-full
-  rounded-2xl shadow-lg
+  w-full 
   flex flex-col md:flex-row
-   md:h-[580px] lg:h-[740px] 2xl:h-[1100px]
+   md:h-[580px] lg:h-[720px] 2xl:h-[1100px]
 "
       >
 
@@ -149,7 +148,7 @@ export default function SignUp() {
         */}
         <div
           ref={bannerRef}
-          className="relative shrink-0 w-full h-[250px] md:h-full md:w-[50%]"
+          className="relative shrink-0 w-full h-[400px] md:h-auto md:w-[50%]"
         >
           <img
             src={sideBanner}
@@ -160,7 +159,7 @@ export default function SignUp() {
               width: "100%",
               height: "100%",
               objectFit: "cover",
-              objectPosition: "center top",
+              objectPosition: "top center",
               display: "block",
             }}
           />
@@ -188,7 +187,7 @@ export default function SignUp() {
                 <button
                   type="button"
                   onClick={() => handleTabSwitch(tab)}
-                  className={`w-full py-3 rounded-full font-semibold text-sm sm:text-base border transition-all duration-300 ${
+                  className={`w-full py-3 cursor-pointer rounded-full font-semibold text-sm sm:text-base border transition-all duration-300 ${
                     activeTab === tab ? "text-white shadow-md" : "bg-white"
                   }`}
                   style={

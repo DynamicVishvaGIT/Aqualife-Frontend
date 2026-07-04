@@ -1,7 +1,6 @@
-// components/ContactUs.jsx
-import { MapPin, Phone, Mail } from "lucide-react";
-  // components/LocationMap.jsx
+// @refresh reset
 import { useEffect, useRef, useState } from "react";
+import { MapPin, Phone, Mail } from "lucide-react";
 import {
   FaMapMarkerAlt,
   FaPhoneAlt,
@@ -11,12 +10,17 @@ import {
   FaLinkedinIn,
   FaWhatsapp,
 } from "react-icons/fa";
-import { FaXTwitter } from "react-icons/fa6"
-
-
-import contactHeroImg from "../assets/about_banner_1.png"; 
+import { FaXTwitter } from "react-icons/fa6";
+import gsap from "gsap";
+import contactHeroImg from "../assets/about_banner_1.png";
 import Breadcrumb from "../components/Breadcrumb";
 
+const prefersReducedMotion = () =>
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ─────────────────────────────────────────────
+   CONSTANTS
+───────────────────────────────────────────── */
 const OFFICES = [
   {
     title: "Head Office",
@@ -36,13 +40,38 @@ const OFFICES = [
 ];
 
 const SOCIALS = [
-  { icon: FaXTwitter, label: "Twitter" },
-  { icon: FaFacebookF, label: "Facebook" },
-  { icon: FaInstagram, label: "Instagram" },
-  { icon: FaLinkedinIn, label: "LinkedIn" },
-  { icon: FaWhatsapp, label: "WhatsApp" },
+  { icon: FaXTwitter,    label: "Twitter"   },
+  { icon: FaFacebookF,   label: "Facebook"  },
+  { icon: FaInstagram,   label: "Instagram" },
+  { icon: FaLinkedinIn,  label: "LinkedIn"  },
+  { icon: FaWhatsapp,    label: "WhatsApp"  },
 ];
 
+const MAP_EMBED_SRC =
+  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3306.9!2d-118.2851!3d34.0224!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sUniversity+of+Southern+California!5e0!3m2!1sen!2sus!4v0";
+
+/* ─────────────────────────────────────────────
+   LOCATION MAP
+───────────────────────────────────────────── */
+function LocationMap() {
+  return (
+    <section className="w-full">
+      <div className="relative w-full h-[260px] sm:h-[340px] lg:h-[420px] overflow-hidden shadow-lg">
+        <iframe
+          title="Our location on Google Maps"
+          src={MAP_EMBED_SRC}
+          className="absolute inset-0 h-full w-full border-0"
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   MAIN PAGE
+───────────────────────────────────────────── */
 export default function ContactUs() {
   const [form, setForm] = useState({
     firstName: "",
@@ -52,65 +81,95 @@ export default function ContactUs() {
     message: "",
   });
 
+  /* ── Hero animation refs ── */
+  const heroWrapRef     = useRef(null);
+  const heroImgRef      = useRef(null);
+  const heroGradientRef = useRef(null);
+  const breadcrumbRef   = useRef(null);
+  const heroTitleRef    = useRef(null);
+
+  /* ── Hero entrance animation ── */
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      gsap.timeline({ defaults: { ease: "power3.out" } })
+        /* image zooms in */
+        .fromTo(
+          heroImgRef.current,
+          { scale: 1.12, transformOrigin: "center center" },
+          { scale: 1, duration: 1.8 }
+        )
+        /* dark overlay fades in */
+        .fromTo(
+          heroGradientRef.current,
+          { opacity: 0 },
+          { opacity: 1, duration: 1.1 },
+          "-=1.5"
+        )
+        /* breadcrumb drops in */
+        .fromTo(
+          breadcrumbRef.current,
+          { y: -16, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6 },
+          "-=0.9"
+        )
+        /* title rises */
+        .fromTo(
+          heroTitleRef.current,
+          { y: 40, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.85 },
+          "-=0.5"
+        );
+    }, heroWrapRef);
+
+    return () => ctx.revert();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = () => {
-    // wire this up to your API / form handler
     console.log(form);
   };
 
-
-
-// Swap in your actual coordinates / embed src.
-const MAP_EMBED_SRC =
-  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3306.9!2d-118.2851!3d34.0224!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sUniversity+of+Southern+California!5e0!3m2!1sen!2sus!4v0";
-
-
-function LocationMap() {
-  return (
-    <section className="w-full">
-        <div
-          className={`relative w-full h-[260px] sm:h-[340px] lg:h-[420px] overflow-hidden shadow-lg
-            transition-all duration-700 ease-out`}
-        >
-          {/* Live, interactive Google Map */}
-          <iframe
-            title="Our location on Google Maps"
-            src={MAP_EMBED_SRC}
-            className="absolute inset-0 h-full w-full border-0"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
-
-        </div>
-    </section>
-  );
-}
-
   return (
     <section className="w-full mt-20">
+
       {/* ── Hero ── */}
-      <div className="relative h-[300px] sm:h-[400px] lg:h-[500px] w-full overflow-hidden">
+      <div
+        ref={heroWrapRef}
+        className="relative h-[300px] sm:h-[400px] lg:h-[500px] w-full overflow-hidden"
+      >
         <img
+          ref={heroImgRef}
           src={contactHeroImg}
           alt="Aqualife products"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-black/40" />
+        <div
+          ref={heroGradientRef}
+          className="absolute inset-0 bg-black/40"
+        />
 
-            {/* Breadcrumb */}
-        <div className="absolute top-2 lg:top-14 left-0 w-full z-10">
+        {/* Breadcrumb */}
+        <div
+          ref={breadcrumbRef}
+          className="absolute top-2 lg:top-14 left-0 w-full z-10"
+        >
           <div className="primary-container">
             <Breadcrumb />
           </div>
         </div>
 
-
+        {/* Title */}
         <div className="relative z-10 h-full primary-container flex items-center justify-center">
-          <h1 className="heading text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
+          <h1
+            ref={heroTitleRef}
+            className="heading text-2xl sm:text-3xl lg:text-4xl font-bold text-white"
+          >
             Contact Us
           </h1>
         </div>
@@ -149,11 +208,12 @@ function LocationMap() {
             Send Us Messages
           </h2>
           <p className="text-sm text-slate-500 mb-8 sm:mb-10 max-w-xl">
-            Do you have a question ? A complaint ? Or need any help to choose the right from
-            Aqualife every feel free to contact us.
+            Do you have a question? A complaint? Or need any help to choose the
+            right product from Aqualife? Feel free to contact us.
           </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr]  gap-6 lg:gap-15">
+          <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 lg:gap-15">
+
             {/* ── Form ── */}
             <div className="flex flex-col gap-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -232,7 +292,7 @@ function LocationMap() {
             {/* ── Info card ── */}
             <div className="relative lg:bottom-12 rounded-2xl bg-[#0061C2] text-white p-6 sm:p-7 flex flex-col gap-5 h-fit">
               <p className="text-sm sm:text-base leading-relaxed">
-                Hi! We are always here to help you .
+                Hi! We are always here to help you.
               </p>
 
               <div className="rounded-xl bg-white text-slate-900 px-4 py-3.5 flex items-start gap-3">
@@ -241,7 +301,7 @@ function LocationMap() {
                 </span>
                 <div className="text-sm text-[#0061C2]">
                   <p className="font-semibold">Contact No</p>
-                  <p className="">+91 9152121121 / 022 47487556</p>
+                  <p>+91 9152121121 / 022 47487556</p>
                 </div>
               </div>
 
@@ -251,9 +311,7 @@ function LocationMap() {
                 </span>
                 <div className="text-sm text-[#0061C2]">
                   <p className="font-semibold">Email</p>
-                  <p className="break-all">
-                    custmersupport@aquacoolgroup
-                  </p>
+                  <p className="break-all">custmersupport@aquacoolgroup</p>
                 </div>
               </div>
 
@@ -261,8 +319,8 @@ function LocationMap() {
                 <p className="text-sm mb-3">Connect With Us :</p>
                 <div className="flex items-center gap-3">
                   {SOCIALS.map(({ icon: Icon, label }) => (
-                    <a
-                      key={label}
+                    
+                   <a   key={label}
                       href="#"
                       aria-label={label}
                       className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 hover:bg-white/25 transition-colors duration-200"
@@ -273,10 +331,13 @@ function LocationMap() {
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>
-        <LocationMap/>
+
+      <LocationMap />
+
     </section>
   );
 }

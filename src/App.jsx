@@ -14,6 +14,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import ProductDetail from "./components/ProductDetails";
 import Signup from "./pages/Signup";
 import Cart from "./pages/Cart";
+import OtpVerification from "./pages/OtpVerification";
 
 import "./App.css";
 
@@ -35,6 +36,7 @@ function App() {
         <Route path="/product-details" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/otp-verification" element={<OtpVerification />} />
       </Routes>
 
       <Footer />

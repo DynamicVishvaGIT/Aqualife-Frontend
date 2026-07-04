@@ -75,7 +75,7 @@ const DownloadPdf = () => {
             <div className="hidden md:block absolute left-1/2 top-0 h-full w-px bg-gray-200 -translate-x-1/2" />
 
             {/* Product Brochure */}
-            <div className="flex items-start sm:items-center justify-between gap-4 p-5 sm:p-6 lg:p-8 border-t md:border-t-0">
+            <div className="flex items-start sm:items-center justify-between gap-4 p-5 sm:p-6 lg:p-8 md:border-t-0">
               <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                 <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#0061C2]">
                   <FiFileText size={22} />
