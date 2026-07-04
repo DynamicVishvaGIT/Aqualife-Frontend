@@ -12,7 +12,7 @@ import ContactUs from "./pages/ContactUs";
 import {Footer} from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import ProductDetail from "./components/ProductDetails";
-import Signup from "./components/Signup";
+import Signup from "./pages/Signup";
 import Cart from "./pages/Cart";
 
 import "./App.css";
@@ -34,7 +34,7 @@ function App() {
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/product-details" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/signup" element={<SignUp />} />
+        <Route path="/signup" element={<Signup />} />
       </Routes>
 
       <Footer />

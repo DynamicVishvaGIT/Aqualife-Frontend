@@ -1,5 +1,5 @@
 // @refresh reset
-import { useState, useRef, useLayoutEffect, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Info } from "lucide-react";
 import gsap from "gsap";
 import sideBanner from "../assets/side_banner.png";
@@ -30,7 +30,6 @@ export default function SignUp() {
   const inputClass =
     "w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-shadow";
 
-  /* ── Mount animation ── */
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(containerRef.current, {
@@ -53,7 +52,6 @@ export default function SignUp() {
     return () => ctx.revert();
   }, []);
 
-  /* ── Animate fields on tab change ── */
   useEffect(() => {
     const fieldsRef = activeTab === "login" ? loginFieldsRef : signupFieldsRef;
     const btnRef    = activeTab === "login" ? loginBtnRef    : signupBtnRef;
@@ -73,7 +71,6 @@ export default function SignUp() {
     }
   }, [activeTab]);
 
-  /* ── Tab switch with slide-out ── */
   const handleTabSwitch = (tab) => {
     if (tab === activeTab) return;
     const outRef = activeTab === "login" ? loginFieldsRef : signupFieldsRef;
@@ -89,15 +86,11 @@ export default function SignUp() {
     }
   };
 
-  /* ── Input focus micro-interaction ── */
   const onFocusAnim = (e) => gsap.to(e.currentTarget, { scale: 1.012, duration: 0.18, ease: "power1.out" });
   const onBlurAnim  = (e) => gsap.to(e.currentTarget, { scale: 1,     duration: 0.18, ease: "power1.in"  });
-
-  /* ── Radio hover ── */
   const onRadioEnter = (e) => gsap.to(e.currentTarget, { scale: 1.03, duration: 0.2, ease: "power1.out" });
   const onRadioLeave = (e) => gsap.to(e.currentTarget, { scale: 1,    duration: 0.2, ease: "power1.in"  });
 
-  /* ── Button press animation ── */
   const pressBtn = (ref) => {
     gsap.timeline()
       .to(ref.current, { scale: 0.96, duration: 0.1, ease: "power1.in" })
@@ -126,17 +119,37 @@ export default function SignUp() {
   };
 
   return (
-    <div className="bg-gray-100 flex items-center justify-center p-3 sm:p-6 lg:p-10">
+    /*
+      Page wrapper: full viewport, centered
+      On mobile → column card scrolls naturally
+      On desktop → card is fixed height, internal form scrolls if needed
+    */
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center pt-14 sm:p-6 lg:pt-30">
+
+      {/*
+        CARD
+        Mobile  : full width, auto height (stacked column)
+        Desktop : max-w-4xl, fixed 680px height so both tabs = same card size
+                  680px fits signup comfortably; login is centered inside
+      */}
       <div
         ref={containerRef}
-        className="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row"
+       className="
+  w-full
+  rounded-2xl shadow-lg
+  flex flex-col md:flex-row
+   md:h-[580px] lg:h-[740px] 2xl:h-[1100px]
+"
       >
 
-        {/* ── Banner ── */}
+        {/*
+          BANNER
+          Mobile  : 240px tall, full width
+          Desktop : 46% wide, height = 100% of card (stretch fills the 680px)
+        */}
         <div
           ref={bannerRef}
-          className="relative shrink-0 w-full h-[260px] md:w-[46%]"
-          style={{ alignSelf: "stretch" }}
+          className="relative shrink-0 w-full h-[250px] md:h-full md:w-[50%]"
         >
           <img
             src={sideBanner}
@@ -153,14 +166,23 @@ export default function SignUp() {
           />
         </div>
 
-        {/* ── Form panel ── */}
+        {/*
+          FORM PANEL
+          Takes remaining width.
+          Uses overflow-y-auto so signup can scroll on short viewports.
+          justify-center keeps login fields vertically centered in the 680px card.
+        */}
         <div
           ref={formPanelRef}
-          className="flex-1 min-w-0 px-5 py-6 sm:px-10 sm:py-9 overflow-y-auto flex flex-col"
+          className="
+            flex-1 min-w-0
+            flex flex-col justify-center
+            px-6 py-8 sm:px-10 sm:py-10
+          "
         >
 
-          {/* Tabs */}
-          <div ref={tabsRef} className="flex gap-3 sm:gap-4 mb-8">
+          {/* ── Tabs ── */}
+          <div ref={tabsRef} className="flex gap-3 sm:gap-4 mb-8 shrink-0">
             {["login", "signup"].map((tab) => (
               <div key={tab} className="relative flex-1">
                 <button
@@ -175,7 +197,7 @@ export default function SignUp() {
                       : { color: BRAND, borderColor: BRAND }
                   }
                 >
-                  {tab === "login" ? "Login In" : "Sign Up"}
+                  {tab === "login" ? "Login" : "Sign Up"}
                 </button>
                 <span
                   className="absolute left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 transition-all duration-300"
@@ -390,7 +412,7 @@ export default function SignUp() {
                   style={{ color: ORANGE }}
                   onClick={() => handleTabSwitch("login")}
                 >
-                  Login In
+                  Login
                 </button>
               </p>
             </form>
