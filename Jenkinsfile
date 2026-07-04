@@ -14,7 +14,7 @@ pipeline {
         string(name: 'PROJECT_DIR', defaultValue: '/var/www/html/aqualife.dvworks.in_chroot/aqualife.dvworks.in/public_html')
         string(name: 'REPO_URL', defaultValue: 'https://github.com/DynamicVishvaGIT/Aqualife-Website.git')
         string(name: 'BRANCH', defaultValue: 'main')
-        string(name: 'NOTIFY_EMAIL', defaultValue: 'balrajpasula189@gmail.com')
+        string(name: 'NOTIFY_EMAIL', defaultValue: 'balrajpasula189@gmail.com,omshinde3724@gmail.com,shalaka@dynamicvishva.in,nilesh@dynamicvishva.in,mayur@dynamicvishva.in')
     }
 
     stages {
