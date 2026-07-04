@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { SlidersHorizontal, ChevronDown, ChevronRight } from "lucide-react";
 import product1 from "../assets/Purifier_1.png";
 import product2 from "../assets/Purifier_2.png";
@@ -6,6 +6,10 @@ import product3 from "../assets/Purifier_3.png";
 import product4 from "../assets/Purifier_4.png";
 import { WaterButton } from "../components/WaterButton";
 import { useNavigate } from "react-router-dom";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 /* ── Category tabs ── */
 const CATEGORIES = [
@@ -71,13 +75,52 @@ const PRODUCTS = [
 ];
 
 /* ── Product card ── */
-function ProductCard({ product }) {
+function ProductCard({ product, setCardRef }) {
   const navigate = useNavigate();
+  const imgRef = useRef(null);
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    if (cardRef.current) {
+      setCardRef(cardRef.current);
+    }
+  }, [setCardRef]);
+
+  const handleMouseEnter = () => {
+    gsap.to(cardRef.current, {
+      y: -6,
+      boxShadow: "0 12px 24px rgba(15, 23, 42, 0.08)",
+      duration: 0.3,
+      ease: "power2.out",
+    });
+    gsap.to(imgRef.current, {
+      scale: 1.06,
+      duration: 0.3,
+      ease: "power2.out",
+    });
+  };
+
+  const handleMouseLeave = () => {
+    gsap.to(cardRef.current, {
+      y: 0,
+      boxShadow: "0 0px 0px rgba(15, 23, 42, 0)",
+      duration: 0.3,
+      ease: "power2.out",
+    });
+    gsap.to(imgRef.current, {
+      scale: 1,
+      duration: 0.3,
+      ease: "power2.out",
+    });
+  };
 
   return (
     <div
+      ref={cardRef}
       className="bg-white cursor-pointer rounded-2xl border border-slate-100 p-3 sm:p-5 flex flex-col h-full select-none justify-between"
       onClick={() => navigate("/product-details")}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="relative  bg-white rounded-xl flex items-center justify-center h-25 sm:h-52 mb-3 sm:mb-4 overflow-hidden">
         {product.badge && (
@@ -86,6 +129,7 @@ function ProductCard({ product }) {
           </span>
         )}
         <img
+          ref={imgRef}
           src={product.image}
           alt={product.name}
           className="h-full w-full object-contain mix-blend-multiply"
@@ -142,24 +186,128 @@ function ProductCard({ product }) {
 export default function WaterPurifierListing() {
   const [activeCategory, setActiveCategory] = useState("All");
 
+  /* ── Category tab animation refs ── */
+  const tabRefs = useRef({});
+  const iconRefs = useRef({});
+  const indicatorRef = useRef(null);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const activeTab = tabRefs.current[activeCategory];
+    const indicator = indicatorRef.current;
+    const container = containerRef.current;
+
+    if (activeTab && indicator && container) {
+      const tabRect = activeTab.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      gsap.to(indicator, {
+        x: tabRect.left - containerRect.left + container.scrollLeft,
+        width: tabRect.width,
+        duration: 0.45,
+        ease: "power3.out",
+      });
+    }
+
+    const activeIcon = iconRefs.current[activeCategory];
+    if (activeIcon) {
+      gsap.fromTo(
+        activeIcon,
+        { scale: 1 },
+        { scale: 1.15, duration: 0.2, yoyo: true, repeat: 1, ease: "power1.inOut" }
+      );
+    }
+  }, [activeCategory]);
+
+  /* ── Scroll-triggered staggered reveal: Category tabs ── */
+  useEffect(() => {
+    const tabs = tabRefs.current;
+    const elements = CATEGORIES.map((cat) => tabs[cat.label]).filter(Boolean);
+    if (!elements.length) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        elements,
+        { opacity: 0, y: 16 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "power3.out",
+          stagger: 0.08,
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top 90%",
+            toggleActions: "play reverse play reverse",
+          },
+        }
+      );
+    });
+
+    return () => ctx.revert();
+  }, []);
+
+  /* ── Product grid: collect refs via callback ── */
+  const cardRefs = useRef([]);
+  const gridRef = useRef(null);
+  const addCardRef = (el) => {
+    if (el && !cardRefs.current.includes(el)) {
+      cardRefs.current.push(el);
+    }
+  };
+
+  /* ── Scroll-triggered staggered reveal: Product cards ── */
+  useEffect(() => {
+    if (!cardRefs.current.length) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        cardRefs.current,
+        { opacity: 0, y: 32, scale: 0.96 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.5,
+          ease: "power3.out",
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: gridRef.current,
+            start: "top 88%",
+            toggleActions: "play reverse play reverse",
+          },
+        }
+      );
+    });
+
+    return () => ctx.revert();
+  }, [activeCategory]);
+
   return (
     <div className="min-h-screen bg-[#F6FAFF]">
       {/* ── Category tabs ── */}
       <div className="bg-white border-b border-slate-100 sticky top-0 z-10 shadow-sm">
         <div className="primary-container max-w-7xl m-auto">
-          <div className="flex items-end  justify-start sm:justify-center gap-3 sm:gap-8 overflow-x-auto scrollbar-hide unique-scroll-container">
+          <div
+            ref={containerRef}
+            className="relative flex items-end justify-start sm:justify-center gap-3 sm:gap-8 overflow-x-auto scrollbar-hide unique-scroll-container"
+          >
             {CATEGORIES.map((cat) => {
               const active = activeCategory === cat.label;
               return (
                 <button
                   key={cat.label}
+                  ref={(el) => (tabRefs.current[cat.label] = el)}
                   onClick={() => setActiveCategory(cat.label)}
-                  className={`flex flex-col items-center gap-1.5 pt-4 sm:pt-6 cursor-pointer shrink-0
-                  border-b-2 sm:border-b-3 transition-all duration-200 min-w-[80px] sm:min-w-[110px]
-                  ${active ? "border-[#155DFC]" : "border-transparent"}`}
+                  className={`flex flex-col items-center gap-1.5 pt-4 sm:pt-7 cursor-pointer shrink-0
+                  border-b-2 sm:border-b-3 duration-500 hover:scale-105 min-w-[80px] sm:min-w-[110px]
+                  border-transparent`}
                 >
                   {/* Image */}
-                  <div className="w-12 sm:w-16 h-14 sm:h-20 flex items-end justify-center">
+                  <div
+                    ref={(el) => (iconRefs.current[cat.label] = el)}
+                    className="w-12 sm:w-16 h-14 sm:h-20 flex items-end justify-center"
+                  >
                     <img
                       src={cat.img}
                       alt={cat.label}
@@ -177,6 +325,13 @@ export default function WaterPurifierListing() {
                 </button>
               );
             })}
+
+            {/* Sliding underline indicator */}
+            <div
+              ref={indicatorRef}
+              className="absolute bottom-0 left-0 h-[2px] sm:h-[3px] bg-[#155DFC] pointer-events-none"
+              style={{ width: 0 }}
+            />
           </div>
         </div>
       </div>
@@ -215,9 +370,12 @@ export default function WaterPurifierListing() {
         </div>
 
         {/* Product grid — 2 columns on mobile, scaling up smoothly */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-5">
+        <div
+          ref={gridRef}
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-5"
+        >
           {PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={product} setCardRef={addCardRef} />
           ))}
         </div>
 

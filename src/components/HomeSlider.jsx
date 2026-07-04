@@ -1,9 +1,14 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useLayoutEffect, useCallback } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import "swiper/css";
 import homeBanner from "../assets/Home_Banner.png";
+import gsap from "gsap";
+
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const SLIDES = [
   {
@@ -28,38 +33,121 @@ const SLIDES = [
 
 export default function HomeSlider() {
   const swiperRef = useRef(null);
+  const sectionRef = useRef(null);
   const [lastDir, setLastDir] = useState(null); // "prev" | "next" | null
 
-  const handlePrev = () => {
-    swiperRef.current?.slidePrev();
-    setLastDir("prev");
+  // Per-slide refs, keyed by slide id
+  const tagRefs = useRef({});
+  const headingRefs = useRef({}); // { [id]: [line1El, line2El] }
+  const imageRefs = useRef({});
+
+  const setTagRef = (id) => (el) => {
+    if (el) tagRefs.current[id] = el;
+  };
+  const setHeadingLineRef = (id, lineIdx) => (el) => {
+    if (!el) return;
+    if (!headingRefs.current[id]) headingRefs.current[id] = [];
+    headingRefs.current[id][lineIdx] = el;
+  };
+  const setImageRef = (id) => (el) => {
+    if (el) imageRefs.current[id] = el;
   };
 
-  const handleNext = () => {
+  const animateSlide = useCallback((id) => {
+    if (prefersReducedMotion()) return;
+
+    const tag = tagRefs.current[id];
+    const lines = headingRefs.current[id] || [];
+    const img = imageRefs.current[id];
+    if (!tag || !lines.length) return;
+
+    // Reset to hidden state before animating in
+    gsap.set(tag, { y: 20, opacity: 0 });
+    gsap.set(lines, { y: 32, opacity: 0 });
+    if (img) gsap.set(img, { scale: 1.1 });
+
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    tl.to(tag, { y: 0, opacity: 1, duration: 0.6 })
+      .to(lines, { y: 0, opacity: 1, duration: 0.7, stagger: 0.12 }, "-=0.35");
+
+    if (img) {
+      // Slow Ken Burns drift synced roughly to the autoplay delay
+      gsap.to(img, { scale: 1, duration: 5.5, ease: "none" });
+    }
+  }, []);
+
+  // Entrance for the whole banner on mount, then animate the first slide's content
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) {
+      animateSlide(SLIDES[0].id);
+      return;
+    }
+
+    gsap.fromTo(
+      sectionRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.6, ease: "power2.out" }
+    );
+
+    animateSlide(SLIDES[0].id);
+  }, [animateSlide]);
+
+  const handleSlideChange = useCallback(
+    (swiper) => {
+      const activeSlide = SLIDES[swiper.realIndex];
+      if (activeSlide) animateSlide(activeSlide.id);
+    },
+    [animateSlide]
+  );
+
+  const bumpButton = (el) => {
+    if (prefersReducedMotion() || !el) return;
+    gsap.fromTo(
+      el,
+      { scale: 0.85 },
+      { scale: 1, duration: 0.35, ease: "back.out(4)" }
+    );
+  };
+
+  const handlePrev = (e) => {
+    swiperRef.current?.slidePrev();
+    setLastDir("prev");
+    bumpButton(e.currentTarget);
+  };
+
+  const handleNext = (e) => {
     swiperRef.current?.slideNext();
     setLastDir("next");
+    bumpButton(e.currentTarget);
   };
 
   const prevActive = lastDir === "prev";
   const nextActive = lastDir === "next" || lastDir === null; // next is default active
 
   return (
-    <section className="relative w-full h-[900px] sm:h-[800px] md:h-[600px] lg:h-[720px] xl:h-[600px] 2xl:h-screen overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="relative w-full h-[900px] sm:h-[800px] md:h-[600px] lg:h-[720px] xl:h-[600px] 2xl:h-screen overflow-hidden"
+    >
       <Swiper
         modules={[Autoplay]}
         autoplay={{ delay: 5000, disableOnInteraction: false }}
         loop
         speed={800}
         onSwiper={(swiper) => (swiperRef.current = swiper)}
+        onSlideChange={handleSlideChange}
         className="w-full h-full"
       >
         {SLIDES.map((slide) => (
           <SwiperSlide key={slide.id} className="relative">
-            <img
-              src={slide.image}
-              alt={slide.heading.join(" ")}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
+            <div className="absolute inset-0 overflow-hidden">
+              <img
+                ref={setImageRef(slide.id)}
+                src={slide.image}
+                alt={slide.heading.join(" ")}
+                className="absolute inset-0 w-full h-full object-cover will-change-transform"
+              />
+            </div>
 
             <div
               className="absolute inset-0"
@@ -71,13 +159,25 @@ export default function HomeSlider() {
 
             <div className="absolute inset-0 flex items-center">
               <div className="max-w-xl px-6 sm:px-10 lg:px-16">
-                <span className="inline-block bg-white/90 heading text-slate-800 text-xs sm:text-sm font-medium px-4 py-2 rounded-lg mb-4 sm:mb-6">
+                <span
+                  ref={setTagRef(slide.id)}
+                  className="inline-block bg-white/90 heading text-slate-800 text-xs sm:text-sm font-medium px-4 py-2 rounded-lg mb-4 sm:mb-6"
+                >
                   {slide.tag}
                 </span>
                 <h1 className="text-[clamp(1.75rem,4vw+0.75rem,2.25rem)] heading font-bold text-white leading-tight">
-                  {slide.heading[0]}
-                  <br />
-                  {slide.heading[1]}
+                  <span
+                    ref={setHeadingLineRef(slide.id, 0)}
+                    className="block overflow-hidden"
+                  >
+                    {slide.heading[0]}
+                  </span>
+                  <span
+                    ref={setHeadingLineRef(slide.id, 1)}
+                    className="block overflow-hidden"
+                  >
+                    {slide.heading[1]}
+                  </span>
                 </h1>
               </div>
             </div>
@@ -99,7 +199,7 @@ export default function HomeSlider() {
         <button
           aria-label="Previous slide"
           onClick={handlePrev}
-          className={`w-10 h-10  cursor-pointer  sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-colors shadow-lg ${
+          className={`w-10 h-10 cursor-pointer sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-colors shadow-lg ${
             prevActive
               ? "bg-[#0061C2] text-white"
               : "bg-white text-slate-900 hover:bg-slate-100"

@@ -1,14 +1,22 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useLayoutEffect, useCallback } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import "swiper/css";
 import { WaterButton } from "../components/WaterButton";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import product1 from "../assets/Purifier_1.png";
 import product2 from "../assets/Purifier_2.png";
 import product3 from "../assets/Purifier_3.png";
 import product4 from "../assets/Purifier_4.png";
+
+gsap.registerPlugin(ScrollTrigger);
+
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const PRODUCTS = [
   {
@@ -64,8 +72,52 @@ const PRODUCTS = [
 ];
 
 function ProductCard({ product }) {
+  const cardRef = useRef(null);
+  const imgRef = useRef(null);
+  const priceRef = useRef(null);
+
+  const handleEnter = () => {
+    if (prefersReducedMotion()) return;
+    gsap.to(cardRef.current, {
+      y: -6,
+      boxShadow: "0 20px 40px -12px rgba(15, 23, 42, 0.18)",
+      duration: 0.35,
+      ease: "power2.out",
+    });
+    gsap.to(imgRef.current, {
+      scale: 1.08,
+      duration: 0.5,
+      ease: "power2.out",
+    });
+    gsap.fromTo(
+      priceRef.current,
+      { scale: 1 },
+      { scale: 1.04, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 1 }
+    );
+  };
+
+  const handleLeave = () => {
+    if (prefersReducedMotion()) return;
+    gsap.to(cardRef.current, {
+      y: 0,
+      boxShadow: "0 0px 0px 0px rgba(15, 23, 42, 0)",
+      duration: 0.35,
+      ease: "power2.out",
+    });
+    gsap.to(imgRef.current, {
+      scale: 1,
+      duration: 0.5,
+      ease: "power2.out",
+    });
+  };
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-4 sm:p-5 flex flex-col h-full select-none">
+    <div
+      ref={cardRef}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      className="product-card bg-white rounded-2xl border border-slate-100 p-4 sm:p-5 flex flex-col h-full select-none"
+    >
       <div className="relative bg-white rounded-xl flex items-center justify-center h-44 sm:h-52 mb-4 overflow-hidden">
         {product.badge && (
           <span className="absolute top-2 left-2 z-10 bg-slate-100 text-slate-500 text-[11px] font-medium px-3 py-1 rounded-full">
@@ -73,9 +125,10 @@ function ProductCard({ product }) {
           </span>
         )}
         <img
+          ref={imgRef}
           src={product.image}
           alt={product.name}
-          className="h-full w-full object-contain mix-blend-multiply"
+          className="h-full w-full object-contain mix-blend-multiply will-change-transform"
           draggable={false}
         />
       </div>
@@ -88,7 +141,7 @@ function ProductCard({ product }) {
           {product.description}
         </p>
 
-        <div className="mb-4">
+        <div ref={priceRef} className="mb-4">
           <p className="text-[22px] font-bold text-slate-900 leading-none mb-1">
             ₹{product.price.toLocaleString("en-IN")}
           </p>
@@ -126,57 +179,117 @@ function ProductCard({ product }) {
 
 export default function TopRecommendations() {
   const swiperRef = useRef(null);
+  const sectionRef = useRef(null);
+  const headingRef = useRef(null);
+  const swiperWrapRef = useRef(null);
   const [lastDir, setLastDir] = useState(null);
 
-  const handlePrev = () => {
-    swiperRef.current?.slidePrev();
-    setLastDir("prev");
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      gsap.from(headingRef.current, {
+        y: 28,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: headingRef.current,
+          start: "top 85%",
+        },
+      });
+
+      // Animate only the currently-rendered (non-cloned) card wrappers
+      const cards = swiperWrapRef.current
+        ? gsap.utils.toArray(
+            swiperWrapRef.current.querySelectorAll(
+              ".swiper-slide:not(.swiper-slide-duplicate) .product-card"
+            )
+          )
+        : [];
+
+      gsap.from(cards, {
+        y: 40,
+        opacity: 0,
+        scale: 0.96,
+        duration: 0.7,
+        stagger: 0.1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: swiperWrapRef.current,
+          start: "top 82%",
+        },
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const bumpButton = (el) => {
+    if (prefersReducedMotion() || !el) return;
+    gsap.fromTo(
+      el,
+      { scale: 0.85 },
+      { scale: 1, duration: 0.3, ease: "back.out(4)" }
+    );
   };
 
-  const handleNext = () => {
+  const handlePrev = (e) => {
+    swiperRef.current?.slidePrev();
+    setLastDir("prev");
+    bumpButton(e.currentTarget);
+  };
+
+  const handleNext = (e) => {
     swiperRef.current?.slideNext();
     setLastDir("next");
+    bumpButton(e.currentTarget);
   };
 
   const prevActive = lastDir === "prev";
   const nextActive = lastDir === "next" || lastDir === null;
 
   return (
-    <section className="bg-[#EEF3F8] py-10 sm:py-14 lg:py-16">
+    <section ref={sectionRef} className="bg-[#EEF3F8] py-10 sm:py-14 lg:py-16">
       <div className="primary-container">
-        <h2 className="text-2xl sm:text-3xl heading lg:text-4xl font-semibold text-slate-900 mb-6 sm:mb-8">
+        <h2
+          ref={headingRef}
+          className="text-2xl sm:text-3xl heading lg:text-4xl font-semibold text-slate-900 mb-6 sm:mb-8"
+        >
           <span className="text-[#0061C2]">Top Recommendations</span> - Water
           Purifiers
         </h2>
 
-        <Swiper
-          modules={[Autoplay]}
-          autoplay={{ delay: 4000, disableOnInteraction: false }}
-          loop
-          speed={600}
-          onSwiper={(swiper) => (swiperRef.current = swiper)}
-          slidesPerView={1}
-          spaceBetween={16}
-          breakpoints={{
-            480: { slidesPerView: 1.4, spaceBetween: 16 },
-            640: { slidesPerView: 2, spaceBetween: 20 },
-            900: { slidesPerView: 3, spaceBetween: 20 },
-            1100: { slidesPerView: 4, spaceBetween: 24 },
-          }}
-          className="!pb-2"
-        >
-          {PRODUCTS.map((product) => (
-            <SwiperSlide key={product.id} className="h-auto">
-              <ProductCard product={product} />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        <div ref={swiperWrapRef}>
+          <Swiper
+            modules={[Autoplay]}
+            autoplay={{ delay: 4000, disableOnInteraction: false }}
+            loop
+            speed={600}
+            onSwiper={(swiper) => (swiperRef.current = swiper)}
+            slidesPerView={1}
+            spaceBetween={16}
+            breakpoints={{
+              480: { slidesPerView: 1.4, spaceBetween: 16 },
+              640: { slidesPerView: 2, spaceBetween: 20 },
+              900: { slidesPerView: 3, spaceBetween: 20 },
+              1100: { slidesPerView: 4, spaceBetween: 24 },
+            }}
+            className="!pb-2"
+          >
+            {PRODUCTS.map((product) => (
+              <SwiperSlide key={product.id} className="h-auto">
+                <ProductCard product={product} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
 
         <div className="flex items-center justify-center gap-4 mt-8">
           <button
             aria-label="Previous"
             onClick={handlePrev}
-            className={`w-11 h-11 cursor-pointer rounded-full flex items-center justify-center transition-all duration-200 shadow-sm active:scale-95 ${
+            className={`w-11 h-11 cursor-pointer rounded-full flex items-center justify-center transition-colors duration-200 shadow-sm ${
               prevActive
                 ? "bg-[#0061C2] text-white "
                 : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200"
@@ -187,7 +300,7 @@ export default function TopRecommendations() {
           <button
             aria-label="Next"
             onClick={handleNext}
-            className={`w-11 h-11 cursor-pointer rounded-full flex items-center justify-center transition-all duration-200 shadow-sm active:scale-95 ${
+            className={`w-11 h-11 cursor-pointer rounded-full flex items-center justify-center transition-colors duration-200 shadow-sm ${
               nextActive
                 ? "bg-[#0061C2] text-white "
                 : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200"

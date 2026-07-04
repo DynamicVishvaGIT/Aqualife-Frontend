@@ -1,13 +1,17 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useLayoutEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "swiper/css";
 
 import product1 from "../assets/Purifier_1.png";
 import product2 from "../assets/Purifier_2.png";
 import product3 from "../assets/Purifier_3.png";
 import product4 from "../assets/Purifier_4.png";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const PRODUCTS = [
   {
@@ -62,9 +66,10 @@ const PRODUCTS = [
   },
 ];
 
-function ProductCard({ product }) {
+function ProductCard({ product, cardRef }) {
   return (
     <div
+      ref={cardRef}
       className="rounded-2xl overflow-hidden flex flex-col h-full"
       style={{ background: product.bg }}
     >
@@ -108,6 +113,12 @@ export default function NewLaunches() {
   const swiperRef = useRef(null);
   const [lastDir, setLastDir] = useState(null);
 
+  const sectionRef = useRef(null);
+  const headingRef = useRef(null);
+  // cardRefs holds one entry per PRODUCTS index (stable across re-renders),
+  // so ScrollTrigger animates only the real slides, not Swiper's loop clones.
+  const cardRefs = useRef([]);
+
   const handlePrev = () => {
     swiperRef.current?.slidePrev();
     setLastDir("prev");
@@ -118,12 +129,62 @@ export default function NewLaunches() {
     setLastDir("next");
   };
 
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      const cards = cardRefs.current.filter(Boolean);
+
+      // Starting state — hidden, shifted down
+      gsap.set(headingRef.current, { opacity: 0, y: 24 });
+      gsap.set(cards, { opacity: 0, y: 40 });
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 5%",
+          // "bottom top" = the trigger's end point is only reached once the
+          // section has fully scrolled past the top of the viewport.
+          // With the previous "bottom 20%" value, short sections would hit
+          // that end point while still fully visible on screen, so the
+          // "reverse" action fired mid-view and everything faded/blurred
+          // back out even though it hadn't left the viewport yet.
+          end: "bottom",
+          // replays the animation every time the section fully re-enters
+          // view, whether scrolling down into it or back up into it —
+          // and only reverses once it has fully left the viewport
+          toggleActions: "play none play none",
+        },
+      });
+
+      tl.to(headingRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: "power3.out",
+      }).to(
+        cards,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          stagger: 0.12,
+        },
+        "-=0.3"
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="bg-white py-10 sm:py-12 lg:py-16">
+    <section ref={sectionRef} className="bg-white py-10 sm:py-12 lg:py-16">
       <div className="primary-container">
 
         {/* Heading row */}
-        <div className="flex items-center justify-between mb-6 sm:mb-8">
+        <div
+          ref={headingRef}
+          className="flex items-center justify-between mb-6 sm:mb-8"
+        >
           <h2 className="text-2xl sm:text-3xl lg:text-[2rem] font-bold text-slate-900 heading">
             New Launches
           </h2>
@@ -172,10 +233,13 @@ export default function NewLaunches() {
           }}
           className="!pb-1"
         >
-          {PRODUCTS.map((product) => (
+          {PRODUCTS.map((product, index) => (
             <SwiperSlide key={product.id} className="h-auto self-stretch">
               <div className="h-full">
-                <ProductCard product={product} />
+                <ProductCard
+                  product={product}
+                  cardRef={(el) => (cardRefs.current[index] = el)}
+                />
               </div>
             </SwiperSlide>
           ))}

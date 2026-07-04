@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef ,useEffect, useState} from "react";
+import React, { useLayoutEffect, useRef, useEffect, useState } from "react";
 import banner1 from "../assets/product_listing_banner.png";
 import Breadcrumb from "../components/Breadcrumb";
 import coller1 from "../assets/water-cooler_1.png";
@@ -17,6 +17,11 @@ import { ChevronDown } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Respect users who've asked for less motion
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  
 /* ── Mock products ── */
 const PRODUCTS = [
   {
@@ -118,17 +123,44 @@ const SPECS = [
   { label: "Net Weight", value: "32 Kg" },
   { label: "Warranty", value: "1 Year Comprehensive" },
 ];
- 
-
 
 /* ── Product card ── */
-function ProductCard({ product }) {
+function ProductCard({ product, setCardRef }) {
   const navigate = useNavigate();
+  const cardRef = useRef(null);
+  const imgRef = useRef(null);
+
+  useEffect(() => {
+    if (cardRef.current) setCardRef(cardRef.current);
+  }, [setCardRef]);
+
+  const handleMouseEnter = () => {
+    gsap.to(cardRef.current, {
+      y: -6,
+      boxShadow: "0 12px 24px rgba(15, 23, 42, 0.08)",
+      duration: 0.3,
+      ease: "power2.out",
+    });
+    gsap.to(imgRef.current, { scale: 1.06, duration: 0.3, ease: "power2.out" });
+  };
+
+  const handleMouseLeave = () => {
+    gsap.to(cardRef.current, {
+      y: 0,
+      boxShadow: "0 0px 0px rgba(15, 23, 42, 0)",
+      duration: 0.3,
+      ease: "power2.out",
+    });
+    gsap.to(imgRef.current, { scale: 1, duration: 0.3, ease: "power2.out" });
+  };
 
   return (
     <div
+      ref={cardRef}
       className="bg-white cursor-pointer rounded-2xl border border-slate-100 p-3 sm:p-5 flex flex-col h-full select-none justify-between"
       onClick={() => navigate("/product-details")}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="relative  bg-white rounded-xl flex items-center justify-center h-25 sm:h-52 mb-3 sm:mb-4 overflow-hidden">
         {product.badge && (
@@ -137,6 +169,7 @@ function ProductCard({ product }) {
           </span>
         )}
         <img
+          ref={imgRef}
           src={product.image}
           alt={product.name}
           className="h-full w-full object-contain mix-blend-multiply"
@@ -197,14 +230,42 @@ const ProductSpecTable = ({
   subtitle = "Available Capacity: 20 / 40 / 80 / 150 / 200 Ltr.",
   specs = SPECS,
 }) => {
-
   const [expanded, setExpanded] = useState(false);
- 
+  const sectionRef = useRef(null);
+  const rowRefs = useRef([]);
+  rowRefs.current = [];
+  const addRowRef = (el) => {
+    if (el && !rowRefs.current.includes(el)) rowRefs.current.push(el);
+  };
+
   const hasMore = specs.length > VISIBLE_COUNT;
   const visibleSpecs = expanded ? specs : specs.slice(0, VISIBLE_COUNT);
- 
+
+  useEffect(() => {
+    if (!rowRefs.current.length) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        rowRefs.current,
+        { opacity: 0, x: -16 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.4,
+          ease: "power2.out",
+          stagger: 0.05,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 85%",
+            toggleActions: "play reverse play reverse",
+          },
+        }
+      );
+    }, sectionRef);
+    return () => ctx.revert();
+  }, [expanded]);
+
   return (
-    <section className="bg-[#FFFFFF] py-8 sm:py-10">
+    <section ref={sectionRef} className="bg-[#FFFFFF] py-8 sm:py-10">
       <div className="primary-container">
         {/* Heading */}
         <h2 className="heading text-xl sm:text-2xl lg:text-[28px] font-bold text-[#191919] leading-tight">
@@ -213,12 +274,13 @@ const ProductSpecTable = ({
         <p className="mt-2 sm:mt-3 text-[#191919] text-[13px] sm:text-[15px]">
           {subtitle}
         </p>
- 
+
         {/* Spec rows */}
         <div className="mt-5 sm:mt-6">
           {visibleSpecs.map((spec, idx) => (
             <div
               key={spec.label + idx}
+              ref={addRowRef}
               className="grid grid-cols-2 gap-4 py-3 sm:py-3.5 border-b border-slate-100"
             >
               <span className="text-[13px] sm:text-[15px] font-semibold text-[#191919]">
@@ -230,7 +292,7 @@ const ProductSpecTable = ({
             </div>
           ))}
         </div>
- 
+
         {/* Show more / less */}
         {hasMore && (
           <button
@@ -257,45 +319,19 @@ const WaterCooler = () => {
   const imageRef = useRef(null);
   const pinRef = useRef(null);
 
-  // working in desktop
-  // useLayoutEffect(() => {
-  // const ctx = gsap.context(() => {
-  //   ScrollTrigger.create({
-  //     trigger: sectionRef.current,
-  //     pin: pinRef.current,
-  //     start: "top top+=100",
-  //     end: "bottom bottom-=100",
-  //     pinSpacing: true,
-  //     anticipatePin: 1,
-  //     invalidateOnRefresh: true,
-  //   });
+  const headingRef = useRef(null);
+  const productHeadingRef = useRef(null);
+  const productGridRef = useRef(null);
+  const featureHeadingRef = useRef(null);
+  const featuresWrapRef = useRef(null);
+  const splitImgWrapRef = useRef(null);
 
-  //   ScrollTrigger.refresh();
-  // }, sectionRef);
+  const cardRefs = useRef([]);
+  const addCardRef = (el) => {
+    if (el && !cardRefs.current.includes(el)) cardRefs.current.push(el);
+  };
 
-  //   return () => ctx.revert();
-  // }, []);
-
-  // working in small laptop
-  // useLayoutEffect(() => {
-  //   const ctx = gsap.context(() => {
-  //     ScrollTrigger.create({
-  //       trigger: sectionRef.current,
-  //       pin: pinRef.current,
-  //       start: "top -=130",
-  //       end: "bottom bottom",
-  //       pinSpacing: false,
-  //       anticipatePin: 1,
-  //       invalidateOnRefresh: true,
-  //       markers: true, // remove after testing
-  //     });
-
-  //     ScrollTrigger.refresh();
-  //   }, sectionRef);
-
-  //   return () => ctx.revert();
-  // }, []);
-
+  // Pin animation (unchanged)
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const mm = gsap.matchMedia();
@@ -320,10 +356,115 @@ const WaterCooler = () => {
 
     return () => ctx.revert();
   }, []);
+
+  /* ── Product section: heading + grid reveal ── */
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      if (productHeadingRef.current) {
+        gsap.fromTo(
+          productHeadingRef.current,
+          { opacity: 0, y: 24 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: productHeadingRef.current,
+              start: "top 88%",
+              toggleActions: "play reverse play reverse",
+            },
+          }
+        );
+      }
+
+      if (cardRefs.current.length) {
+        gsap.fromTo(
+          cardRefs.current,
+          { opacity: 0, y: 32, scale: 0.96 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.5,
+            ease: "power3.out",
+            stagger: 0.1,
+            scrollTrigger: {
+              trigger: productGridRef.current,
+              start: "top 88%",
+              toggleActions: "play reverse play reverse",
+            },
+          }
+        );
+      }
+    });
+
+    return () => ctx.revert();
+  }, []);
+
+  /* ── Experience section: heading + feature cards + pinned image ── */
+   const heroWrapRef = useRef(null);
+  const heroImgRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      tl.fromTo(
+        heroImgRef.current,
+        { scale: 1.15 },
+        { scale: 1, duration: 1.6 }
+      )
+       
+    }, heroWrapRef);
+
+    // Safety net: recalc ScrollTrigger positions once everything (fonts/images) has settled
+    const onLoad = () => ScrollTrigger.refresh();
+    window.addEventListener("load", onLoad);
+
+    return () => {
+      ctx.revert();
+      window.removeEventListener("load", onLoad);
+    };
+  }, []);
+
+
+  /* ── Split image banner reveal ── */
+  // useEffect(() => {
+  //   const ctx = gsap.context(() => {
+  //     const imgs = splitImgWrapRef.current
+  //       ? Array.from(splitImgWrapRef.current.children)
+  //       : [];
+  //     if (imgs.length) {
+  //       gsap.fromTo(
+  //         imgs,
+  //         { opacity: 0, y: 40 },
+  //         {
+  //           opacity: 1,
+  //           y: 0,
+  //           duration: 0.6,
+  //           ease: "power3.out",
+  //           stagger: 0.15,
+  //           scrollTrigger: {
+  //             trigger: splitImgWrapRef.current,
+  //             start: "top 85%",
+  //             toggleActions: "play reverse play reverse",
+  //           },
+  //         }
+  //       );
+  //     }
+  //   });
+
+  //   return () => ctx.revert();
+  // }, []);
+
   return (
     <main className="w-full overflow-x-hidden pt-20 lg:pt-20">
       {/* Hero Banner */}
       <div
+        ref={heroWrapRef}
         className="relative w-full overflow-hidden
       aspect-[4/5]
       sm:aspect-[16/10]
@@ -331,6 +472,7 @@ const WaterCooler = () => {
       >
         <img
           src={banner1}
+          ref={heroImgRef}
           alt="Water Cooler Banner"
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -347,7 +489,10 @@ const WaterCooler = () => {
       <section className="bg-[#FFFFFF] py-10 sm:py-12">
         <div className="primary-container">
           {/* Heading */}
-          <div className="w-full mb-10 flex flex-col items-center justify-center">
+          <div
+            ref={productHeadingRef}
+            className="w-full mb-10 flex flex-col items-center justify-center"
+          >
             <h2 className="heading text-2xl lg:text-4xl font-semibold text-[#191919]">
               Aqualife Water Cooler
             </h2>
@@ -361,9 +506,12 @@ const WaterCooler = () => {
         {/* Product grid — 2 columns on mobile, scaling up smoothly */}
         <div className="bg-[#F6FAFF] py-10 sm:py-12">
           <div className="primary-container">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-5">
+            <div
+              ref={productGridRef}
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-5"
+            >
               {PRODUCTS.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.id} product={product} setCardRef={addCardRef} />
               ))}
             </div>
           </div>
@@ -373,7 +521,10 @@ const WaterCooler = () => {
       {/* Experience Cooler */}
       <section ref={sectionRef} className="bg-white mb-5">
         <div className="primary-container">
-          <div className="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
+          <div
+            ref={featureHeadingRef}
+            className="max-w-3xl mx-auto text-center mb-12 lg:mb-16"
+          >
             <h2 className="heading text-3xl lg:text-4xl font-semibold text-[#191919] leading-tight">
               Experience Pure Water with Advanced Cooling Technology
             </h2>
@@ -386,7 +537,7 @@ const WaterCooler = () => {
           {/* Content */}
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
             {/* Left Cards */}
-            <div className="order-2 lg:order-1 space-y-6">
+            <div ref={featuresWrapRef} className="order-2 lg:order-1 space-y-6">
               {COOLER_FEATURES.map((feature) => (
                 <div
                   key={feature.id}
@@ -417,32 +568,28 @@ const WaterCooler = () => {
         </div>
       </section>
 
-      {/* banners */}
       <section className="bg-white">
-        {/* Images */}
-        <div className="grid grid-cols-1 md:grid-cols-2">
+        <div ref={splitImgWrapRef} className="grid grid-cols-1 md:grid-cols-2">
           {/* Left */}
-          <div className="overflow-hidden">
+          <div className="overflow-hidden h-[260px] sm:h-[350px] md:h-[420px] lg:h-[600px] 2xl:h-[900px]">
             <img
               src={coolerPeople}
               alt="Office Water Cooler"
-              className="w-full h-[260px] sm:h-[350px] md:h-[420px] lg:h-[520px] object-cover transition duration-500 hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             />
           </div>
 
           {/* Right */}
-          <div className="overflow-hidden">
+          <div className="overflow-hidden h-[260px] sm:h-[350px] md:h-[420px] lg:h-[600px] 2xl:h-[900px]">
             <img
               src={coolerSchool}
               alt="School Water Cooler"
-              className="w-full h-[260px] sm:h-[350px] md:h-[420px] lg:h-[520px] object-cover transition duration-500 hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             />
           </div>
         </div>
       </section>
-
-<ProductSpecTable/>
-      
+      <ProductSpecTable />
     </main>
   );
 };

@@ -12,6 +12,8 @@ import ContactUs from "./pages/ContactUs";
 import {Footer} from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import ProductDetail from "./components/ProductDetails";
+import Cart from "./pages/Cart";
+import SignUp from "./pages/SignUp";
 
 import "./App.css";
 
@@ -31,6 +33,8 @@ function App() {
         <Route path="/ro-plant" element={<ROPlant />} />
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/product-details" element={<ProductDetail />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/signup" element={<SignUp />} />
       </Routes>
 
       <Footer />

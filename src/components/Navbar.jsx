@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import whiteLogo from "../assets/White_Logo.png";
 import blueLogo from "../assets/Blue_Logo.png";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import SearchOverlay from "./SearchOverlay";
 
@@ -29,6 +29,7 @@ export default function Navbar({ cartCount = 0 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   /* ── refs ── */
   const utilBarRef = useRef(null);
@@ -175,11 +176,13 @@ export default function Navbar({ cartCount = 0 }) {
   const openDrawer = () => setMobileOpen(true);
   const closeDrawer = () => setMobileOpen(false);
 
-  // navbar text/logo: white only on home page (before scroll); dark everywhere else
-  const isHomePage = location.pathname === "/";
-  const isWhiteText = isHomePage && !scrolled;
-  // header background: solid once scrolled, OR always solid on non-home pages
-  const showSolidHeader = scrolled || !isHomePage;
+  const HERO_PAGES = ["/", "/about-us"];
+  const hasHeroBanner = HERO_PAGES.includes(location.pathname);
+
+  // white text only on hero pages, and only while still over the hero (not scrolled)
+  const isWhiteText = hasHeroBanner && !scrolled;
+  // solid white header background once scrolled, OR always on non-hero pages
+  const showSolidHeader = scrolled || !hasHeroBanner;
 
   return (
     <>
@@ -225,13 +228,15 @@ export default function Navbar({ cartCount = 0 }) {
                 to="/contact-us"
                 className={`transition-colors duration-200 ${
                   isWhiteText ? "hover:text-blue-200" : "hover:text-blue-600"
-                }`}
+                }`}   
               >
                 Contact Us
               </Link>
             </div>
           </div>
-          <hr className={isWhiteText ? "border-white/30" : "border-slate-200"} />
+          <hr
+            className={isWhiteText ? "border-white/30" : "border-slate-200"}
+          />
         </div>
 
         {/* ── Main nav row ── */}
@@ -316,6 +321,8 @@ export default function Navbar({ cartCount = 0 }) {
               <div className="flex items-center">
                 {/* Account */}
                 <button
+                  onClick={() => navigate("/signup")}
+
                   aria-label="Account"
                   className={`p-1.5 rounded-lg transition-all duration-200 cursor-pointer active:scale-95
       [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-110
@@ -337,6 +344,7 @@ export default function Navbar({ cartCount = 0 }) {
 
                 {/* Cart */}
                 <button
+                  onClick={() => navigate("/cart")}
                   aria-label="Cart"
                   className={`relative p-1.5 rounded-lg transition-all duration-200 cursor-pointer active:scale-95
       [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-110
