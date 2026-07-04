@@ -115,6 +115,7 @@ Pipeline failed.
 
 Build URL:
 ${env.BUILD_URL}
+echo "WEBSITE LINK : https://aqualife.dvworks.in/"
 """
     )
 }
