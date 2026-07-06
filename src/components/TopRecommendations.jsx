@@ -79,7 +79,6 @@ function ProductCard({ product }) {
   const handleEnter = () => {
     if (prefersReducedMotion()) return;
     gsap.to(cardRef.current, {
-      y: -6,
       boxShadow: "0 20px 40px -12px rgba(15, 23, 42, 0.18)",
       duration: 0.35,
       ease: "power2.out",

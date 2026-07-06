@@ -4,7 +4,6 @@ import {
   Mail,
   Phone,
   Search,
-  User,
   ShoppingCart,
   Menu,
   X,
@@ -15,6 +14,7 @@ import blueLogo from "../assets/Blue_Logo.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import SearchOverlay from "./SearchOverlay";
+import AccountDropdown from "./AccountDropdown";
 
 const NAV_LINKS = [
   { label: "Water Purifiers", to: "/water-purifiers" },
@@ -24,7 +24,16 @@ const NAV_LINKS = [
   { label: "About Us", to: "/about-us" },
 ];
 
-export default function Navbar({ cartCount = 0 }) {
+const MOBILE_NAV_LINKS = [
+  { label: "Water Purifiers", to: "/water-purifiers" },
+  { label: "Water Cooler", to: "/water-cooler" },
+  { label: "Water Softeners", to: "/water-softeners" },
+  { label: "RO Plant", to: "/ro-plant" },
+  { label: "About Us", to: "/about-us" },
+  { label: "Contact Us", to: "/contact-us" },
+];
+
+export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -228,7 +237,7 @@ export default function Navbar({ cartCount = 0 }) {
                 to="/contact-us"
                 className={`transition-colors duration-200 ${
                   isWhiteText ? "hover:text-blue-200" : "hover:text-[#0061C2]"
-                }`}   
+                }`}
               >
                 Contact Us
               </Link>
@@ -271,11 +280,11 @@ export default function Navbar({ cartCount = 0 }) {
                       className={`relative py-1 group text-[14px] inline-block transition-colors duration-200 ${
                         isWhiteText
                           ? isActive
-                            ? "text-white"
+                            ? "text-white font-medium"
                             : "text-white/75 hover:text-white"
                           : isActive
-                            ? "text-[#0061C2]"
-                            : "text-slate-700 hover:text-[#0061C2]"
+                            ? "text-[#0061C2] font-medium"
+                            : "text-slate-700 font-medium hover:text-[#0061C2]"
                       }`}
                     >
                       {link.label}
@@ -319,21 +328,8 @@ export default function Navbar({ cartCount = 0 }) {
               </button>
 
               <div className="flex items-center">
-                {/* Account */}
-                <button
-                  onClick={() => navigate("/signup")}
-
-                  aria-label="Account"
-                  className={`p-1.5 rounded-lg transition-all duration-200 cursor-pointer active:scale-95
-      [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-110
-      ${
-        isWhiteText
-          ? "hover:text-white hover:bg-white/10"
-          : "hover:text-[#0061C2] hover:bg-blue-50"
-      }`}
-                >
-                  <User size={20} />
-                </button>
+                {/* Account — signup / login / profile dropdown */}
+                <AccountDropdown isWhiteText={isWhiteText} isLoggedIn={isLoggedIn} />
 
                 {/* Divider */}
                 <div
@@ -383,6 +379,7 @@ export default function Navbar({ cartCount = 0 }) {
               <button
                 aria-label="Cart"
                 className="relative p-1 rounded-lg transition-all hover:bg-white/10 active:scale-90"
+                onClick={() => navigate("/cart")}
               >
                 <ShoppingCart size={20} />
                 <span
@@ -392,6 +389,8 @@ export default function Navbar({ cartCount = 0 }) {
                   {cartCount}
                 </span>
               </button>
+              {/* Account — signup / login / profile dropdown */}
+              <AccountDropdown isWhiteText={isWhiteText} isLoggedIn={isLoggedIn} />
               <button
                 aria-label="Open menu"
                 onClick={openDrawer}
@@ -444,7 +443,7 @@ export default function Navbar({ cartCount = 0 }) {
 
             {/* Drawer nav links */}
             <ul className="flex flex-col px-2 overflow-y-auto flex-1">
-              {NAV_LINKS.map((link, i) => {
+              {MOBILE_NAV_LINKS.map((link, i) => {
                 const isActive = location.pathname === link.to;
                 return (
                   <li

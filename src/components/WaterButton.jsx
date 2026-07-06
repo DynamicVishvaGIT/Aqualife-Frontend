@@ -48,8 +48,8 @@ export function WaterButton({
       {/* Wave fill */}
       <div className={`water-fill ${v.fill}`}>
         <svg
-          viewBox="0 0 200 40"
-          height="40"
+          viewBox="0 0 150 40"
+          className="h-[34px] lg:h-[45px] w-[200%]"
           preserveAspectRatio="none"
           xmlns="http://www.w3.org/2000/svg"
           style={{ width: "200%" }}

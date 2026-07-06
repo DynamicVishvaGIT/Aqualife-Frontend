@@ -15,6 +15,9 @@ import ProductDetail from "./components/ProductDetails";
 import Signup from "./pages/Signup";
 import Cart from "./pages/Cart";
 import OtpVerification from "./pages/OtpVerification";
+import Profile from "./pages/Profile";
+import Orders from "./pages/MyOrders";
+import PageNotFound from "./pages/PageNotFound";
 
 import "./App.css";
 
@@ -35,8 +38,11 @@ function App() {
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/product-details" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Signup />} />
         <Route path="/otp-verification" element={<OtpVerification />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
 
       <Footer />

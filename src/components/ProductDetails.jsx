@@ -17,6 +17,8 @@ import { WaterButton } from "../components/WaterButton";
 import { useNavigate } from "react-router-dom";
 import FaqSection from "../components/FaqSection";
 import DownloadPdf from "./DownloadPdf";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -25,17 +27,17 @@ const images = [product1, product2, product3, product4, product2];
 const allSpecs = [
   { label: "Net Weight", value: "4.5 kg" },
   { label: "Dimensions MM (WxDxH)", value: "31× 21× 41CM" },
-  { label: "Installation Type", value: "4.5 kg" },
-  { label: "Purification Modules", value: "31× 21× 41CM" },
-  { label: "Purification Stage", value: "4.5 kg" },
-  { label: "Storage Capacity", value: "31× 21× 41CM" },
-  { label: "TDS", value: "4.5 kg" },
-  { label: "Water Flow Rate", value: "31× 21× 41CM" },
-  { label: "Input Water Pressure", value: "4.5 kg" },
-  { label: "Input Water Temperature", value: "31× 21× 41CM" },
-  { label: "Input Water Chlorine (Max)", value: "4.5 kg" },
-  { label: "Input Water Turbidity (Max)", value: "31× 21× 41CM" },
-  { label: "Input Water Iron", value: "4.5 kg" },
+  { label: "Installation Type", value: "Wall Mounted / Counter Top" },
+  { label: "Purification Modules", value: "RO + UV + UF + Copper & Zinc" },
+  { label: "Purification Stage", value: "8 Stage Purification" },
+  { label: "Storage Capacity", value: "6 Litres" },
+  { label: "TDS", value: "Up to 2000 ppm" },
+  { label: "Water Flow Rate", value: "12-15 Litres/hour" },
+  { label: "Input Water Pressure", value: "0.3 - 3 kg/cm²" },
+  { label: "Input Water Temperature", value: "10°C - 40°C" },
+  { label: "Input Water Chlorine (Max)", value: "1 ppm" },
+  { label: "Input Water Turbidity (Max)", value: "5 NTU" },
+  { label: "Input Water Iron", value: "0.2 ppm" },
   // hidden rows (shown after "Show More")
   { label: "Voltage", value: "220V / 50Hz" },
   { label: "Power Consumption", value: "60 W" },
@@ -107,7 +109,6 @@ const PRODUCTS = [
   },
 ];
 
-// cards
 /* ── Product card ── */
 function ProductCard({ product }) {
   const navigate = useNavigate();
@@ -128,7 +129,7 @@ function ProductCard({ product }) {
       className="pd-product-card bg-white cursor-pointer rounded-2xl border border-slate-100 p-3 sm:p-5 flex flex-col h-full select-none justify-between transition-shadow duration-300 hover:shadow-lg"
       onClick={() => navigate("/product-details")}
     >
-      <div className="relative  bg-white rounded-xl flex items-center justify-center h-25 sm:h-52 mb-3 sm:mb-4 overflow-hidden">
+      <div className="relative bg-white rounded-xl flex items-center justify-center h-25 sm:h-52 mb-3 sm:mb-4 overflow-hidden">
         {product.badge && (
           <span className="absolute top-1.5 left-1.5 z-10 bg-slate-100 text-slate-500 text-[10px] sm:text-[11px] font-medium px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
             {product.badge}
@@ -166,7 +167,7 @@ function ProductCard({ product }) {
         </div>
       </div>
 
-      {/* Action row — optimized touch target sizing on mobile */}
+      {/* Action row */}
       <div className="flex gap-2 mt-auto">
         <WaterButton
           variant="primary"
@@ -197,6 +198,7 @@ export default function ProductDetail() {
   const rootRef = useRef(null);
   const imgRef = useRef(null);
   const galleryImgContainerRef = useRef(null);
+  const swiperRef = useRef(null);
   const touchStartX = useRef(0);
   const touchDeltaX = useRef(0);
   const isSwiping = useRef(false);
@@ -217,9 +219,17 @@ export default function ProductDetail() {
   const pinchStartDistRef = useRef(null);
   const pinchStartScaleRef = useRef(1);
 
-  const prevImg = () =>
-    setMainImg((p) => (p - 1 + images.length) % images.length);
-  const nextImg = () => setMainImg((p) => (p + 1) % images.length);
+  /* ── Go to a given slide, keeping the Swiper instance and state in sync ── */
+  const goToSlide = (index) => {
+    const wrapped = (index + images.length) % images.length;
+    setMainImg(wrapped);
+    if (swiperRef.current) {
+      swiperRef.current.slideTo(wrapped);
+    }
+  };
+
+  const prevImg = () => goToSlide(mainImg - 1);
+  const nextImg = () => goToSlide(mainImg + 1);
 
   /* ── Mobile swipe handlers for the main gallery image ── */
   const handleTouchStart = (e) => {
@@ -352,7 +362,7 @@ export default function ProductDetail() {
     }
   };
 
-  //   product info
+  // product info
   const VISIBLE_COUNT = 13;
   const [showAll, setShowAll] = useState(false);
 
@@ -519,7 +529,7 @@ export default function ProductDetail() {
   }, []);
 
   return (
-    <div ref={rootRef} className="relative min-h-screen  pt-25 lg:pt-33 bg-white">
+    <div ref={rootRef} className="relative min-h-screen pt-25 lg:pt-33 bg-white">
       {/* Breadcrumb */}
       <div className="absolute left-0 w-full z-10">
         <div className="primary-container">
@@ -535,7 +545,7 @@ export default function ProductDetail() {
             {/* Main image */}
             <div
               ref={galleryImgContainerRef}
-              className="relative overflow-hidden flex items-center justify-center h-72 sm:h-96 touch-pan-y lg:cursor-zoom-in"
+              className="relative overflow-hidden flex items-center justify-center w-full h-[340px] sm:h-[420px] lg:h-[500px] bg-white touch-pan-y lg:cursor-zoom-in"
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
@@ -545,21 +555,51 @@ export default function ProductDetail() {
             >
               <button
                 onClick={prevImg}
+                onMouseEnter={(e) => e.stopPropagation()}
+                onMouseMove={(e) => e.stopPropagation()}
+                aria-label="Previous image"
                 className="hidden sm:flex absolute left-3 z-10 w-9 h-9 rounded-full cursor-pointer bg-white shadow-md items-center justify-center text-gray-500 hover:text-gray-800 hover:scale-110 active:scale-90 transition-transform"
               >
                 <ArrowLeft size={20} />
               </button>
 
-              <img
-                ref={imgRef}
-                src={images[mainImg]}
-                alt="Product"
-                className="h-full w-full object-contain p-4 select-none"
-                draggable={false}
-              />
+              <Swiper
+                onSwiper={(swiper) => {
+                  swiperRef.current = swiper;
+                }}
+                slidesPerView={1}
+                onSlideChange={(swiper) => setMainImg(swiper.activeIndex)}
+                className="w-full h-full"
+              >
+                {images.map((img, index) => (
+                  <SwiperSlide
+                    key={index}
+                    className="flex items-center justify-center"
+                  >
+                    <img
+                      ref={index === mainImg ? imgRef : null}
+                      src={img}
+                      alt={`Product view ${index + 1}`}
+                      onClick={openLightbox}
+                      className="w-full h-[340px] sm:h-[420px] lg:h-[500px] object-contain"
+                      draggable={false}
+                    />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+
+              {/* Mobile Image Counter */}
+              <div className="absolute top-3 right-3 lg:hidden">
+                <div className="bg-black/60 text-white text-xs font-medium px-3 py-1 rounded-full">
+                  {mainImg + 1} / {images.length}
+                </div>
+              </div>
 
               <button
                 onClick={nextImg}
+                onMouseEnter={(e) => e.stopPropagation()}
+                onMouseMove={(e) => e.stopPropagation()}
+                aria-label="Next image"
                 className="hidden select-none sm:flex absolute right-3 z-10 w-9 h-9 rounded-full cursor-pointer bg-[#0061C2] shadow-md items-center justify-center text-white hover:scale-110 active:scale-90 transition-transform"
               >
                 <ArrowRight size={20} />
@@ -577,8 +617,6 @@ export default function ProductDetail() {
                   }}
                 />
               )}
-
-
             </div>
 
             {/* Desktop zoom pane — portaled to <body> so it always paints
@@ -606,11 +644,11 @@ export default function ProductDetail() {
               )}
 
             {/* Mobile dot navigation — swipe the image above or tap a dot */}
-            <div className="flex sm:hidden justify-center items-center gap-1.5 mt-3">
+            <div className="flex lg:hidden justify-center items-center gap-1.5 mt-3">
               {images.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => setMainImg(i)}
+                  onClick={() => goToSlide(i)}
                   aria-label={`Go to image ${i + 1}`}
                   aria-current={mainImg === i}
                   className={`h-1.5 rounded-full cursor-pointer transition-all duration-300 active:scale-90 ${
@@ -627,7 +665,7 @@ export default function ProductDetail() {
               {images.map((img, i) => (
                 <button
                   key={i}
-                  onClick={() => setMainImg(i)}
+                  onClick={() => goToSlide(i)}
                   aria-current={mainImg === i}
                   className={`flex-shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 transition-all duration-300 active:scale-95
         w-16 h-16
@@ -637,7 +675,7 @@ export default function ProductDetail() {
         xl:w-22 xl:h-22
         ${
           mainImg === i
-            ? "border-[#0061C2] opacity-100  shadow-md shadow-blue-100"
+            ? "border-[#0061C2] opacity-100 shadow-md shadow-blue-100"
             : "border-gray-200 opacity-60 hover:opacity-100 hover:border-gray-400"
         }`}
                 >
@@ -690,7 +728,7 @@ export default function ProductDetail() {
 
               <div className="pd-feature">
                 <h3 className="text-sm heading sm:text-base font-bold text-gray-900">
-                  RO Purification
+                  Smart Display
                 </h3>
                 <p
                   className={`text-sm text-gray-500 mt-1 leading-relaxed ${!showMore ? "line-clamp-3" : ""}`}
@@ -752,12 +790,12 @@ export default function ProductDetail() {
                     setQty((q) => Math.max(1, q - 1));
                     bumpButton(e.currentTarget);
                   }}
-                  className="w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
+                  className="w-11 h-11 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
                 >
-                  <FiMinus size={18} />
+                  <FiMinus size={16} />
                 </button>
 
-                <span className="min-w-[56px] h-12 flex items-center justify-center border-x border-gray-300 text-base font-semibold text-gray-900">
+                <span className="min-w-[45px] h-11 flex items-center justify-center border-x border-gray-300 text-sm font-semibold text-gray-900">
                   {qty}
                 </span>
 
@@ -766,9 +804,9 @@ export default function ProductDetail() {
                     setQty((q) => q + 1);
                     bumpButton(e.currentTarget);
                   }}
-                  className="w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
+                  className="w-11 h-11 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
                 >
-                  <FiPlus size={18} />
+                  <FiPlus size={16} />
                 </button>
               </div>
 
@@ -840,7 +878,7 @@ export default function ProductDetail() {
       {/* info banner */}
       <AlkalineWaterBanner />
 
-    <DownloadPdf/>
+      <DownloadPdf />
 
       {/* What Customers Are Saying */}
       <section className="bg-[#FFF9F9] py-10 sm:py-12">
@@ -909,7 +947,6 @@ export default function ProductDetail() {
           </div>
 
           {/* Cards */}
-          {/* Product grid — 2 columns on mobile, scaling up smoothly */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-4 lg:gap-6">
             {PRODUCTS.map((product) => (
               <ProductCard key={product.id} product={product} />
@@ -919,7 +956,7 @@ export default function ProductDetail() {
       </section>
 
       {/* faq */}
-      <FaqSection className="pb-15"/>
+      <FaqSection className="pb-15" />
 
       {/* ── Mobile zoom lightbox: pinch, double-tap, or swipe ── */}
       {lightboxOpen && (
@@ -961,7 +998,7 @@ export default function ProductDetail() {
             {images.map((_, i) => (
               <button
                 key={i}
-                onClick={() => setMainImg(i)}
+                onClick={() => goToSlide(i)}
                 aria-label={`Go to image ${i + 1}`}
                 aria-current={mainImg === i}
                 className={`h-1.5 rounded-full cursor-pointer transition-all duration-300 active:scale-90 ${

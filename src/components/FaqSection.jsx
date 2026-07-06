@@ -220,7 +220,7 @@ export default function FaqSection({
 
   return (
     <section ref={sectionRef} className={`bg-white ${className}`}>
-      <div className="primary-container max-w-7xl mx-auto">
+      <div className="primary-container">
 
         {/* Header */}
         <div ref={headerRef} className="mb-6 sm:mb-10">

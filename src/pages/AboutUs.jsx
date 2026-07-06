@@ -107,7 +107,7 @@ function VisionMission() {
         return (
           <div
             key={key}
-            className="relative w-full h-[420px] sm:h-[480px] lg:h-[700px] overflow-hidden"
+            className="relative w-full h-[420px] sm:h-[480px] lg:h-[700px] 2xl:h-[1100px] overflow-hidden"
           >
             <img src={image} alt={`${label} - Aqualife`} className="absolute inset-0 h-full w-full object-cover" />
             <div className={isDark
@@ -141,7 +141,7 @@ function WhyChooseUs() {
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 sm:gap-6">
           {/* Left column */}
           <div className="flex flex-col gap-5 sm:gap-6">
-            <div className="relative w-full h-[220px] sm:h-[260px] lg:h-[400px] rounded-2xl sm:rounded-3xl overflow-hidden">
+            <div className="relative w-full h-[220px] sm:h-[260px] lg:h-[400px] 2xl:h-[500px] rounded-2xl sm:rounded-3xl overflow-hidden">
               <img src={familyImg} alt="Aqualife family with water purifiers" className="absolute inset-0 h-full w-full object-cover" />
               <div className="absolute top-2 left-2 right-4 sm:top-3 sm:left-2 sm:right-auto sm:max-w-xs">
                 <div className="rounded-xl py-3 sm:px-5 sm:py-4">
@@ -153,7 +153,7 @@ function WhyChooseUs() {
                 </div>
               </div>
             </div>
-            <div className="relative w-full h-[220px] sm:h-[260px] lg:h-[400px] rounded-2xl sm:rounded-3xl overflow-hidden">
+            <div className="relative w-full h-[220px] sm:h-[260px] lg:h-[400px] 2xl:h-[500px] rounded-2xl sm:rounded-3xl overflow-hidden">
               <img src={trustImg} alt="Aqualife-Ever trusted brand" className="absolute inset-0 h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-transparent" />
               <div className="relative z-10 h-full flex flex-col justify-center p-4 sm:p-6">

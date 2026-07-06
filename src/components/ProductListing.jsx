@@ -79,6 +79,7 @@ function ProductCard({ product, setCardRef }) {
   const navigate = useNavigate();
   const imgRef = useRef(null);
   const cardRef = useRef(null);
+  const priceRef = useRef(null);
 
   useEffect(() => {
     if (cardRef.current) {
@@ -86,30 +87,40 @@ function ProductCard({ product, setCardRef }) {
     }
   }, [setCardRef]);
 
+  const prefersReducedMotion = () =>
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   const handleMouseEnter = () => {
+    if (prefersReducedMotion()) return;
     gsap.to(cardRef.current, {
       y: -6,
-      boxShadow: "0 12px 24px rgba(15, 23, 42, 0.08)",
-      duration: 0.3,
+      boxShadow: "0 20px 40px -12px rgba(15, 23, 42, 0.18)",
+      duration: 0.35,
       ease: "power2.out",
     });
     gsap.to(imgRef.current, {
-      scale: 1.06,
-      duration: 0.3,
+      scale: 1.08,
+      duration: 0.5,
       ease: "power2.out",
     });
+    gsap.fromTo(
+      priceRef.current,
+      { scale: 1 },
+      { scale: 1.04, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 1 }
+    );
   };
 
   const handleMouseLeave = () => {
+    if (prefersReducedMotion()) return;
     gsap.to(cardRef.current, {
       y: 0,
-      boxShadow: "0 0px 0px rgba(15, 23, 42, 0)",
-      duration: 0.3,
+      boxShadow: "0 0px 0px 0px rgba(15, 23, 42, 0)",
+      duration: 0.35,
       ease: "power2.out",
     });
     gsap.to(imgRef.current, {
       scale: 1,
-      duration: 0.3,
+      duration: 0.5,
       ease: "power2.out",
     });
   };
@@ -132,7 +143,7 @@ function ProductCard({ product, setCardRef }) {
           ref={imgRef}
           src={product.image}
           alt={product.name}
-          className="h-full w-full object-contain mix-blend-multiply"
+          className="h-full w-full object-contain mix-blend-multiply will-change-transform"
           draggable={false}
         />
       </div>
@@ -145,7 +156,7 @@ function ProductCard({ product, setCardRef }) {
           {product.description}
         </p>
 
-        <div className="mb-3 sm:mb-4">
+        <div ref={priceRef} className="mb-3 sm:mb-4">
           <p className="text-lg sm:text-[22px] font-bold text-slate-900 leading-none mb-1">
             ₹{product.price.toLocaleString("en-IN")}
           </p>
@@ -284,10 +295,10 @@ export default function WaterPurifierListing() {
   }, [activeCategory]);
 
   return (
-    <div className="min-h-screen bg-[#F6FAFF]">
+    <div className="min-h-screen bg-[#fff7f6]">
       {/* ── Category tabs ── */}
       <div className="bg-white border-b border-slate-100 sticky top-0 z-10 shadow-sm">
-        <div className="primary-container max-w-7xl m-auto">
+        <div className="primary-container  lm-auto">
           <div
             ref={containerRef}
             className="relative flex items-end justify-start sm:justify-center gap-3 sm:gap-8 overflow-x-auto scrollbar-hide unique-scroll-container"
@@ -300,7 +311,8 @@ export default function WaterPurifierListing() {
                   ref={(el) => (tabRefs.current[cat.label] = el)}
                   onClick={() => setActiveCategory(cat.label)}
                   className={`flex flex-col items-center gap-1.5 pt-4 sm:pt-7 cursor-pointer shrink-0
-                  border-b-2 sm:border-b-3 duration-500 hover:scale-105 min-w-[80px] sm:min-w-[110px]
+                  border-b-2 sm:border-b-3 duration-500 hover:scale-105 min-w-[80px] sm:min-w-[120px]
+                  2xl:min-w-[160px]
                   border-transparent`}
                 >
                   {/* Image */}

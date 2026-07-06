@@ -323,72 +323,73 @@ export default function CartComponent() {
                   className="cart-item-card border border-gray-200 rounded-xl overflow-hidden mb-4"
                 >
                   <div className="flex gap-3 p-3 sm:p-4">
-  {/* Image */}
-  <div className="w-20 h-24 sm:w-28 sm:h-32 shrink-0 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
-    <img
-      src={item.image}
-      alt={item.name}
-      className="w-full h-full object-contain"
-    />
-  </div>
+                    {/* Image */}
+                    <div className="w-20 h-24 sm:w-28 sm:h-32 shrink-0 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
 
-  {/* Details */}
-  <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                    {/* Details */}
+                    <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                      <p className="text-sm font-medium text-gray-900 leading-snug line-clamp-2">
+                        {item.name}
+                      </p>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Color: {item.color}
+                          </p>
+                          <p className="text-xs text-green-600 font-medium mt-2">
+                            ({item.discount})
+                          </p>
+                        </div>
 
-    {/* Row 1: name + stepper */}
-    <div className="flex  lg:flex  items-start justify-between gap-2">
-      <div className="min-w-0">
-        <p className="text-sm font-medium text-gray-900 leading-snug line-clamp-2">
-          {item.name}
-        </p>
-        <p className="text-xs text-gray-500 mt-0.5">Color: {item.color}</p>
-        <p className="text-xs text-green-600 font-medium mt-0.5">
-          ({item.discount})
-        </p>
-      </div>
+                        {/* Qty stepper — top-right, never wraps */}
+                        <div className="inline-flex items-center border border-gray-300 rounded-md overflow-hidden shrink-0">
+                          <button
+                            onClick={() => updateQty(item.id, -1)}
+                            className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
+                          >
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                          <span
+                            ref={(el) => {
+                              if (el) qtyRefs.current[item.id] = el;
+                            }}
+                            className="w-9 h-8 flex items-center justify-center border-x border-gray-300 text-sm font-semibold text-gray-900 select-none"
+                          >
+                            {item.qty}
+                          </span>
+                          <button
+                            onClick={() => updateQty(item.id, 1)}
+                            className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
 
-      {/* Qty stepper — top-right, never wraps */}
-      <div className="inline-flex items-center border border-gray-300 rounded-md overflow-hidden shrink-0">
-        <button
-          onClick={() => updateQty(item.id, -1)}
-          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
-        >
-          <Minus className="w-3.5 h-3.5" />
-        </button>
-        <span
-          ref={(el) => { if (el) qtyRefs.current[item.id] = el; }}
-          className="w-9 h-8 flex items-center justify-center border-x border-gray-300 text-sm font-semibold text-gray-900 select-none"
-        >
-          {item.qty}
-        </span>
-        <button
-          onClick={() => updateQty(item.id, 1)}
-          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
-        >
-          <Plus className="w-3.5 h-3.5" />
-        </button>
-      </div>
-    </div>
-
-    {/* Row 2: price + delete */}
-    <div className="flex items-center gap-2 mt-auto pt-1">
-      <span className="text-xs text-gray-400 line-through">
-        {formatINR(item.mrp)}
-      </span>
-      <span className="text-sm font-semibold text-gray-900">
-        {formatINR(item.price)}
-      </span>
-      <button
-        onClick={() => removeItem(item.id)}
-        className="ml-auto text-red-400 hover:text-red-500 p-1"
-        aria-label="Remove item"
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>
-    </div>
-
-  </div>
-</div>
+                      {/* Row 2: price + delete */}
+                      <div className="flex items-center gap-2 mt-auto pt-1">
+                        <span className="text-xs text-gray-400 line-through">
+                          {formatINR(item.mrp)}
+                        </span>
+                        <span className="text-sm font-semibold text-gray-900">
+                          {formatINR(item.price)}
+                        </span>
+                        <button
+                          onClick={() => removeItem(item.id)}
+                          className="ml-auto text-red-400 hover:text-red-500 p-1"
+                          aria-label="Remove item"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
 
                   <button
                     onClick={bounceButton}

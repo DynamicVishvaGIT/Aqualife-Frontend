@@ -13,6 +13,10 @@ import product4 from "../assets/Purifier_4.png";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 const PRODUCTS = [
   {
     id: 1,
@@ -66,120 +70,175 @@ const PRODUCTS = [
   },
 ];
 
-function ProductCard({ product, cardRef }) {
-  return (
-    <div
-      ref={cardRef}
-      className="rounded-2xl overflow-hidden flex flex-col h-full"
-      style={{ background: product.bg }}
-    >
-      <div className="px-4 pt-4 pb-2">
-        <span className="inline-block bg-blue-100 text-blue-500 text-[11px] font-medium px-3 py-1 rounded-full mb-3">
-          New launch
-        </span>
-        <h3 className="text-[15px] font-bold text-slate-900 leading-tight">
-          {product.name}
-        </h3>
-        <p className="text-slate-400 text-[12px] mt-0.5 mb-3 leading-snug">
-          {product.description}
-        </p>
-        <p className="text-[22px] font-bold text-slate-900 leading-none mb-1">
-          ₹{product.price.toLocaleString("en-IN")}
-        </p>
-        <div className="flex items-center gap-1.5 text-[12px]">
-          <span className="text-slate-400">MRP</span>
-          <span className="text-slate-400 line-through">
-            ₹{product.mrp.toLocaleString("en-IN")}
-          </span>
-          <span className="text-green-500 font-semibold">
-            ({product.discount}% OFF)
-          </span>
-        </div>
-      </div>
+function ProductCard({ product }) {
+  const cardRef = useRef(null);
+  const imgRef = useRef(null);
+  const priceRef = useRef(null);
 
-      <div className="flex-1 flex items-end justify-center px-4 pt-4 pb-4 min-h-[180px] sm:min-h-[200px]">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full max-w-[180px] sm:max-w-[200px] h-auto object-contain drop-shadow-md"
-          draggable={false}
-        />
-      </div>
+  const handleEnter = () => {
+    if (prefersReducedMotion()) return;
+    gsap.to(cardRef.current, {
+      boxShadow: "0 20px 40px -12px rgba(15, 23, 42, 0.18)",
+      duration: 0.35,
+      ease: "power2.out",
+    });
+    gsap.to(imgRef.current, {
+      scale: 1.08,
+      duration: 0.5,
+      ease: "power2.out",
+    });
+    gsap.fromTo(
+      priceRef.current,
+      { scale: 1 },
+      { scale: 1.04, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 1 }
+    );
+  };
+
+  const handleLeave = () => {
+    if (prefersReducedMotion()) return;
+    gsap.to(cardRef.current, {
+      boxShadow: "0 0px 0px 0px rgba(15, 23, 42, 0)",
+      duration: 0.35,
+      ease: "power2.out",
+    });
+    gsap.to(imgRef.current, {
+      scale: 1,
+      duration: 0.5,
+      ease: "power2.out",
+    });
+  };
+
+  return (
+  <div
+  ref={cardRef}
+  onMouseEnter={handleEnter}
+  onMouseLeave={handleLeave}
+  className="product-card rounded-2xl overflow-hidden flex flex-col h-[420px] w-full select-none"
+  style={{ background: product.bg }}
+>
+  {/* Content */}
+  <div className="px-4 pt-4 pb-2 flex-shrink-0">
+    <span className="inline-block bg-blue-100 text-blue-500 text-[11px] font-medium px-3 py-1 rounded-full mb-3">
+      New launch
+    </span>
+
+    <h3 className="text-[15px] font-bold text-slate-900 leading-tight min-h-[42px]">
+      {product.name}
+    </h3>
+
+    <p className="text-slate-400 text-[12px] mt-1 mb-3 leading-snug min-h-[36px]">
+      {product.description}
+    </p>
+
+    <p
+      ref={priceRef}
+      className="text-[22px] font-bold text-slate-900 leading-none mb-1"
+    >
+      ₹{product.price.toLocaleString("en-IN")}
+    </p>
+
+    <div className="flex items-center gap-1.5 text-[12px]">
+      <span className="text-slate-400">MRP</span>
+      <span className="text-slate-400 line-through">
+        ₹{product.mrp.toLocaleString("en-IN")}
+      </span>
+      <span className="text-green-500 font-semibold">
+        ({product.discount}% OFF)
+      </span>
     </div>
+  </div>
+
+  {/* Fixed Image Area */}
+  <div className="flex-1 flex items-center justify-center px-4">
+    <div className="w-[180px] h-[180px] sm:w-[200px] sm:h-[200px] flex items-center justify-center">
+      <img
+        ref={imgRef}
+        src={product.image}
+        alt={product.name}
+        className="w-full h-full object-contain drop-shadow-md will-change-transform"
+        draggable={false}
+      />
+    </div>
+  </div>
+</div>
   );
 }
 
 export default function NewLaunches() {
   const swiperRef = useRef(null);
-  const [lastDir, setLastDir] = useState(null);
-
   const sectionRef = useRef(null);
   const headingRef = useRef(null);
-  // cardRefs holds one entry per PRODUCTS index (stable across re-renders),
-  // so ScrollTrigger animates only the real slides, not Swiper's loop clones.
-  const cardRefs = useRef([]);
-
-  const handlePrev = () => {
-    swiperRef.current?.slidePrev();
-    setLastDir("prev");
-  };
-
-  const handleNext = () => {
-    swiperRef.current?.slideNext();
-    setLastDir("next");
-  };
+  const swiperWrapRef = useRef(null);
+  const [lastDir, setLastDir] = useState(null);
 
   useLayoutEffect(() => {
+    if (prefersReducedMotion()) return;
+
     const ctx = gsap.context(() => {
-      const cards = cardRefs.current.filter(Boolean);
-
-      // Starting state — hidden, shifted down
-      gsap.set(headingRef.current, { opacity: 0, y: 24 });
-      gsap.set(cards, { opacity: 0, y: 40 });
-
-      const tl = gsap.timeline({
+      gsap.from(headingRef.current, {
+        y: 28,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power3.out",
         scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 5%",
-          // "bottom top" = the trigger's end point is only reached once the
-          // section has fully scrolled past the top of the viewport.
-          // With the previous "bottom 20%" value, short sections would hit
-          // that end point while still fully visible on screen, so the
-          // "reverse" action fired mid-view and everything faded/blurred
-          // back out even though it hadn't left the viewport yet.
-          end: "bottom",
-          // replays the animation every time the section fully re-enters
-          // view, whether scrolling down into it or back up into it —
-          // and only reverses once it has fully left the viewport
-          toggleActions: "play none play none",
+          trigger: headingRef.current,
+          start: "top 85%",
         },
       });
 
-      tl.to(headingRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
+      // Animate only the currently-rendered (non-cloned) card wrappers
+      const cards = swiperWrapRef.current
+        ? gsap.utils.toArray(
+            swiperWrapRef.current.querySelectorAll(
+              ".swiper-slide:not(.swiper-slide-duplicate) .product-card"
+            )
+          )
+        : [];
+
+      gsap.from(cards, {
+        y: 40,
+        opacity: 0,
+        scale: 0.96,
+        duration: 0.7,
+        stagger: 0.1,
         ease: "power3.out",
-      }).to(
-        cards,
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          ease: "power3.out",
-          stagger: 0.12,
+        scrollTrigger: {
+          trigger: swiperWrapRef.current,
+          start: "top 82%",
         },
-        "-=0.3"
-      );
+      });
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
+  const bumpButton = (el) => {
+    if (prefersReducedMotion() || !el) return;
+    gsap.fromTo(
+      el,
+      { scale: 0.85 },
+      { scale: 1, duration: 0.3, ease: "back.out(4)" }
+    );
+  };
+
+  const handlePrev = (e) => {
+    swiperRef.current?.slidePrev();
+    setLastDir("prev");
+    bumpButton(e.currentTarget);
+  };
+
+  const handleNext = (e) => {
+    swiperRef.current?.slideNext();
+    setLastDir("next");
+    bumpButton(e.currentTarget);
+  };
+
+  const prevActive = lastDir === "prev";
+  const nextActive = lastDir === "next" || lastDir === null;
+
   return (
     <section ref={sectionRef} className="bg-white py-10 sm:py-12 lg:py-16">
       <div className="primary-container">
-
         {/* Heading row */}
         <div
           ref={headingRef}
@@ -195,7 +254,7 @@ export default function NewLaunches() {
               aria-label="Previous"
               onClick={handlePrev}
               className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 ${
-                lastDir === "prev"
+                prevActive
                   ? "bg-blue-600 text-white hover:bg-blue-700"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
@@ -206,7 +265,7 @@ export default function NewLaunches() {
               aria-label="Next"
               onClick={handleNext}
               className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 ${
-                lastDir !== "prev"
+                nextActive
                   ? "bg-blue-600 text-white hover:bg-blue-700"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
@@ -217,33 +276,32 @@ export default function NewLaunches() {
         </div>
 
         {/* Slider */}
-        <Swiper
-          modules={[Autoplay]}
-          autoplay={{ delay: 4000, disableOnInteraction: false }}
-          loop
-          speed={600}
-          onSwiper={(swiper) => (swiperRef.current = swiper)}
-          slidesPerView={1}
-          spaceBetween={14}
-          breakpoints={{
-            480:  { slidesPerView: 1.5, spaceBetween: 14 },
-            640:  { slidesPerView: 2,   spaceBetween: 16 },
-            900:  { slidesPerView: 3,   spaceBetween: 18 },
-            1100: { slidesPerView: 4,   spaceBetween: 20 },
-          }}
-          className="!pb-1"
-        >
-          {PRODUCTS.map((product, index) => (
-            <SwiperSlide key={product.id} className="h-auto self-stretch">
-              <div className="h-full">
-                <ProductCard
-                  product={product}
-                  cardRef={(el) => (cardRefs.current[index] = el)}
-                />
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        <div ref={swiperWrapRef}>
+          <Swiper
+            modules={[Autoplay]}
+            autoplay={{ delay: 4000, disableOnInteraction: false }}
+            loop
+            speed={600}
+            onSwiper={(swiper) => (swiperRef.current = swiper)}
+            slidesPerView={1}
+            spaceBetween={14}
+            breakpoints={{
+              480: { slidesPerView: 1.5, spaceBetween: 14 },
+              640: { slidesPerView: 2, spaceBetween: 16 },
+              900: { slidesPerView: 3, spaceBetween: 18 },
+              1100: { slidesPerView: 4, spaceBetween: 20 },
+            }}
+            className="!pb-1"
+          >
+            {PRODUCTS.map((product) => (
+              <SwiperSlide key={product.id} className="h-auto self-stretch">
+                <div className="h-full">
+                  <ProductCard product={product} />
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
 
         {/* Arrows — mobile bottom-center */}
         <div className="flex sm:hidden items-center justify-center gap-4 mt-6">
@@ -251,7 +309,7 @@ export default function NewLaunches() {
             aria-label="Previous"
             onClick={handlePrev}
             className={`w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-95 ${
-              lastDir === "prev"
+              prevActive
                 ? "bg-blue-600 text-white"
                 : "bg-slate-100 text-slate-600"
             }`}
@@ -262,7 +320,7 @@ export default function NewLaunches() {
             aria-label="Next"
             onClick={handleNext}
             className={`w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-95 ${
-              lastDir !== "prev"
+              nextActive
                 ? "bg-blue-600 text-white"
                 : "bg-slate-100 text-slate-600"
             }`}
@@ -270,7 +328,6 @@ export default function NewLaunches() {
             <ChevronRight size={20} />
           </button>
         </div>
-
       </div>
     </section>
   );

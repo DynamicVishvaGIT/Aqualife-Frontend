@@ -122,12 +122,12 @@ export default function HomeSlider() {
   };
 
   const prevActive = lastDir === "prev";
-  const nextActive = lastDir === "next" || lastDir === null; // next is default active
+  const nextActive = lastDir === "next" || lastDir === null; 
 
   return (
     <section
       ref={sectionRef}
-      className="relative w-full h-[900px] sm:h-[800px] md:h-[600px] lg:h-[720px] xl:h-[600px] 2xl:h-screen overflow-hidden"
+      className="relative w-full h-[680px] sm:h-[900px] md:h-[600px] lg:h-[720px] xl:h-[600px] 2xl:h-screen overflow-hidden"
     >
       <Swiper
         modules={[Autoplay]}
