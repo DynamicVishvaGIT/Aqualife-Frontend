@@ -195,7 +195,7 @@ export default function AccountDropdown({ isWhiteText = false }) {
       {/* Trigger */}
       <button
         onClick={toggleMenu}
-        onFocus={openMenu}
+        // onFocus={openMenu}
         aria-label="Account"
         aria-haspopup="menu"
         aria-expanded={open}

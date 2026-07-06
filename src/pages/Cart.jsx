@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import gsap from "gsap";
 import Breadcrumb from "../components/Breadcrumb";
+import { WaterButton } from "../components/WaterButton";
+
 
 const BRAND = "#0061C2";
 const BRAND_DARK = "#004f9e";
@@ -351,23 +353,23 @@ export default function CartComponent() {
                         <div className="inline-flex items-center border border-gray-300 rounded-md overflow-hidden shrink-0">
                           <button
                             onClick={() => updateQty(item.id, -1)}
-                            className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
+                            className="w-7 h-7  lg:w-9 lg:h-9 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
                           >
-                            <Minus className="w-3.5 h-3.5" />
+                            <Minus className="w-3 h-3" />
                           </button>
                           <span
                             ref={(el) => {
                               if (el) qtyRefs.current[item.id] = el;
                             }}
-                            className="w-9 h-8 flex items-center justify-center border-x border-gray-300 text-sm font-semibold text-gray-900 select-none"
+                            className="w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center border-x border-gray-300 text-sm font-semibold text-gray-900 select-none"
                           >
                             {item.qty}
                           </span>
                           <button
                             onClick={() => updateQty(item.id, 1)}
-                            className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
+                            className="w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
                           >
-                            <Plus className="w-3.5 h-3.5" />
+                            <Plus className="w-3 h-3" />
                           </button>
                         </div>
                       </div>
@@ -488,9 +490,10 @@ export default function CartComponent() {
             </div>
           </div>
 
-          <button
+          <WaterButton
             onClick={bounceButton}
-            className="w-full mt-4 text-white font-medium py-3 rounded-lg text-sm transition-colors"
+            sizing="h-[50px] lg:h-[45px]"
+            className="w-full mt-4 text-white font-medium py-2.5 rounded-lg text-sm transition-colors"
             style={{ backgroundColor: BRAND }}
             onMouseEnter={(e) =>
               (e.currentTarget.style.backgroundColor = BRAND_DARK)
@@ -500,7 +503,7 @@ export default function CartComponent() {
             }
           >
             Continue To Checkout
-          </button>
+          </WaterButton>
         </div>
       </div>
     </div>

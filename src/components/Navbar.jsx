@@ -329,7 +329,10 @@ export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
 
               <div className="flex items-center">
                 {/* Account — signup / login / profile dropdown */}
-                <AccountDropdown isWhiteText={isWhiteText} isLoggedIn={isLoggedIn} />
+                <AccountDropdown
+                  isWhiteText={isWhiteText}
+                  isLoggedIn={isLoggedIn}
+                />
 
                 {/* Divider */}
                 <div
@@ -390,7 +393,10 @@ export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
                 </span>
               </button>
               {/* Account — signup / login / profile dropdown */}
-              <AccountDropdown isWhiteText={isWhiteText} isLoggedIn={isLoggedIn} />
+              <AccountDropdown
+                isWhiteText={isWhiteText}
+                isLoggedIn={isLoggedIn}
+              />
               <button
                 aria-label="Open menu"
                 onClick={openDrawer}

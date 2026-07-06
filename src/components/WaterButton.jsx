@@ -13,6 +13,7 @@ export function WaterButton({
   variant = "primary",
   onClick,
   className = "",
+  sizing="h-[32px] lg:h-[45px]",
   textClassName = "text-[9px] sm:text-[8px] md:text-[10px] lg:text-[12px] xl:text-[14px]",
 }) {
   const btnRef = useRef(null);
@@ -49,7 +50,7 @@ export function WaterButton({
       <div className={`water-fill ${v.fill}`}>
         <svg
           viewBox="0 0 150 40"
-          className="h-[34px] lg:h-[45px] w-[200%]"
+          className={sizing}
           preserveAspectRatio="none"
           xmlns="http://www.w3.org/2000/svg"
           style={{ width: "200%" }}

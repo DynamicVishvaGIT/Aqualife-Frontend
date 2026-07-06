@@ -40,7 +40,7 @@ function App() {
           <Route path="/water-softeners" element={<WaterSofteners />} />
           <Route path="/ro-plant" element={<ROPlant />} />
           <Route path="/contact-us" element={<ContactUs />} />
-          <Route path="/product-details/:id" element={<ProductDetail />} />
+          <Route path="/product-details" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/login" element={<Signup />} />
           <Route path="/otp-verification" element={<OtpVerification />} />
