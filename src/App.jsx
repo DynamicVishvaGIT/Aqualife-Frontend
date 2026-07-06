@@ -1,52 +1,56 @@
 import { Routes, Route } from "react-router-dom";
+import { lazy, Suspense } from "react";
 
 import Navbar from "./components/Navbar";
-
-import Home from "./pages/Home";
-import AboutUs from "./pages/AboutUs";
-import WaterPurifiers from "./pages/WaterPurifiers";
-import WaterCooler from "./pages/WaterCooler";
-import WaterSofteners from "./pages/WaterSofteners";
-import ROPlant from "./pages/ROPlant";
-import ContactUs from "./pages/ContactUs";
-import {Footer} from "./components/Footer";
+import { Footer } from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
-import ProductDetail from "./components/ProductDetails";
-import Signup from "./pages/Signup";
-import Cart from "./pages/Cart";
-import OtpVerification from "./pages/OtpVerification";
-import Profile from "./pages/Profile";
-import Orders from "./pages/MyOrders";
-import PageNotFound from "./pages/PageNotFound";
+
+const Home = lazy(() => import("./pages/Home"));
+const AboutUs = lazy(() => import("./pages/AboutUs"));
+const WaterPurifiers = lazy(() => import("./pages/WaterPurifiers"));
+const WaterCooler = lazy(() => import("./pages/WaterCooler"));
+const WaterSofteners = lazy(() => import("./pages/WaterSofteners"));
+const ROPlant = lazy(() => import("./pages/ROPlant"));
+const ContactUs = lazy(() => import("./pages/ContactUs"));
+const ProductDetail = lazy(() => import("./components/ProductDetails"));
+const Signup = lazy(() => import("./pages/Signup"));
+const Cart = lazy(() => import("./pages/Cart"));
+const OtpVerification = lazy(() => import("./pages/OtpVerification"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Orders = lazy(() => import("./pages/MyOrders"));
+const PageNotFound = lazy(() => import("./pages/PageNotFound"));
 
 import "./App.css";
+import Loader from "./components/Loader";
+
 
 function App() {
   return (
     <>
       <ScrollToTop />
-      
+
       <Navbar />
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about-us" element={<AboutUs />} />
-        <Route path="/water-purifiers" element={<WaterPurifiers />} />
-        <Route path="/water-cooler" element={<WaterCooler />} />
-        <Route path="/water-softeners" element={<WaterSofteners />} />
-        <Route path="/ro-plant" element={<ROPlant />} />
-        <Route path="/contact-us" element={<ContactUs />} />
-        <Route path="/product-details" element={<ProductDetail />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/login" element={<Signup />} />
-        <Route path="/otp-verification" element={<OtpVerification />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="*" element={<PageNotFound />} />
-      </Routes>
+      <Suspense fallback={<Loader />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/water-purifiers" element={<WaterPurifiers />} />
+          <Route path="/water-cooler" element={<WaterCooler />} />
+          <Route path="/water-softeners" element={<WaterSofteners />} />
+          <Route path="/ro-plant" element={<ROPlant />} />
+          <Route path="/contact-us" element={<ContactUs />} />
+          <Route path="/product-details/:id" element={<ProductDetail />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/login" element={<Signup />} />
+          <Route path="/otp-verification" element={<OtpVerification />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="*" element={<PageNotFound />} />
+        </Routes>
+      </Suspense>
 
       <Footer />
-
     </>
   );
 }

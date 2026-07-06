@@ -226,7 +226,6 @@
 //     </>
 //   );
 // }
-
 import { useEffect, useRef } from "react";
 import { Droplets } from "lucide-react";
 
@@ -391,11 +390,17 @@ export default function AppLoader({ onComplete }) {
       if (progressRef.current >= 100) finish();
     }
 
+    /* ── keyboard activation (Enter / Space) ── */
+    function onKeyDown(e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault(); // stop Space from scrolling the page
+        onTap();
+      }
+    }
+
     const el = iconWrapRef.current;
     el?.addEventListener("click", onTap);
-    el?.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") onTap();
-    });
+    el?.addEventListener("keydown", onKeyDown);
     setProgress(0);
 
     return () => {
@@ -404,6 +409,7 @@ export default function AppLoader({ onComplete }) {
       clearInterval(bubbleTimer);
       cancelAnimationFrame(rafRef.current);
       el?.removeEventListener("click", onTap);
+      el?.removeEventListener("keydown", onKeyDown);
     };
   }, [onComplete]);
 
@@ -495,7 +501,7 @@ export default function AppLoader({ onComplete }) {
           0%
         </p>
 
-      
+
         {/* hint */}
         <p ref={hintRef} style={{
           fontSize: 10, color: "#6699cc", marginTop: 16,
@@ -509,3 +515,11 @@ export default function AppLoader({ onComplete }) {
     </>
   );
 }
+
+
+// Lightweight fallback for ordinary route-to-route navigation.
+// AppLoader is the one-time branded splash (played once in main.jsx,
+// before the router even mounts) — reusing it here would replay its
+// full 3s intro/progress animation on every lazy page load, and
+// Suspense would cut it off mid-animation the moment the real page
+// is ready, since it has no concept of AppLoader's own finish() sequence.
