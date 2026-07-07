@@ -70,14 +70,14 @@ const defaultCardsData = [
 ───────────────────────────────────────────── */
 function IndustrialWaterPurificationSection({ cardsData = defaultCardsData }) {
   return (
-    <section className="bg-white py-10 sm:py-14">
+    <section className="bg-white py-10 sm:py-12 md:py-14">
       <div className="primary-container w-full">
-        <h2 className="mb-6 sm:mb-8 lg:mb-10 heading text-2xl sm:text-3xl lg:max-w-lg font-semibold text-gray-900 leading-snug">
+        <h2 className="mb-6 sm:mb-8 lg:mb-10 heading text-xl sm:text-2xl md:text-3xl lg:max-w-lg font-semibold text-gray-900 leading-snug">
           Reliable Industrial Water Purification Technology
         </h2>
       </div>
 
-      <div className="w-full space-y-5 sm:space-y-6 lg:space-y-8">
+      <div className="w-full space-y-4 sm:space-y-6 md:space-y-8">
         {cardsData.map((item, i) => {
           const style = CARD_STYLES[i % CARD_STYLES.length];
           const card = { ...item, ...style };
@@ -85,10 +85,10 @@ function IndustrialWaterPurificationSection({ cardsData = defaultCardsData }) {
           return (
             <div
               key={card.id}
-              className="relative w-full aspect-[4/5] sm:aspect-[16/8] lg:aspect-[16/6] overflow-hidden"
+              className="relative w-full aspect-[4/5] sm:aspect-[16/9] md:aspect-[16/8] lg:aspect-[16/6] overflow-hidden"
             >
               <img
-              loading="lazy"
+                loading="lazy"
                 src={card.image}
                 alt={card.title}
                 className="absolute inset-0 w-full h-full object-cover"
@@ -102,12 +102,12 @@ function IndustrialWaterPurificationSection({ cardsData = defaultCardsData }) {
               )}
 
               <div
-                className={`relative z-10 h-full flex items-center px-6 sm:px-10 lg:px-14 ${
+                className={`relative z-10 h-full flex items-center px-5 sm:px-8 md:px-10 lg:px-14 ${
                   card.align === "left" ? "justify-start" : "justify-end"
                 }`}
               >
                 <div
-                  className="max-w-[280px] sm:max-w-sm text-left"
+                  className="max-w-[240px] xs:max-w-[280px] sm:max-w-xs md:max-w-sm text-left"
                   style={
                     !card.overlayGradient
                       ? { textShadow: "0 1px 3px rgba(0,0,0,0.55), 0 1px 8px rgba(0,0,0,0.35)" }
@@ -115,10 +115,9 @@ function IndustrialWaterPurificationSection({ cardsData = defaultCardsData }) {
                   }
                 >
                   <h1
-                    className={`font-semibold heading ${
+                    className={`font-semibold heading leading-tight text-lg sm:text-xl md:text-2xl lg:text-[25px] ${
                       card.theme === "dark" ? "text-white" : "text-gray-900"
                     }`}
-                    style={{ fontSize: "25px" }}
                   >
                     {card.title}
                   </h1>
@@ -129,7 +128,7 @@ function IndustrialWaterPurificationSection({ cardsData = defaultCardsData }) {
                   >
                     {card.description}
                   </p>
-                  <button className="mt-4 px-4 sm:px-5 py-2 sm:py-2.5 bg-[#0061C2] text-white text-xs sm:text-sm font-semibold rounded-full transition-colors">
+                  <button className="mt-3 sm:mt-4 px-4 sm:px-5 py-2 sm:py-2.5 bg-[#0061C2] text-white text-xs sm:text-sm font-semibold rounded-full transition-colors hover:bg-[#004e9c]">
                     {card.buttonText}
                   </button>
                 </div>
@@ -203,7 +202,7 @@ function FiltrationModuleSection() {
   }, [activeIndex]);
 
   return (
-    <section className="w-full">
+    <section className="w-full py-8 sm:py-10 md:py-12">
       <div className="primary-container w-full">
         <div className="relative border-b border-gray-100 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="relative flex w-max min-w-full">
@@ -216,7 +215,7 @@ function FiltrationModuleSection() {
                 key={tab.id}
                 ref={(el) => (tabRefs.current[i] = el)}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative cursor-pointer heading z-10 px-4 sm:px-5 lg:px-6 py-3 sm:py-3.5 text-sm sm:text-base font-semibold whitespace-nowrap transition-colors duration-300 ${
+                className={`relative cursor-pointer heading z-10 px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 text-xs sm:text-sm md:text-base font-semibold whitespace-nowrap transition-colors duration-300 ${
                   activeTab === tab.id ? "text-[#0061C2]" : "text-gray-900 hover:text-[#0061C2]"
                 }`}
               >
@@ -227,12 +226,12 @@ function FiltrationModuleSection() {
         </div>
 
         <div key={activeTab} className="animate-[tabFadeIn_0.25s_ease-out]">
-          {activeRows.map((row, i) => (
+          {activeRows.map((row) => (
             <div
               key={row.label}
-              className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-6 px-2 sm:px-0 py-4 sm:py-5 rounded-md transition-colors hover:bg-gray-50 border-b border-gray-100"
+              className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4 md:gap-6 px-2 sm:px-0 py-3.5 sm:py-4 md:py-5 rounded-md transition-colors hover:bg-gray-50 border-b border-gray-100"
             >
-              <div className="w-full sm:w-[45%] md:w-[300px] lg:w-[320px] shrink-0 text-sm sm:text-base font-medium text-gray-900">
+              <div className="w-full sm:w-[40%] md:w-[300px] lg:w-[320px] shrink-0 text-sm sm:text-base font-medium text-gray-900">
                 {row.label}
               </div>
               <div className="text-sm sm:text-base text-gray-500 leading-relaxed">
@@ -329,12 +328,12 @@ const ROPlant = () => {
   }, []);
 
   return (
-    <section className="min-h-screen">
+    <section className="min-h-screen overflow-x-hidden">
 
       {/* ── Hero banner ── */}
       <div
         ref={heroWrapRef}
-        className="relative w-full aspect-[4/6] sm:aspect-[16/10] lg:aspect-[1440/700] overflow-hidden"
+        className="relative w-full aspect-[4/5] sm:aspect-[16/10] md:aspect-[16/8] lg:aspect-[1440/700] overflow-hidden"
       >
         {/* Image */}
         <img
@@ -355,7 +354,7 @@ const ROPlant = () => {
         {/* Breadcrumb */}
         <div
           ref={breadcrumbRef}
-          className="absolute top-4 lg:top-33 left-0 w-full z-20"
+          className="absolute top-4 md:top-20 lg:top-[132px] left-0 w-full z-20"
         >
           <div className="primary-container">
             <Breadcrumb />
@@ -365,16 +364,16 @@ const ROPlant = () => {
         {/* Text content */}
         <div className="absolute inset-0 z-10 flex items-center">
           <div className="primary-container w-full">
-            <div className="max-w-[500px] pt-10 sm:pt-14 lg:pt-40">
+            <div className="max-w-full sm:max-w-[420px] md:max-w-[460px] lg:max-w-[500px] pt-12 sm:pt-14 md:pt-24 lg:pt-40">
               <h1
                 ref={heroTitleRef}
-                className="font-semibold heading text-white leading-[1.15] text-[clamp(1.6rem,4.2vw,2.6rem)]"
+                className="font-semibold heading text-white leading-[1.15] text-[clamp(1.5rem,5vw,2.6rem)]"
               >
                 {heroData.title}
               </h1>
               <p
                 ref={heroDescRef}
-                className="mt-4 sm:mt-5 max-w-[360px] text-gray-300 text-[clamp(0.9rem,1.4vw,1.3rem)] leading-relaxed"
+                className="mt-3 sm:mt-4 md:mt-5 max-w-[320px] sm:max-w-[360px] text-gray-300 text-[clamp(0.85rem,2vw,1.3rem)] leading-relaxed"
               >
                 {heroData.description}
               </p>
@@ -384,11 +383,11 @@ const ROPlant = () => {
       </div>
 
       {/* ── Header text block ── */}
-      <div className="text-center mt-5 sm:mt-10 lg:mt-10 lg:py-8">
-        <h1 className="text-3xl sm:text-4xl heading font-semibold text-gray-900 tracking-tight">
+      <div className="text-center mt-6 sm:mt-8 md:mt-10 lg:py-8 px-4 sm:px-6">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl heading font-semibold text-gray-900 tracking-tight">
           {sectionData.title}
         </h1>
-        <p className="mt-3 text-base sm:text-md font-medium text-gray-600 max-w-3xl mx-auto">
+        <p className="mt-3 text-sm sm:text-base md:text-md font-medium text-gray-600 max-w-3xl mx-auto">
           {sectionData.shortDescription}
         </p>
         <p className="mt-6 text-sm text-gray-500 leading-relaxed max-w-4xl mx-auto">

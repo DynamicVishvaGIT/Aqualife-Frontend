@@ -60,7 +60,7 @@ function SidebarCard({ post, cardRef }) {
     <Link
       to="/blog-details"
       ref={cardRef}
-      className="block group relative h-[300px] rounded-2xl overflow-hidden mb-6 cursor-pointer
+      className="block group relative h-[380px] rounded-2xl overflow-hidden mb-6 cursor-pointer
                  transition-shadow duration-500
                  hover:shadow-[0_15px_35px_-12px_rgba(0,97,194,0.4)]"
     >

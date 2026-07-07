@@ -332,7 +332,7 @@ export default function WaterPurifierListing() {
                   {/* Label */}
                   <span
                     className={`text-[12px] sm:text-[13px] font-semibold whitespace-nowrap transition-colors pb-3 sm:pb-4 duration-200
-                  ${active ? "text-[#155DFC]" : "text-slate-800 hover:text-slate-600"}`}
+                  ${active ? "text-[#0061C2]" : "text-slate-800 hover:text-slate-600"}`}
                   >
                     {cat.label}
                   </span>
@@ -343,7 +343,7 @@ export default function WaterPurifierListing() {
             {/* Sliding underline indicator */}
             <div
               ref={indicatorRef}
-              className="absolute bottom-0 left-0 h-[2px] sm:h-[3px] bg-[#155DFC] pointer-events-none"
+              className="absolute bottom-0 left-0 h-[2px] sm:h-[3px] bg-[#0061C2] rounded-full pointer-events-none"
               style={{ width: 0 }}
             />
           </div>

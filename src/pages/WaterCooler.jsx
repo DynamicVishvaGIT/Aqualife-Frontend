@@ -431,35 +431,6 @@ const WaterCooler = () => {
   }, []);
 
 
-  /* ── Split image banner reveal ── */
-  // useEffect(() => {
-  //   const ctx = gsap.context(() => {
-  //     const imgs = splitImgWrapRef.current
-  //       ? Array.from(splitImgWrapRef.current.children)
-  //       : [];
-  //     if (imgs.length) {
-  //       gsap.fromTo(
-  //         imgs,
-  //         { opacity: 0, y: 40 },
-  //         {
-  //           opacity: 1,
-  //           y: 0,
-  //           duration: 0.6,
-  //           ease: "power3.out",
-  //           stagger: 0.15,
-  //           scrollTrigger: {
-  //             trigger: splitImgWrapRef.current,
-  //             start: "top 85%",
-  //             toggleActions: "play reverse play reverse",
-  //           },
-  //         }
-  //       );
-  //     }
-  //   });
-
-  //   return () => ctx.revert();
-  // }, []);
-
   return (
     <main className="w-full overflow-x-hidden pt-20 lg:pt-20">
       {/* Hero Banner */}
@@ -560,7 +531,7 @@ const WaterCooler = () => {
                   src={coller2}
                   loading="lazy"
                   alt="Water Cooler"
-                  className="w-full max-w-[500px] lg:max-h-[500px] 2xl:max-h-[800px] object-contain"
+                  className="w-full max-w-[500px] max-h-[400px] lg:max-h-[500px] 2xl:max-h-[800px] object-contain"
                   onLoad={() => ScrollTrigger.refresh()}
                 />
               </div>
@@ -572,7 +543,7 @@ const WaterCooler = () => {
       <section className="bg-white">
         <div ref={splitImgWrapRef} className="grid grid-cols-1 md:grid-cols-2">
           {/* Left */}
-          <div className="overflow-hidden h-[260px] sm:h-[350px] md:h-[420px] lg:h-[600px] 2xl:h-[900px]">
+          <div className="overflow-hidden h-[350px] sm:h-[400px] md:h-[420px] lg:h-[600px] 2xl:h-[950px]">
             <img
             loading="lazy"
               src={coolerPeople}
@@ -582,7 +553,7 @@ const WaterCooler = () => {
           </div>
 
           {/* Right */}
-          <div className="overflow-hidden h-[260px] sm:h-[350px] md:h-[420px] lg:h-[600px] 2xl:h-[900px]">
+          <div className="overflow-hidden h-[350px] sm:h-[400px] md:h-[420px] lg:h-[600px] 2xl:h-[950px]">
             <img
             loading="lazy"
               src={coolerSchool}

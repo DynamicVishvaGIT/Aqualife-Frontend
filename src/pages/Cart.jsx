@@ -91,6 +91,10 @@ export default function CartComponent() {
     initialItems.reduce((sum, it) => sum + it.price * it.qty, 0),
   );
 
+  // Tracks ids the user has explicitly deleted, so "View More" never
+  // resurrects an item the user removed from their cart.
+  const [removedIds, setRemovedIds] = useState(() => new Set());
+
   const containerRef = useRef(null);
   const itemRefs = useRef({});
   const qtyRefs = useRef({});
@@ -113,7 +117,21 @@ export default function CartComponent() {
       gsap.fromTo(
         ".bill-panel",
         { opacity: 0, y: 24 },
-        { opacity: 1, y: 0, duration: 0.6, ease: "power3.out", delay: 0.1 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power3.out",
+          delay: 0.1,
+          // Fix: .bill-panel is the same element that has `sticky`
+          // positioning. GSAP animating its `y` writes an inline
+          // transform and leaves it behind (even at identity) once the
+          // tween finishes — and many browsers silently disable
+          // position: sticky on any element carrying a non-`none`
+          // transform. clearProps removes that inline transform once
+          // the animation completes, so sticky works normally again.
+          clearProps: "transform",
+        },
       );
       gsap.fromTo(
         ".cart-item-card",
@@ -217,6 +235,7 @@ export default function CartComponent() {
     if (!el) {
       setItems((prev) => prev.filter((it) => it.id !== id));
       setMoreItems((prev) => prev.filter((it) => it.id !== id));
+      setRemovedIds((prev) => new Set(prev).add(id));
       return;
     }
     const startHeight = el.scrollHeight;
@@ -231,6 +250,7 @@ export default function CartComponent() {
       onComplete: () => {
         setItems((prev) => prev.filter((it) => it.id !== id));
         setMoreItems((prev) => prev.filter((it) => it.id !== id));
+        setRemovedIds((prev) => new Set(prev).add(id));
         delete itemRefs.current[id];
         delete qtyRefs.current[id];
       },
@@ -239,7 +259,7 @@ export default function CartComponent() {
 
   const toggleShowMore = () => {
     if (!showMore) {
-      setMoreItems(extraItems);
+      setMoreItems(extraItems.filter((it) => !removedIds.has(it.id)));
       setShowMore(true);
       return;
     }
@@ -264,14 +284,6 @@ export default function CartComponent() {
       },
     });
   };
-
-  // const bounceButton = (e) => {
-  //   gsap.fromTo(
-  //     e.currentTarget,
-  //     { scale: 0.94 },
-  //     { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.5)" },
-  //   );
-  // };
 
   return (
     <div className="min-h-screen bg-gray-50 pt-34 py-4 sm:pt-44 ">
@@ -395,7 +407,6 @@ export default function CartComponent() {
                   </div>
 
                   <button
-                    // onClick={bounceButton}
                     className="w-full text-white text-sm font-medium py-2.5 flex items-center justify-center gap-1.5 transition-colors"
                     style={{ backgroundColor: BRAND }}
                     onMouseEnter={(e) =>
@@ -476,7 +487,7 @@ export default function CartComponent() {
             <div className="border-t border-gray-300 pt-3 flex items-start justify-between">
               <div>
                 <p className="font-semibold text-gray-900 text-sm">
-                  Bill Summary
+                  Total Payable
                 </p>
                 <p className="text-xs text-gray-500">Include GST</p>
               </div>
