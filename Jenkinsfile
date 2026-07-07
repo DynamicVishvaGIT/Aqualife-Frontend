@@ -118,9 +118,6 @@ Build URL    : ${env.BUILD_URL}
 
 Regards,
 Balraj Pasula - DevOps Engineer
-
-This is an automated email from the Jenkins CI/CD Pipeline.
-Please do not reply to this email.
 """,
                 mimeType: 'text/plain'
             )
@@ -147,9 +144,6 @@ Will check the detailed error logs and fix the pipeline.
 
 Regards,
 Balraj Pasula - DevOps Engineer
-
-This is an automated email from the Jenkins CI/CD Pipeline.
-Please do not reply to this email.
 """,
                 mimeType: 'text/plain'
             )
