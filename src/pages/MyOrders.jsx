@@ -403,7 +403,7 @@ const OrdersPage = () => {
                     {/* Thumbnail + details */}
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="w-15 h-15 lg:h-24 lg:w-22">
-                       <img src={order.img} className="w-full h-full" alt="order_img" />
+                       <img src={order.img} loading="lazy" className="w-full h-full" alt="order_img" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm heading font-semibold text-gray-800 truncate max-w-[240px] sm:max-w-[280px]">

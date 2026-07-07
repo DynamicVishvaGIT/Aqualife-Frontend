@@ -558,6 +558,7 @@ const WaterCooler = () => {
               <div ref={pinRef} className="flex justify-center">
                 <img
                   src={coller2}
+                  loading="lazy"
                   alt="Water Cooler"
                   className="w-full max-w-[500px] lg:max-h-[500px] 2xl:max-h-[800px] object-contain"
                   onLoad={() => ScrollTrigger.refresh()}
@@ -573,6 +574,7 @@ const WaterCooler = () => {
           {/* Left */}
           <div className="overflow-hidden h-[260px] sm:h-[350px] md:h-[420px] lg:h-[600px] 2xl:h-[900px]">
             <img
+            loading="lazy"
               src={coolerPeople}
               alt="Office Water Cooler"
               className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
@@ -582,6 +584,7 @@ const WaterCooler = () => {
           {/* Right */}
           <div className="overflow-hidden h-[260px] sm:h-[350px] md:h-[420px] lg:h-[600px] 2xl:h-[900px]">
             <img
+            loading="lazy"
               src={coolerSchool}
               alt="School Water Cooler"
               className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"

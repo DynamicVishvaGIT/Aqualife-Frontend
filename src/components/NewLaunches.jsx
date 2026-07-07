@@ -153,6 +153,7 @@ function ProductCard({ product }) {
   <div className="flex-1 flex items-center justify-center px-4">
     <div className="w-[180px] h-[180px] sm:w-[200px] sm:h-[200px] flex items-center justify-center">
       <img
+      loading="lazy"
         ref={imgRef}
         src={product.image}
         alt={product.name}

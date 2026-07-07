@@ -125,6 +125,7 @@ function ProductCard({ product }) {
         )}
         <img
           ref={imgRef}
+          loading="lazy"
           src={product.image}
           alt={product.name}
           className="h-full w-full object-contain mix-blend-multiply will-change-transform"

@@ -45,6 +45,7 @@ const WaterPurifiers = () => {
       {/* Hero Banner */}
       <div
         ref={heroWrapRef}
+        loading="lazy"
         className="
       relative w-full overflow-hidden
       aspect-[4/5]
@@ -54,6 +55,7 @@ const WaterPurifiers = () => {
       >
         <img
           src={banner1}
+          loading="lazy"
           ref={heroImgRef}
           alt="Water Cooler Banner"
           className="absolute inset-0 w-full h-full object-cover"

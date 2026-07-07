@@ -169,6 +169,7 @@ export default function OtpVerification() {
         >
           <img
             src={sideBanner}
+            loading="lazy"
             alt="Aqualife-Ever – Pure Water. Pure Life."
             style={{
               position: "absolute", inset: 0,

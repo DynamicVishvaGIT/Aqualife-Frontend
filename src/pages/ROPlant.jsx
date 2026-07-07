@@ -88,6 +88,7 @@ function IndustrialWaterPurificationSection({ cardsData = defaultCardsData }) {
               className="relative w-full aspect-[4/5] sm:aspect-[16/8] lg:aspect-[16/6] overflow-hidden"
             >
               <img
+              loading="lazy"
                 src={card.image}
                 alt={card.title}
                 className="absolute inset-0 w-full h-full object-cover"
@@ -338,6 +339,7 @@ const ROPlant = () => {
         {/* Image */}
         <img
           ref={heroImgRef}
+          loading="lazy"
           src={heroData.image}
           alt={heroData.alt}
           className="absolute inset-0 w-full h-full object-cover"

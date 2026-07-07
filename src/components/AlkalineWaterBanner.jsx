@@ -10,6 +10,7 @@ const AlkalineWaterBanner = () => {
       {/* Background Image */}
       <img
         src={banner2}
+        loading="lazy"
         alt="Aqualife Elite RO+UV Water Purifier"
         className="absolute inset-0 w-full h-full object-cover"
       />

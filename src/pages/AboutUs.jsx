@@ -142,7 +142,7 @@ function WhyChooseUs() {
           {/* Left column */}
           <div className="flex flex-col gap-5 sm:gap-6">
             <div className="relative w-full h-[220px] sm:h-[260px] lg:h-[400px] 2xl:h-[500px] rounded-2xl sm:rounded-3xl overflow-hidden">
-              <img src={familyImg} alt="Aqualife family with water purifiers" className="absolute inset-0 h-full w-full object-cover" />
+              <img loading="lazy" src={familyImg} alt="Aqualife family with water purifiers" className="absolute inset-0 h-full w-full object-cover" />
               <div className="absolute top-2 left-2 right-4 sm:top-3 sm:left-2 sm:right-auto sm:max-w-xs">
                 <div className="rounded-xl py-3 sm:px-5 sm:py-4">
                   <p className="text-xs sm:text-sm leading-relaxed text-slate-800">
@@ -154,7 +154,7 @@ function WhyChooseUs() {
               </div>
             </div>
             <div className="relative w-full h-[220px] sm:h-[260px] lg:h-[400px] 2xl:h-[500px] rounded-2xl sm:rounded-3xl overflow-hidden">
-              <img src={trustImg} alt="Aqualife-Ever trusted brand" className="absolute inset-0 h-full w-full object-cover" />
+              <img loading="lazy" src={trustImg} alt="Aqualife-Ever trusted brand" className="absolute inset-0 h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-transparent" />
               <div className="relative z-10 h-full flex flex-col justify-center p-4 sm:p-6">
                 <p className="max-w-[220px] sm:max-w-[260px] text-sm sm:text-base leading-relaxed text-white">
@@ -175,7 +175,7 @@ function WhyChooseUs() {
               </p>
             </div>
             <div className="relative flex-1 mt-4">
-              <img src={coolerImg} alt="Aqualife stainless steel water cooler" className="absolute inset-0 h-full w-full object-contain object-bottom p-4 sm:p-6" />
+              <img src={coolerImg} loading="lazy" alt="Aqualife stainless steel water cooler" className="absolute inset-0 h-full w-full object-contain object-bottom p-4 sm:p-6" />
             </div>
           </div>
         </div>
@@ -256,6 +256,7 @@ export default function AboutUs() {
         <img
           ref={heroImgRef}
           src={aboutHeroImg}
+          loading="lazy"
           alt="Aqualife water purifiers and coolers"
           className="absolute inset-0 h-full w-full object-cover"
         />

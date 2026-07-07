@@ -113,6 +113,7 @@ function CertCard({ cert, delay }) {
       <div className="shrink-0 w-16 sm:w-20 overflow-hidden rounded-md border border-slate-200"
            style={{ height: "96px" }}>
         <img
+        loading="lazy"
           src={cert.image}
           alt={cert.title}
           className="w-full h-full object-cover"
@@ -140,6 +141,7 @@ function BadgeItem({ badge, delay }) {
       className="legacy-anim pop-anim flex items-center justify-center"
     >
       <img
+      loading="lazy"
         src={badge.image}
         alt={badge.alt}
         className="h-14 sm:h-16 lg:h-20 w-auto object-contain"

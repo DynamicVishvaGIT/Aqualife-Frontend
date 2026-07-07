@@ -209,6 +209,7 @@ const BlogDetails = () => {
 
             <div className="flex items-center gap-3 mb-6">
               <img
+              loading="lazy"
                 src="https://i.pravatar.cc/32?img=1"
                 alt="Tracey Wilson"
                 className="w-8 h-8 rounded-full object-cover"
@@ -225,6 +226,7 @@ const BlogDetails = () => {
               className="relative rounded-2xl overflow-hidden h-[300px] sm:h-[380px] mb-6 group cursor-pointer"
             >
               <img
+              loading="lazy"
                 src={img_1}
                 alt="Blog"
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
@@ -289,6 +291,7 @@ const BlogDetails = () => {
               className="relative rounded-2xl overflow-hidden h-[300px] sm:h-[380px] mb-6 group cursor-pointer"
             >
               <img
+              loading="lazy"
                 src={img_2}
                 alt="Blog"
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"

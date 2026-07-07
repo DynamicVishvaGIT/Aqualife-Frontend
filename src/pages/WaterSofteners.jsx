@@ -346,6 +346,7 @@ function WhyChooseAqualife() {
       {/* Background image */}
       <img
         ref={imgRef}
+        loading="lazy"
         src={banner_2}
         alt="Aqualife water softener installed on a rooftop"
         className="absolute inset-0 w-full h-full object-cover will-change-transform"

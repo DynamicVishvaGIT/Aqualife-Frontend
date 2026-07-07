@@ -950,6 +950,7 @@ export default function ProductDetail() {
                 {/* Image */}
                 <div className="aspect-[4/3] overflow-hidden">
                   <img
+                  loading="lazy"
                     src={item.image}
                     alt={item.name}
                     className="w-full h-full object-cover hover:scale-105 transition duration-500"
@@ -1024,6 +1025,7 @@ export default function ProductDetail() {
             onTouchEnd={handleLightboxTouchEnd}
           >
             <img
+            loading="lazy"
               src={images[mainImg]}
               alt="Product zoomed"
               draggable={false}

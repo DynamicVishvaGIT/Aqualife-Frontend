@@ -203,6 +203,7 @@ export default function SignUp() {
           className="relative shrink-0 w-full h-[400px] md:h-auto md:w-[50%]"
         >
           <img
+          loading="lazy"
             src={sideBanner}
             alt="Aqualife-Ever – Pure Water. Pure Life."
             style={{

@@ -141,6 +141,7 @@ function ProductCard({ product, setCardRef }) {
         )}
         <img
           ref={imgRef}
+          loading="lazy"
           src={product.image}
           alt={product.name}
           className="h-full w-full object-contain mix-blend-multiply will-change-transform"
@@ -321,6 +322,7 @@ export default function WaterPurifierListing() {
                     className="w-12 sm:w-16 h-14 sm:h-20 flex items-end justify-center"
                   >
                     <img
+                    loading="lazy"
                       src={cat.img}
                       alt={cat.label}
                       className="max-h-full max-w-full object-contain transition-all duration-200"

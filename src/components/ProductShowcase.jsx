@@ -24,6 +24,7 @@ export default function ProductShowcase() {
 
           <img
             src={bannerLeft}
+            loading="lazy"
             alt=""
             aria-hidden="true"
             className="absolute inset-0 w-full h-full object-cover pointer-events-none mix-blend-multiply opacity-60"
@@ -78,6 +79,7 @@ export default function ProductShowcase() {
           {/* Background */}
           <img
             src={bannerRight}
+            loading="lazy"
             alt=""
             aria-hidden="true"
             className="absolute inset-0 w-full h-full object-cover"
@@ -94,6 +96,7 @@ export default function ProductShowcase() {
 
           {/* Product */}
           <img
+          loading="lazy"
             src={product4}
             alt="Elite+ purifier"
             className="relative z-10 w-[130px] sm:w-[170px] md:w-[200px] lg:w-[225px] object-contain drop-shadow-xl my-5"
@@ -131,6 +134,7 @@ export default function ProductShowcase() {
       <div className="relative w-full">
 
         <img
+        loading="lazy"
           src={BottomBanner}
           alt="Pure Water Pure Life — Aqualife"
           className="w-full h-auto object-cover block"

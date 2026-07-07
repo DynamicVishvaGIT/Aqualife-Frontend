@@ -145,6 +145,7 @@ export default function ContactUs() {
       >
         <img
           ref={heroImgRef}
+          loading="lazy"
           src={contactHeroImg}
           alt="Aqualife products"
           className="absolute inset-0 h-full w-full object-cover"

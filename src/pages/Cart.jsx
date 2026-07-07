@@ -329,6 +329,7 @@ export default function CartComponent() {
                     <div className="w-20 h-24 sm:w-28 sm:h-32 shrink-0 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
                       <img
                         src={item.image}
+                        loading="lazy"
                         alt={item.name}
                         className="w-full h-full object-contain"
                       />

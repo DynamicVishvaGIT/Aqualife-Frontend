@@ -142,6 +142,7 @@ export default function HomeSlider() {
           <SwiperSlide key={slide.id} className="relative">
             <div className="absolute inset-0 overflow-hidden">
               <img
+              loading="lazy"
                 ref={setImageRef(slide.id)}
                 src={slide.image}
                 alt={slide.heading.join(" ")}

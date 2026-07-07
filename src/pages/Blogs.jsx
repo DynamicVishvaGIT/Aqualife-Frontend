@@ -40,6 +40,7 @@ function BlogCard({ post, cardRef }) {
     >
       <img
         src={post.image}
+        loading="lazy"
         alt={post.title}
         className="absolute inset-0 w-full h-full object-cover object-top
           transition-transform duration-700 ease-out group-hover:scale-110"
@@ -79,6 +80,7 @@ function BlogCard({ post, cardRef }) {
         <div className="flex justify-between items-center gap-4 mt-1">
           <div className="flex justify-between gap-2 items-center">
             <img
+            loading="lazy"
               src={post.avatar}
               alt={post.author}
               className="w-7 h-7 rounded-full object-cover border-2 transition-colors duration-300"

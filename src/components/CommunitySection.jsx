@@ -80,6 +80,7 @@ export function CommunitySection() {
                     {/* Photo */}
                     <div className="w-full h-44 sm:h-52 overflow-hidden">
                       <img
+                      loading="lazy"
                         src={t.image}
                         alt={t.name}
                         className="w-full h-full object-cover object-top"

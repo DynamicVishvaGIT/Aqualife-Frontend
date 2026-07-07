@@ -97,7 +97,9 @@ export function Footer() {
           {/* Col 1 — Brand */}
           <div className="lg:col-span-1">
             <Link to="/" className="block w-35  mb-4">
-              <img src={footerLogo} alt="Aqualife" className="w-full h-full object-contain" />
+              <img src={footerLogo} 
+              loading="lazy"
+              alt="Aqualife" className="w-full h-full object-contain" />
             </Link>
 
             <p className="text-slate-400 text-[13px] leading-relaxed">
@@ -130,7 +132,7 @@ export function Footer() {
                   key={p.alt}
                   className="bg-white rounded px-1.5 py-1 flex items-center justify-center h-7"
                 >
-                  <img src={p.src} alt={p.alt} className="h-4 w-auto object-contain" />
+                  <img loading="lazy" src={p.src} alt={p.alt} className="h-4 w-auto object-contain" />
                 </div>
               ))}
             </div>

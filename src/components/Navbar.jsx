@@ -272,6 +272,7 @@ export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
             {/* Logo — crossfade */}
             <Link to="/" className="block w-28 h-20 shrink-0 relative">
               <img
+              loading="lazy"
                 src={whiteLogo}
                 alt="AquaLife"
                 className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${
@@ -279,6 +280,7 @@ export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
                 }`}
               />
               <img
+              loading="lazy"
                 src={blueLogo}
                 alt="AquaLife"
                 className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${
@@ -450,6 +452,7 @@ export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
             <div className="flex items-center justify-between px-5 border-b border-slate-100 shrink-0">
               <Link to="/" className="block w-20 h-20" onClick={closeDrawer}>
                 <img
+                loading="lazy"
                   src={blueLogo}
                   alt="AquaLife"
                   className="w-full h-full object-contain"
