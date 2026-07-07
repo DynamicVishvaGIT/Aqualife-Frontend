@@ -45,10 +45,12 @@ const WaterPurifiers = () => {
       {/* Hero Banner */}
       <div
         ref={heroWrapRef}
-        className="relative w-full overflow-hidden
+        className="
+      relative w-full overflow-hidden
       aspect-[4/5]
       sm:aspect-[16/10]
-      lg:aspect-[1440/572]"
+      lg:aspect-[1440/572]
+      "
       >
         <img
           src={banner1}

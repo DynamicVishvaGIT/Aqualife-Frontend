@@ -158,8 +158,9 @@ function ProductCard({ product }) {
         <div className="flex items-center gap-3 mt-auto">
           <WaterButton
             variant="primary"
+            sizing="h-[40px] lg:h-[45px]"
             textClassName="text-[13px] sm:text-[9px] lg:text-[14px]"
-            className="py-1 px-2 text-[18px] lg:px-4 lg:py-2.5 sm:py-2 sm:text-sm"
+            className="py-2 px-6 text-[18px] lg:px-4 lg:py-2.5 sm:py-2 sm:text-sm"
           >
             Book Demo
           </WaterButton>

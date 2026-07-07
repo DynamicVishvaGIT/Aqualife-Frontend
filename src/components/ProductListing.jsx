@@ -311,7 +311,7 @@ export default function WaterPurifierListing() {
                   ref={(el) => (tabRefs.current[cat.label] = el)}
                   onClick={() => setActiveCategory(cat.label)}
                   className={`flex flex-col items-center gap-1.5 pt-4 sm:pt-7 cursor-pointer shrink-0
-                  border-b-2 sm:border-b-3 duration-500 hover:scale-105 min-w-[80px] sm:min-w-[120px]
+                  border-b-2 sm:border-b-3 duration-500 hover:scale-105 min-w-[90px] sm:min-w-[120px]
                   2xl:min-w-[160px]
                   border-transparent`}
                 >
@@ -329,7 +329,7 @@ export default function WaterPurifierListing() {
 
                   {/* Label */}
                   <span
-                    className={`text-[11px] sm:text-[13px] font-medium whitespace-nowrap transition-colors pb-3 sm:pb-4 duration-200
+                    className={`text-[12px] sm:text-[13px] font-semibold whitespace-nowrap transition-colors pb-3 sm:pb-4 duration-200
                   ${active ? "text-[#155DFC]" : "text-slate-800 hover:text-slate-600"}`}
                   >
                     {cat.label}

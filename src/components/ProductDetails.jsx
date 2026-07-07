@@ -22,8 +22,6 @@ import "swiper/css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const images = [product1, product2, product3, product4, product2];
-
 const allSpecs = [
   { label: "Net Weight", value: "4.5 kg" },
   { label: "Dimensions MM (WxDxH)", value: "31× 21× 41CM" },
@@ -43,6 +41,30 @@ const allSpecs = [
   { label: "Power Consumption", value: "60 W" },
   { label: "Warranty", value: "1 Year" },
 ];
+
+const singleProduct = {
+  id: 1,
+  mainImage: product1,
+  title: "Aqualife Ever LEGO+ Water Purifier",
+  description: `RO + UV + UF + Copper & Zinc + Mineral Technology Water Purifier. Designed to suit the needs of small firms, shops, and businesses with 6 litres storage capacity, ensuring employees get access to pure drinking water.`,
+  color: "Black",
+  price: "12,599.00",
+  mrp: "23,000.00",
+  discount: "25% OFF",
+  features: [
+    {
+      title: "RO Purification",
+      description:
+        "Removes contaminants like lead and mercury and eliminates disease-causing viruses and bacteria.",
+    },
+    {
+      title: "Smart Display & Sensors",
+      description:
+        "Live TDS Status, Filter Life Indicator System, Sensor Base Technology. The LED display acts as a smart indicator and also assists you in hassle-free operations. The water level indicator enables you to check the water quantity in the tank, while the service and fault indicator throws light on the issues that need your attention.",
+    },
+  ],
+  galleryImages: [product1, product2, product3, product4],
+};
 
 const TESTIMONIALS = [
   {
@@ -82,7 +104,8 @@ const PRODUCTS = [
     image: product1,
     badge: "New launch",
     name: "Venus",
-    description: "UV+UF+Copper & zinc water purifier",
+    description:
+      "UV+UF+Copper & zinc water purifier UV+UF+Copper & zinc water purifier",
     price: 28999,
     mrp: 39000,
     discount: 25,
@@ -119,7 +142,7 @@ function ProductCard({ product }) {
     gsap.fromTo(
       e.currentTarget,
       { scale: 0.93 },
-      { scale: 1, duration: 0.35, ease: "back.out(3)" }
+      { scale: 1, duration: 0.35, ease: "back.out(3)" },
     );
   };
 
@@ -191,6 +214,9 @@ function ProductCard({ product }) {
 }
 
 export default function ProductDetail() {
+  const product = singleProduct;
+  const images = singleProduct.galleryImages;
+
   const [mainImg, setMainImg] = useState(0);
   const [qty, setQty] = useState(1);
   const [showMore, setShowMore] = useState(false);
@@ -199,6 +225,11 @@ export default function ProductDetail() {
   const imgRef = useRef(null);
   const galleryImgContainerRef = useRef(null);
   const swiperRef = useRef(null);
+
+  // Used ONLY by the mobile lightbox's single-finger swipe (no Swiper
+  // instance runs inside the lightbox, so manual touch tracking is
+  // needed there). The main gallery no longer uses these — Swiper's own
+  // touch engine handles swiping there (see note above the Swiper below).
   const touchStartX = useRef(0);
   const touchDeltaX = useRef(0);
   const isSwiping = useRef(false);
@@ -219,25 +250,29 @@ export default function ProductDetail() {
   const pinchStartDistRef = useRef(null);
   const pinchStartScaleRef = useRef(1);
 
-  /* ── Go to a given slide, keeping the Swiper instance and state in sync ── */
+  /* ── Go to a given slide.
+     Single source of truth: `mainImg` is only ever set from Swiper's
+     `onSlideChange` (via realIndex). goToSlide just tells Swiper where
+     to go; it never sets `mainImg` directly, so there's no race between
+     two writers desyncing the thumbnail/dot highlight from what's
+     actually on screen. */
   const goToSlide = (index) => {
     const wrapped = (index + images.length) % images.length;
-    setMainImg(wrapped);
     if (swiperRef.current) {
       swiperRef.current.slideTo(wrapped);
+    } else {
+      setMainImg(wrapped);
     }
   };
 
   const prevImg = () => goToSlide(mainImg - 1);
   const nextImg = () => goToSlide(mainImg + 1);
 
-  /* ── Mobile swipe handlers for the main gallery image ── */
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchDeltaX.current = 0;
-    isSwiping.current = true;
-  };
-
+  /* ── Single-finger swipe tracking used ONLY inside the mobile lightbox
+     (when not pinch-zoomed). Kept separate from the main gallery, which
+     now relies entirely on Swiper's built-in touch handling — running
+     both a manual touch tracker and Swiper's native one on the same
+     element caused janky/conflicting swipes. ── */
   const handleTouchMove = (e) => {
     if (!isSwiping.current) return;
     touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
@@ -260,7 +295,7 @@ export default function ProductDetail() {
     gsap.fromTo(
       el,
       { scale: 0.9 },
-      { scale: 1, duration: 0.35, ease: "back.out(3)" }
+      { scale: 1, duration: 0.35, ease: "back.out(3)" },
     );
   };
 
@@ -278,8 +313,14 @@ export default function ProductDetail() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    const lensX = Math.min(Math.max(x - LENS_SIZE / 2, 0), rect.width - LENS_SIZE);
-    const lensY = Math.min(Math.max(y - LENS_SIZE / 2, 0), rect.height - LENS_SIZE);
+    const lensX = Math.min(
+      Math.max(x - LENS_SIZE / 2, 0),
+      rect.width - LENS_SIZE,
+    );
+    const lensY = Math.min(
+      Math.max(y - LENS_SIZE / 2, 0),
+      rect.height - LENS_SIZE,
+    );
     setLensPos({ x: lensX, y: lensY });
 
     const bgX = (x / rect.width) * 100;
@@ -338,9 +379,9 @@ export default function ProductDetail() {
       const scale = Math.min(
         Math.max(
           (newDist / pinchStartDistRef.current) * pinchStartScaleRef.current,
-          1
+          1,
         ),
-        3
+        3,
       );
       setZoomScale(scale);
       return;
@@ -371,14 +412,14 @@ export default function ProductDetail() {
   /* ── Crossfade the main gallery image whenever it changes ── */
   useLayoutEffect(() => {
     const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
+      "(prefers-reduced-motion: reduce)",
     ).matches;
     if (prefersReducedMotion || !imgRef.current) return;
 
     gsap.fromTo(
       imgRef.current,
       { opacity: 0, scale: 1.04 },
-      { opacity: 1, scale: 1, duration: 0.45, ease: "power2.out" }
+      { opacity: 1, scale: 1, duration: 0.45, ease: "power2.out" },
     );
   }, [mainImg]);
 
@@ -394,21 +435,21 @@ export default function ProductDetail() {
   useLayoutEffect(() => {
     if (!showAll) return;
     const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
+      "(prefers-reduced-motion: reduce)",
     ).matches;
     if (prefersReducedMotion) return;
 
     gsap.fromTo(
       ".pd-extra-row",
       { opacity: 0, y: -8 },
-      { opacity: 1, y: 0, duration: 0.4, stagger: 0.04, ease: "power2.out" }
+      { opacity: 1, y: 0, duration: 0.4, stagger: 0.04, ease: "power2.out" },
     );
   }, [showAll]);
 
   /* ── Page load reveal + scroll-triggered sections ── */
   useLayoutEffect(() => {
     const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
+      "(prefers-reduced-motion: reduce)",
     ).matches;
     if (prefersReducedMotion) return;
 
@@ -423,31 +464,31 @@ export default function ProductDetail() {
           ".pd-title",
           { opacity: 0, y: 20 },
           { opacity: 1, y: 0 },
-          "-=0.45"
+          "-=0.45",
         )
         .fromTo(
           ".pd-desc",
           { opacity: 0, y: 16 },
           { opacity: 1, y: 0 },
-          "-=0.45"
+          "-=0.45",
         )
         .fromTo(
           ".pd-feature",
           { opacity: 0, y: 14 },
           { opacity: 1, y: 0, stagger: 0.12 },
-          "-=0.35"
+          "-=0.35",
         )
         .fromTo(
           ".pd-price",
           { opacity: 0, y: 14 },
           { opacity: 1, y: 0 },
-          "-=0.3"
+          "-=0.3",
         )
         .fromTo(
           ".pd-actions",
           { opacity: 0, y: 14 },
           { opacity: 1, y: 0 },
-          "-=0.35"
+          "-=0.35",
         );
 
       // Generic fade-up reveal for below-the-fold sections
@@ -465,7 +506,7 @@ export default function ProductDetail() {
               start: "top 82%",
               once: true,
             },
-          }
+          },
         );
       });
 
@@ -484,7 +525,7 @@ export default function ProductDetail() {
             start: "top 80%",
             once: true,
           },
-        }
+        },
       );
 
       // Testimonials
@@ -502,7 +543,7 @@ export default function ProductDetail() {
               duration: 0.6,
               stagger: 0.12,
               ease: "power2.out",
-            }
+            },
           ),
       });
 
@@ -520,7 +561,7 @@ export default function ProductDetail() {
               duration: 0.6,
               stagger: 0.1,
               ease: "power2.out",
-            }
+            },
           ),
       });
     }, rootRef);
@@ -529,7 +570,10 @@ export default function ProductDetail() {
   }, []);
 
   return (
-    <div ref={rootRef} className="relative min-h-screen pt-25 lg:pt-33 bg-white">
+    <div
+      ref={rootRef}
+      className="relative min-h-screen pt-25 lg:pt-33 bg-white"
+    >
       {/* Breadcrumb */}
       <div className="absolute left-0 w-full z-10">
         <div className="primary-container">
@@ -542,13 +586,13 @@ export default function ProductDetail() {
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           {/* ── LEFT: Image Gallery ── */}
           <div className="pd-gallery relative w-full lg:w-[45%] flex-shrink-0">
-            {/* Main image */}
+            {/* Main image — swipe handling is delegated entirely to
+                Swiper's own touch engine (see Swiper props below). No
+                manual onTouchStart/Move/End here anymore, since running
+                both at once caused conflicting/janky swipe behaviour. */}
             <div
               ref={galleryImgContainerRef}
               className="relative overflow-hidden flex items-center justify-center w-full h-[340px] sm:h-[420px] lg:h-[500px] bg-white touch-pan-y lg:cursor-zoom-in"
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
               onMouseEnter={handleGalleryMouseEnter}
               onMouseMove={handleGalleryMouseMove}
               onMouseLeave={handleGalleryMouseLeave}
@@ -568,7 +612,17 @@ export default function ProductDetail() {
                   swiperRef.current = swiper;
                 }}
                 slidesPerView={1}
-                onSlideChange={(swiper) => setMainImg(swiper.activeIndex)}
+                spaceBetween={0}
+                speed={350}
+                resistanceRatio={0.85}
+                threshold={10}
+                touchRatio={1}
+                longSwipes={true}
+                longSwipesRatio={0.5}
+                shortSwipes={true}
+                followFinger={true}
+                allowTouchMove={true}
+                onSlideChange={(swiper) => setMainImg(swiper.realIndex)}
                 className="w-full h-full"
               >
                 {images.map((img, index) => (
@@ -589,7 +643,7 @@ export default function ProductDetail() {
               </Swiper>
 
               {/* Mobile Image Counter */}
-              <div className="absolute top-3 right-3 lg:hidden">
+              <div className="absolute top-3 right-3 lg:hidden z-[999]">
                 <div className="bg-black/60 text-white text-xs font-medium px-3 py-1 rounded-full">
                   {mainImg + 1} / {images.length}
                 </div>
@@ -640,7 +694,7 @@ export default function ProductDetail() {
                     zIndex: 9999,
                   }}
                 />,
-                document.body
+                document.body,
               )}
 
             {/* Mobile dot navigation — swipe the image above or tap a dot */}
@@ -694,17 +748,12 @@ export default function ProductDetail() {
           <div className="w-full lg:w-[55%]">
             {/* Title */}
             <h1 className="pd-title text-2xl heading sm:text-3xl font-semibold text-gray-900 leading-tight">
-              Aqualife Ever LEGO+ Water Purifier
+              {product.title}
             </h1>
 
             {/* Short desc */}
             <p className="pd-desc mt-3 text-sm sm:text-base text-gray-600 leading-relaxed">
-              <span className="font-semibold text-gray-800">
-                RO + UV + UF + Copper &amp; Zinc + Mineral
-              </span>{" "}
-              Technology Water Purifier. Designed to suit the needs of small
-              firms, shops, and businesses with 6 litres storage capacity,
-              ensuring employees get access to pure drinking water.
+              {product.description}
             </p>
 
             {/* Divider */}
@@ -716,44 +765,40 @@ export default function ProductDetail() {
             </h2>
 
             <div className="space-y-4">
-              <div className="pd-feature">
-                <h3 className="text-sm heading sm:text-base font-bold text-gray-900">
-                  RO Purification
-                </h3>
-                <p className="text-sm text-gray-500 mt-1 leading-relaxed">
-                  Removes contaminants like lead and mercury and eliminates
-                  disease-causing viruses and bacteria.
-                </p>
-              </div>
-
-              <div className="pd-feature">
-                <h3 className="text-sm heading sm:text-base font-bold text-gray-900">
-                  Smart Display
-                </h3>
-                <p
-                  className={`text-sm text-gray-500 mt-1 leading-relaxed ${!showMore ? "line-clamp-3" : ""}`}
-                >
-                  Live TDS Status, Filter Life Indicator System, Sensor Base
-                  Technology. The LED display acts as a smart indicator and also
-                  assists you in hassle-free operations. The water level
-                  indicator enables you to check the water quantity in the tank,
-                  while the service and fault indicator throws light on the
-                  issues that need your attention.
-                </p>
-                <button
-                  onClick={(e) => {
-                    setShowMore(!showMore);
-                    bumpButton(e.currentTarget);
-                  }}
-                  className="mt-2 flex items-center gap-1 text-sm font-medium text-[#0061C2] cursor-pointer transition-colors hover:text-[#004A99] active:scale-95"
-                >
-                  {showMore ? "Show Less" : "Show More"}
-                  <ChevronDown
-                    size={15}
-                    className={`transition-transform duration-300 ${showMore ? "rotate-180" : ""}`}
-                  />
-                </button>
-              </div>
+              {product.features.map((feature, idx) => {
+                const isLast = idx === product.features.length - 1;
+                return (
+                  <div className="pd-feature" key={idx}>
+                    <h3 className="text-sm heading sm:text-base font-bold text-gray-900">
+                      {feature.title}
+                    </h3>
+                    <p
+                      className={`text-sm text-gray-500 mt-1 leading-relaxed ${
+                        isLast && !showMore ? "line-clamp-3" : ""
+                      }`}
+                    >
+                      {feature.description}
+                    </p>
+                    {isLast && (
+                      <button
+                        onClick={(e) => {
+                          setShowMore(!showMore);
+                          bumpButton(e.currentTarget);
+                        }}
+                        className="mt-2 flex items-center gap-1 text-sm font-medium text-[#0061C2] cursor-pointer transition-colors hover:text-[#004A99] active:scale-95"
+                      >
+                        {showMore ? "Show Less" : "Show More"}
+                        <ChevronDown
+                          size={15}
+                          className={`transition-transform duration-300 ${
+                            showMore ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Divider */}
@@ -761,22 +806,22 @@ export default function ProductDetail() {
 
             {/* Color */}
             <p className="pd-feature text-sm heading sm:text-base font-semibold text-gray-800">
-              Color: <span className="font-semibold">Black</span>
+              Color: <span className="font-semibold">{product.color}</span>
             </p>
 
             {/* Divider */}
             <hr className="my-5 border-gray-100" />
 
             {/* Pricing */}
-            <div className="pd-price flex flex-wrap items-baseline sm:gap-3">
+            <div className="pd-price flex flex-wrap items-baseline gap-4 mb-3">
               <span className="text-sm font-medium line-through">
-                MRP ₹23,000.00
+                MRP ₹ {product.mrp}
               </span>
               <span className="text-xl sm:text-2xl heading font-semibold text-gray-900">
-                ₹ 12,599.00
+                ₹ {product.price}
               </span>
-              <span className="text-sm font-semibold text-green-600 bg-[#E9FFF4] rounded-sm">
-                (25% OFF)
+              <span className="text-sm font-semibold text-green-600 bg-[#E9FFF4] rounded-sm px-1.5">
+                ({product.discount})
               </span>
             </div>
             <p className="text-xs text-gray-400 mt-1">Tax included.</p>
@@ -896,7 +941,7 @@ export default function ProductDetail() {
           </div>
 
           {/* Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {TESTIMONIALS.map((item) => (
               <div
                 key={item.id}
@@ -912,17 +957,19 @@ export default function ProductDetail() {
                 </div>
 
                 {/* Content */}
-                <div className="p-6 flex flex-col h-[220px]">
-                  <p className="text-[15px] leading-6 text-[#626C7A] line-clamp-5">
+                <div className="p-4 sm:p-6 flex flex-col min-h-[200px] sm:min-h-[220px]">
+                  <p className="text-sm sm:text-[15px] leading-6 text-[#626C7A] line-clamp-4 sm:line-clamp-5">
                     {item.text}
                   </p>
 
-                  <div className="mt-auto pt-5">
-                    <h4 className="font-semibold text-lg text-[#191919]">
+                  <div className="mt-auto pt-4 sm:pt-5">
+                    <h4 className="font-semibold text-base sm:text-lg text-[#191919]">
                       {item.name}
                     </h4>
 
-                    <p className="text-sm text-[#7A7A7A]">{item.location}</p>
+                    <p className="text-xs sm:text-sm text-[#7A7A7A]">
+                      {item.location}
+                    </p>
                   </div>
                 </div>
               </div>
