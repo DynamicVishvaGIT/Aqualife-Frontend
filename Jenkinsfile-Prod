@@ -1,0 +1,152 @@
+pipeline {
+    agent any
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timestamps()
+    }
+
+    triggers {
+        githubPush()
+    }
+
+    parameters {
+        string(name: 'PROJECT_NAME', defaultValue: 'aqualife')
+        string(name: 'PROJECT_DIR', defaultValue: '/var/www/html/aqualife.dvworks.in_chroot/aqualife.dvworks.in/public_html')
+        string(name: 'REPO_URL', defaultValue: 'https://github.com/DynamicVishvaGIT/Aqualife-Website.git')
+        string(name: 'BRANCH', defaultValue: 'main')
+        string(name: 'NOTIFY_EMAIL', defaultValue: 'balrajpasula189@gmail.com,omshinde3724@gmail.com,shalaka@dynamicvishva.in,nilesh@dynamicvishva.in,mayur@dynamicvishva.in,sourabh@dynamicvishva.in')
+    }
+
+    stages {
+
+        stage('Pull Code') {
+            steps {
+                withCredentials([string(credentialsId: 'Github-Access-Token', variable: 'GHTOKEN')]) {
+                    sh """
+                        sudo -u aqualife GHTOKEN=${GHTOKEN} bash << 'EOF'
+                        set -e
+                        cd "${params.PROJECT_DIR}"
+
+                        AUTH_URL="https://\${GHTOKEN}@github.com/DynamicVishvaGIT/Aqualife-Website.git"
+
+                        if [ ! -d .git ]; then
+                            git clone \${AUTH_URL} .
+                        else
+                            git remote set-url origin \${AUTH_URL}
+                        fi
+
+                        git fetch origin
+                        git reset --hard origin/${params.BRANCH}
+EOF
+                    """
+                }
+            }
+        }
+
+        stage('Build & Deploy') {
+            steps {
+                sh """
+                    cd ${params.PROJECT_DIR}
+
+                    sudo -u aqualife npm install
+                    sudo -u aqualife npm run build
+
+                    sudo -n rm -rf assets/
+
+                    if [ -d "dist" ]; then
+                        sudo -n cp -r dist/* .
+                        echo "Files copied successfully"
+                    else
+                        echo "Build failed: dist folder not found"
+                        exit 1
+                    fi
+
+                    sudo -n chown -R aqualife:aqualife .
+                """
+            }
+        }
+
+        stage('Permissions & Services') {
+            steps {
+                sh """
+                    sudo chown -R aqualife:aqualife ${params.PROJECT_DIR}
+                    sudo systemctl restart apache2
+                """
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                sleep 5
+                sh "curl -I https://aqualife.dvworks.in || exit 1"
+            }
+        }
+    }
+
+    post {
+
+        aborted {
+            echo "Rollback Triggered"
+
+            sh """
+                sudo -u aqualife bash -c '
+                cd ${params.PROJECT_DIR}
+                if [ "\$PREVIOUS_COMMIT" != "none" ]; then
+                    git reset --hard \$PREVIOUS_COMMIT
+                fi
+                '
+            """
+        }
+
+        success {
+            emailext(
+                to: params.NOTIFY_EMAIL,
+                subject: "🟢 SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+Hello Team,
+
+React deployment completed successfully. 🚀
+
+Project      : ${params.PROJECT_NAME}
+Branch       : ${params.BRANCH}
+Status       : SUCCESS
+
+WEBSITE LINK : https://aqualife.dvworks.in/
+
+Build URL    : ${env.BUILD_URL}
+
+Regards,
+Balraj Pasula - DevOps Engineer
+""",
+                mimeType: 'text/plain'
+            )
+        }
+
+        failure {
+            emailext(
+                to: params.NOTIFY_EMAIL,
+                subject: "❌ FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+Hello Team,
+
+React deployment failed. ❌
+
+Project      : ${params.PROJECT_NAME}
+Branch       : ${params.BRANCH}
+Status       : FAILURE
+
+WEBSITE LINK : https://aqualife.dvworks.in/
+
+Build URL    : ${env.BUILD_URL}
+
+Will check the detailed error logs and fix the pipeline.
+
+Regards,
+Balraj Pasula - DevOps Engineer
+""",
+                mimeType: 'text/plain'
+            )
+        }
+    }
+}
