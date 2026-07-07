@@ -159,7 +159,7 @@ function ProductCard({ product }) {
           <WaterButton
             variant="primary"
             textClassName="text-[13px] sm:text-[9px] lg:text-[14px]"
-            className="py-2 text-[18px] px-6 lg:px-4 lg:py-2.5 sm:py-2 sm:text-sm"
+            className="py-1 px-2 text-[18px] lg:px-4 lg:py-2.5 sm:py-2 sm:text-sm"
           >
             Book Demo
           </WaterButton>

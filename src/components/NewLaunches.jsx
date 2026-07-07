@@ -1,7 +1,8 @@
 import { useRef, useState, useLayoutEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "swiper/css";
@@ -118,15 +119,15 @@ function ProductCard({ product }) {
 >
   {/* Content */}
   <div className="px-4 pt-4 pb-2 flex-shrink-0">
-    <span className="inline-block bg-blue-100 text-blue-500 text-[11px] font-medium px-3 py-1 rounded-full mb-3">
+    <span className="inline-block bg-blue-100 text-[#0061C2] text-[11px] font-medium px-3 py-1 rounded-full mb-3">
       New launch
     </span>
 
-    <h3 className="text-[15px] font-bold text-slate-900 leading-tight min-h-[42px]">
+    <h3 className="text-[15px] font-bold text-slate-900 leading-tight">
       {product.name}
     </h3>
 
-    <p className="text-slate-400 text-[12px] mt-1 mb-3 leading-snug min-h-[36px]">
+    <p className="text-slate-400 text-[12px] mt-1 mb-3 leading-snug ">
       {product.description}
     </p>
 
@@ -255,22 +256,22 @@ export default function NewLaunches() {
               onClick={handlePrev}
               className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 ${
                 prevActive
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  ? "bg-[#0061C2] text-white hover:bg-[#0061C2]"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
-              <ChevronLeft size={18} />
+              <ArrowLeft size={18} />
             </button>
             <button
               aria-label="Next"
               onClick={handleNext}
               className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 ${
                 nextActive
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  ? "bg-[#0061C2] text-white hover:bg-[#0061C2]"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
-              <ChevronRight size={18} />
+              <ArrowRight size={18} />
             </button>
           </div>
         </div>
@@ -314,7 +315,7 @@ export default function NewLaunches() {
                 : "bg-slate-100 text-slate-600"
             }`}
           >
-            <ChevronLeft size={20} />
+            <ArrowLeft size={20} />
           </button>
           <button
             aria-label="Next"
@@ -325,7 +326,7 @@ export default function NewLaunches() {
                 : "bg-slate-100 text-slate-600"
             }`}
           >
-            <ChevronRight size={20} />
+            <ArrowRight size={20} />
           </button>
         </div>
       </div>

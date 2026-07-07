@@ -22,6 +22,7 @@ const NAV_LINKS = [
   { label: "Water Softeners", to: "/water-softeners" },
   { label: "RO Plant", to: "/ro-plant" },
   { label: "About Us", to: "/about-us" },
+  { label: "Blogs", to: "/blogs" },
 ];
 
 const MOBILE_NAV_LINKS = [
@@ -31,6 +32,7 @@ const MOBILE_NAV_LINKS = [
   { label: "RO Plant", to: "/ro-plant" },
   { label: "About Us", to: "/about-us" },
   { label: "Contact Us", to: "/contact-us" },
+  { label: "Blogs", to: "/blogs" },
 ];
 
 export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
@@ -117,15 +119,11 @@ export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
     }
   }, [scrolled]);
 
-  /* ── body lock (drawer only; SearchOverlay handles its own) ── */
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [mobileOpen]);
-
-  /* ── drawer GSAP ── */
+  /* ── drawer GSAP + scroll lock ──
+     Merged into ONE effect so the scroll lock is released only after the
+     CLOSE animation finishes (onComplete), instead of unlocking the instant
+     `mobileOpen` flips to false. That mismatch was what caused the icon row
+     to visibly "bounce" right/left while the drawer was still animating out. */
   useEffect(() => {
     const overlay = overlayRef.current;
     const drawer = drawerRef.current;
@@ -133,7 +131,15 @@ export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
     const footer = drawerFooterRef.current;
     if (!overlay || !drawer) return;
 
+    const scrollBarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+
     if (mobileOpen) {
+      // Lock immediately on open — no visual cost since the drawer/overlay
+      // are already animating in and mask any reflow.
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = `${scrollBarWidth}px`;
+
       gsap.set(drawer, { x: "100%" });
       gsap.set(links, { x: 30, opacity: 0 });
       gsap.set(footer, { y: 16, opacity: 0 });
@@ -160,7 +166,13 @@ export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
         );
     } else {
       gsap
-        .timeline()
+        .timeline({
+          // Only unlock scroll once the drawer has fully slid off-screen.
+          onComplete: () => {
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
+          },
+        })
         .to([...links].reverse(), {
           x: 20,
           opacity: 0,
@@ -180,6 +192,12 @@ export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
           "-=0.3",
         );
     }
+
+    return () => {
+      // Safety net: never leave the page scroll-locked if this unmounts mid-animation.
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
   }, [mobileOpen]);
 
   const openDrawer = () => setMobileOpen(true);

@@ -1,12 +1,11 @@
 @import "tailwindcss";
 
-
 /* =========================
    ROOT VARIABLES
 ========================= */
 
 :root {
-  --primary-blue: #0061C2;
+  --primary-blue: #0061c2;
   --text_white: #ffffff;
   --foreground: #0f172a;
   --section-space: clamp(70px, 8vw, 140px);
@@ -26,22 +25,21 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
   }
-
+  
   body {
     overflow-x: hidden;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
-     font-family: "Inter", sans-serif;
+    font-family: "Inter", sans-serif;
   }
 }
 
 .heading {
   font-family: "Montserrat", sans-serif;
 }
-
-
 
 /* =========================
    COMMON CLASSES
@@ -109,13 +107,16 @@
   border-radius: 100px;
 }
 
-
 @keyframes pulse-ring {
-  0%   { transform: scale(1);    opacity: 0.8; }
-  100% { transform: scale(1.55); opacity: 0;   }
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
 }
-
-
 
 /* button */
 /* ── Water Button — global ── */
@@ -127,9 +128,13 @@
   font-size: 14px;
   border: none;
   outline: none;
-  transition: transform 0.15s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.25s ease;
 }
-.w-btn:active { transform: scale(0.96); }
+.w-btn:active {
+  transform: scale(0.96);
+}
 
 .w-btn .water-fill {
   position: absolute;
@@ -140,7 +145,9 @@
   transition: bottom 0.55s cubic-bezier(0.22, 0.8, 0.36, 1);
   pointer-events: none;
 }
-.w-btn:hover .water-fill { bottom: -10%; }
+.w-btn:hover .water-fill {
+  bottom: -10%;
+}
 
 .w-btn .water-fill svg {
   position: absolute;
@@ -151,8 +158,12 @@
 }
 
 @keyframes wave-slide {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 .w-btn .ripple {
@@ -164,16 +175,26 @@
   pointer-events: none;
 }
 @keyframes ripple-out {
-  to { transform: scale(4); opacity: 0; }
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
 }
-.w-btn span { position: relative; z-index: 1; }
-
-
+.w-btn span {
+  position: relative;
+  z-index: 1;
+}
 
 @keyframes badge-pop {
-  0%   { transform: scale(0) rotate(-10deg); }
-  60%  { transform: scale(1.3) rotate(5deg); }
-  100% { transform: scale(1) rotate(0deg); }
+  0% {
+    transform: scale(0) rotate(-10deg);
+  }
+  60% {
+    transform: scale(1.3) rotate(5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 /* Add this to your CSS targeting the wave image */
@@ -217,47 +238,91 @@
   }
 }
 
-
-
 /* Tailwind-friendly keyframes — add these once to your global CSS
 (e.g. index.css / globals.css) so the entrance animations above work: */
- 
-  @keyframes fadeScaleIn {
-    from { opacity: 0; transform: scale(0.97); }
-    to   { opacity: 1; transform: scale(1); }
-  }
-  @keyframes floatY {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-4px); }
-  }
-  @keyframes progressFill {
-    from { width: 0%; }
-    to   { width: 100%; }
-  }
-  @keyframes checkPop {
-    0%   { opacity: 0; transform: scale(0.5); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-  @keyframes ringPulse {
-    0%   { opacity: 0.6; transform: scale(0.9); }
-    100% { opacity: 0; transform: scale(1.4); }
-  }
 
+@keyframes fadeScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes floatY {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+@keyframes checkPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes ringPulse {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
 
- @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
-  @keyframes modalScaleIn {
-    from { opacity: 0; transform: scale(0.94) translateY(6px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
+  to {
+    opacity: 1;
   }
-  @keyframes modalSlideUp {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
+}
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(6px);
   }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes modalSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
 
-   @keyframes tabFadeIn {
-     from { opacity: 0; transform: translateY(4px); }
-     to   { opacity: 1; transform: translateY(0); }
-   }
+@keyframes tabFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

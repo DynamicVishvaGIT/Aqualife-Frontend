@@ -22,6 +22,8 @@ const PageNotFound = lazy(() => import("./pages/PageNotFound"));
 
 import "./App.css";
 import Loader from "./components/Loader";
+import Blogs from "./pages/Blogs";
+import BlogDetails from "./pages/BlogDetails";
 
 
 function App() {
@@ -46,6 +48,8 @@ function App() {
           <Route path="/otp-verification" element={<OtpVerification />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/blogs" element={<Blogs />} />
+          <Route path="/blog-details" element={<BlogDetails />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </Suspense>

@@ -76,7 +76,7 @@ const ProfileInfo = () => {
   };
 
   const editButtonClass =
-    "relative cursor-pointer text-sm font-medium transition-colors after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full";
+    "relative cursor-pointer  select-none  text-sm font-medium transition-colors after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full";
 
   const focusHandlers = {
     onFocus: (e) => {

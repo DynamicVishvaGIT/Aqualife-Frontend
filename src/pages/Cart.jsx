@@ -265,13 +265,13 @@ export default function CartComponent() {
     });
   };
 
-  const bounceButton = (e) => {
-    gsap.fromTo(
-      e.currentTarget,
-      { scale: 0.94 },
-      { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.5)" },
-    );
-  };
+  // const bounceButton = (e) => {
+  //   gsap.fromTo(
+  //     e.currentTarget,
+  //     { scale: 0.94 },
+  //     { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.5)" },
+  //   );
+  // };
 
   return (
     <div className="min-h-screen bg-gray-50 pt-34 py-4 sm:pt-44 ">
@@ -394,7 +394,7 @@ export default function CartComponent() {
                   </div>
 
                   <button
-                    onClick={bounceButton}
+                    // onClick={bounceButton}
                     className="w-full text-white text-sm font-medium py-2.5 flex items-center justify-center gap-1.5 transition-colors"
                     style={{ backgroundColor: BRAND }}
                     onMouseEnter={(e) =>
@@ -491,9 +491,9 @@ export default function CartComponent() {
           </div>
 
           <WaterButton
-            onClick={bounceButton}
             sizing="h-[50px] lg:h-[45px]"
-            className="w-full mt-4 text-white font-medium py-2.5 rounded-lg text-sm transition-colors"
+            className="w-full mt-4 text-white font-medium py-2.5 rounded-lg lg:text-sm transition-colors"
+            textClassName=""
             style={{ backgroundColor: BRAND }}
             onMouseEnter={(e) =>
               (e.currentTarget.style.backgroundColor = BRAND_DARK)

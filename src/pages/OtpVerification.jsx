@@ -25,6 +25,7 @@ export default function OtpVerification() {
   const panelRef     = useRef(null);
   const contentRef   = useRef(null);
   const submitRef    = useRef(null);
+  const firstInputRef = useRef(null); // ← anchor for scroll/focus
 
   /* ── countdown ── */
   useEffect(() => {
@@ -33,7 +34,7 @@ export default function OtpVerification() {
     return () => clearTimeout(t);
   }, [timer]);
 
-  /* ── entrance animations (mirrors SignUp) ── */
+  /* ── entrance animations ── */
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(containerRef.current, {
@@ -56,6 +57,15 @@ export default function OtpVerification() {
       }
     });
     return () => ctx.revert();
+  }, []);
+
+  /* ── scroll card to center + focus first OTP box on mount ── */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      firstInputRef.current?.focus({ preventScroll: true });
+    }, 300);
+    return () => clearTimeout(timer);
   }, []);
 
   /* ── input handlers ── */
@@ -108,7 +118,6 @@ export default function OtpVerification() {
       return;
     }
     pressBtn();
-    /* demo: "1234" = correct */
     if (code === "1234") {
       setSuccess(true);
       setError("");
@@ -136,7 +145,6 @@ export default function OtpVerification() {
   const filled     = otp.filter(Boolean).length;
   const isComplete = filled === OTP_LENGTH;
 
-  /* ── btn hover (mirrors SignUp) ── */
   const btnEnter = (e) => {
     e.currentTarget.style.backgroundColor = BRAND_DARK;
     gsap.to(submitRef.current, { scale: 1.02, duration: 0.2, ease: "power1.out" });
@@ -149,13 +157,12 @@ export default function OtpVerification() {
   return (
     <div className="min-h-screen bg-[#FBFBFB] flex items-center justify-center pt-14 sm:p-6 lg:pt-30">
 
-      {/* CARD — identical sizing tokens to SignUp */}
       <div
         ref={containerRef}
         className="w-full flex flex-col md:flex-row md:h-[580px] lg:h-[720px] 2xl:h-[1100px]"
       >
 
-        {/* LEFT BANNER — exact same markup as SignUp */}
+        {/* LEFT BANNER */}
         <div
           ref={bannerRef}
           className="relative shrink-0 w-full h-[400px] md:h-auto md:w-[50%]"
@@ -164,12 +171,9 @@ export default function OtpVerification() {
             src={sideBanner}
             alt="Aqualife-Ever – Pure Water. Pure Life."
             style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: "top center",
+              position: "absolute", inset: 0,
+              width: "100%", height: "100%",
+              objectFit: "cover", objectPosition: "top center",
               display: "block",
             }}
           />
@@ -236,7 +240,10 @@ export default function OtpVerification() {
                 {otp.map((digit, i) => (
                   <input
                     key={i}
-                    ref={(el) => (inputRefs.current[i] = el)}
+                    ref={(el) => {
+                      inputRefs.current[i] = el;
+                      if (i === 0) firstInputRef.current = el; // ← attach firstInputRef to box 0
+                    }}
                     type="text"
                     inputMode="numeric"
                     maxLength={1}
@@ -245,11 +252,9 @@ export default function OtpVerification() {
                     onKeyDown={(e) => handleKeyDown(i, e)}
                     autoComplete="one-time-code"
                     style={{
-                      width: "60px",
-                      height: "60px",
+                      width: "60px", height: "60px",
                       textAlign: "center",
-                      fontSize: "1.25rem",
-                      fontWeight: "700",
+                      fontSize: "1.25rem", fontWeight: "700",
                       borderRadius: "10px",
                       border: `2px solid ${
                         submitted && !digit ? "#EF4444"
@@ -349,8 +354,8 @@ export default function OtpVerification() {
           from { opacity: 0; transform: translateY(5px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        .otp-shake    { animation: otp-shake 0.5s ease; }
-        .otp-fade-in  { animation: otp-fade-in-kf 0.35s ease forwards; }
+        .otp-shake   { animation: otp-shake 0.5s ease; }
+        .otp-fade-in { animation: otp-fade-in-kf 0.35s ease forwards; }
       `}</style>
     </div>
   );

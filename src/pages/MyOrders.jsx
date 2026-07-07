@@ -46,7 +46,7 @@ const ORDERS = [
   },
   {
     id: "ord-3",
-    name: "Aqualife Ever LEGO+ Water Purifier",
+    name: "Aqualife Ever LEGO+ Water Purifier  Aqualife Ever LEGO+ Water Purifier",
     img: product4,
     color: "Black",
     price: "12,599.00",
