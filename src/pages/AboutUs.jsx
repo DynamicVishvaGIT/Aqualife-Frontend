@@ -136,7 +136,7 @@ function WhyChooseUs() {
     <section className="w-full bg-white py-5 sm:py-8 lg:py-10">
       <div className="primary-container">
         <h2 className="heading text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">
-          Why Choose Us - <span className="text-blue-600">AQUALIFE</span>
+          Why Choose Us - <span className="text-[#0061C2]">AQUALIFE</span>
         </h2>
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 sm:gap-6">
           {/* Left column */}

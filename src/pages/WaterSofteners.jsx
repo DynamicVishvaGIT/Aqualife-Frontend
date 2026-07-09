@@ -342,49 +342,48 @@ function WhyChooseAqualife() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative w-full overflow-hidden">
-      {/* Background image */}
-      <img
-        ref={imgRef}
-        loading="lazy"
-        src={banner_2}
-        alt="Aqualife water softener installed on a rooftop"
-        className="absolute inset-0 w-full h-full object-cover will-change-transform"
-      />
+  <section
+    ref={sectionRef}
+    className="relative min-h-[800px] w-full overflow-hidden"
+  >
+    {/* Background Image */}
+    <img
+      ref={imgRef}
+      loading="lazy"
+      src={banner_2}
+      alt="Aqualife water softener installed on a rooftop"
+      className="absolute inset-0 h-full w-full object-cover will-change-transform"
+    />
 
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/40 sm:bg-transparent"
-        style={{
-          backgroundImage:
-            "linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.55) 65%, rgba(0,0,0,0.6) 100%)",
-        }}
-      />
 
-      {/* Content */}
-      <div className="relative z-10 max-w-5xl mx-auto px-5 sm:px-8 lg:px-12 py-14 sm:py-20 lg:py-28">
-        <div className="flex justify-center sm:justify-center lg:justify-end items-center gap-8 sm:gap-10 lg:gap-12">
-          <div className="w-full max-w-lg text-center sm:text-left">
+    {/* Content */}
+    <div className="relative z-10 flex min-h-[800px] items-center">
+      <div className="mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-12">
+        <div className="flex justify-center lg:justify-end">
+          <div className="w-full max-w-xl text-center lg:text-left">
             <h2
               ref={headingRef}
-              className="text-2xl sm:text-3xl heading lg:text-4xl font-semibold text-white leading-tight"
+              className="heading text-4xl font-semibold leading-tight text-white sm:text-4xl lg:text-4xl"
             >
               Why Choose Aqualife Ever?
             </h2>
 
-            <p ref={subRef} className="mt-2 sm:mt-3 text-sm sm:text-base text-gray-200">
+            <p
+              ref={subRef}
+              className="mt-4 text-base text-gray-200 sm:text-lg"
+            >
               The Ultimate Solution for Hard Water Problems
             </p>
 
             <ul
               ref={listRef}
-              className="mt-5 sm:mt-6 space-y-2.5 sm:space-y-3 inline-block sm:block text-left"
+              className="mt-8 space-y-4 text-left"
             >
               {features.map((item) => (
                 <li
-                  ref={addItemRef}
                   key={item}
-                  className="flex items-center gap-2.5 text-sm sm:text-[15px] text-white/90"
+                  ref={addItemRef}
+                  className="flex items-center gap-3 text-base text-white"
                 >
                   <CheckIcon />
                   <span>{item}</span>
@@ -394,10 +393,9 @@ function WhyChooseAqualife() {
           </div>
         </div>
       </div>
-
-      <div className="invisible aspect-[3/4] sm:aspect-[16/9] lg:aspect-[1420/560]" />
-    </section>
-  );
+    </div>
+  </section>
+);
 }
 
 /**

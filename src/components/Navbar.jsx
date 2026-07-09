@@ -297,7 +297,7 @@ export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
                   <li key={link.label}>
                     <Link
                       to={link.to}
-                      className={`relative py-1 group text-[14px] inline-block transition-colors duration-200 ${
+                      className={`relative select-none py-1 group text-[14px] inline-block transition-colors duration-200 ${
                         isWhiteText
                           ? isActive
                             ? "text-white font-medium"
@@ -395,7 +395,7 @@ export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
               <button
                 aria-label="Search"
                 onClick={() => setSearchOpen(true)}
-                className="p-1 rounded-lg transition-all hover:bg-white/10 active:scale-90"
+                className="p-1 select-none rounded-lg transition-all hover:bg-white/10 active:scale-90"
               >
                 <Search size={20} />
               </button>
@@ -489,7 +489,7 @@ export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
                             : "text-slate-800 hover:text-[#0061C2] hover:bg-blue-50/40"
                         }`}
                     >
-                      <span className="flex items-center gap-2.5">
+                      <span className="flex select-none items-center gap-2.5">
                         {isActive && (
                           <span className="w-1.5 h-1.5 rounded-full bg-[#0061C2] shrink-0" />
                         )}
