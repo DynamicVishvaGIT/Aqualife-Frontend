@@ -2,7 +2,6 @@ import React from 'react'
 import Navbar from "../components/Navbar"
 import HomeSlider from "../components/HomeSlider"
 import TopRecommendations from "../components/TopRecommendations"
-import WaveAnimation from "../components/WaveAnimation"
 import InnovationSection from "../components/InnovationSection"
 import ProductShowcase from "../components/ProductShowcase"
 import NewLaunches from "../components/NewLaunches"

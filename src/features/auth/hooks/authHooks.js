@@ -9,19 +9,6 @@ import {
 } from "../auth";
 
 
-// SIGNUP — logs in immediately, cookie set by backend
-export const useRegister = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: registerUser,
-        onSuccess: (data) => {
-            queryClient.setQueryData(["currentUser"], data.user);
-            queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-        },
-    });
-};
-
 // LOGIN step 1 — send OTP to mobile
 export const useSendLoginOtp = () => {
     return useMutation({

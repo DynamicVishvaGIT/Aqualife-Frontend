@@ -54,8 +54,22 @@
     calc(100% - (var(--container-padding) * 2)),
     var(--container-width)
   );
-
   margin-inline: auto;
+}
+
+.primary-container_2 {
+  width: 100%;
+  margin-inline: 0;
+}
+
+@media (min-width: 768px) {
+  .primary-container_2 {
+    width: min(
+      calc(100% - (var(--container-padding) * 2)),
+      var(--container-width)
+    );
+    margin-inline: auto;
+  }
 }
 
 /*

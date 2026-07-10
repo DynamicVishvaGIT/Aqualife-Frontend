@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
 import Navbar from "./components/Navbar";
@@ -13,25 +13,29 @@ const WaterSofteners = lazy(() => import("./pages/WaterSofteners"));
 const ROPlant = lazy(() => import("./pages/ROPlant"));
 const ContactUs = lazy(() => import("./pages/ContactUs"));
 const ProductDetail = lazy(() => import("./components/ProductDetails"));
-const Signup = lazy(() => import("./pages/Signup"));
+const Signup = lazy(() => import("./pages/Login"));
 const Cart = lazy(() => import("./pages/Cart"));
 const OtpVerification = lazy(() => import("./pages/OtpVerification"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Orders = lazy(() => import("./pages/MyOrders"));
+const Blogs = lazy(() => import("./pages/Blogs"));
+const BlogDetails = lazy(() => import("./pages/BlogDetails"));
 const PageNotFound = lazy(() => import("./pages/PageNotFound"));
 
 import "./App.css";
 import Loader from "./components/Loader";
-import Blogs from "./pages/Blogs";
-import BlogDetails from "./pages/BlogDetails";
-
 
 function App() {
+  const location = useLocation();
+
+  // Pages where Navbar/Footer should be hidden
+  const hideLayout = ["/otp-verification"].includes(location.pathname);
+  const notFoundPage = ["*"].includes(location.pathname);
+
   return (
     <>
       <ScrollToTop />
-
-      <Navbar />
+      {!notFoundPage &&   <Navbar />}
 
       <Suspense fallback={<Loader />}>
         <Routes>
@@ -54,7 +58,7 @@ function App() {
         </Routes>
       </Suspense>
 
-      <Footer />
+    {!hideLayout && !notFoundPage && <Footer />}
     </>
   );
 }

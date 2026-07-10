@@ -40,7 +40,10 @@ import { User, LogIn, UserCircle2 } from "lucide-react";
  *  - isLoggedIn:  bool — flips the tooltip label between "Login" and
  *                 "My Account"
  */
-export default function AccountDropdown({ isWhiteText = false, isLoggedIn = false }) {
+export default function AccountDropdown({
+  isWhiteText = false,
+  isLoggedIn = false,
+}) {
   const [open, setOpen] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, right: 0 });
@@ -109,7 +112,7 @@ export default function AccountDropdown({ isWhiteText = false, isLoggedIn = fals
       panelRef.current,
       { opacity: 0, y: -8, scale: 0.96 },
       { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "back.out(1.7)" },
-      0
+      0,
     ).fromTo(
       itemsRef.current,
       { opacity: 0, x: -8 },
@@ -120,7 +123,7 @@ export default function AccountDropdown({ isWhiteText = false, isLoggedIn = fals
         stagger: 0.05,
         ease: "power2.out",
       },
-      "-=0.12"
+      "-=0.12",
     );
 
     return () => tl.kill();
@@ -153,7 +156,7 @@ export default function AccountDropdown({ isWhiteText = false, isLoggedIn = fals
         scale: 1,
         duration: 0.4,
         ease: "back.out(1.7)",
-      }
+      },
     );
   }, [tooltipOpen]);
 
@@ -316,7 +319,30 @@ export default function AccountDropdown({ isWhiteText = false, isLoggedIn = fals
     // },
   ];
 
-  const tooltipLabel = isLoggedIn ? "My Account" : "Login";
+  const loginBtnRef = useRef(null);
+
+  useEffect(() => {
+    if (!loginBtnRef.current || prefersReducedMotion()) return;
+
+    const tl = gsap.timeline({
+      repeat: -1,
+      repeatDelay: 2.5,
+    });
+
+    tl.to(loginBtnRef.current, {
+      y: -6,
+      duration: 0.15,
+      ease: "power2.out",
+    }).to(loginBtnRef.current, {
+      y: 0,
+      duration: 0.55,
+      ease: "bounce.out",
+    });
+
+    return () => tl.kill();
+  }, []);
+
+
 
   return (
     <div
@@ -325,25 +351,50 @@ export default function AccountDropdown({ isWhiteText = false, isLoggedIn = fals
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Trigger */}
-      <button
-        onClick={toggleMenu}
-        aria-label="Account"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        className={`p-1.5 rounded-lg transition-all duration-200 cursor-pointer active:scale-95
-          [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-110
-          ${
-            isWhiteText
-              ? "hover:text-white hover:bg-white/10"
-              : "hover:text-[#0061C2] hover:bg-blue-50"
-          }`}
-      >
-        <User size={20} />
-      </button>
+      {/* Account menu trigger + dropdown — wrap BOTH in one relative container */}
+      <div className="relative">
+        {/* Trigger button */}
+        <button
+          onClick={toggleMenu}
+          aria-label="Account"
+          aria-haspopup="menu"
+          aria-expanded={open}
+          className={`p-1.5 rounded-lg transition-all duration-200 cursor-pointer active:scale-95
+      [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-110
+      ${
+        isWhiteText
+          ? "hover:text-white hover:bg-white/10"
+          : "hover:text-[#0061C2] hover:bg-blue-50"
+      }`}
+        >
+          <User size={20} />
+        </button>
 
-   
+        {/* Dropdown panel */}
+        <div
+          ref={loginBtnRef}
+          className="absolute top-full  right-[-35px] mt-2 z-50"
+        >
+          {/* Caret: attached to the TOP of the panel, centered */}
+          <span
+            className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-3 rotate-45
+          bg-[#0061C2] border-l border-t border-white/20"
+          />
 
+          {/* Panel */}
+          <div className="relative flex gap-3 p-[6px] rounded-full bg-[#0061C2] min-w-[100px]">
+            <div className="flex-1">
+              <button
+                type="button"
+                className="w-full heading cursor-pointer rounded-full font-semibold text-sm sm:text-sm
+               text-[#FFFF] transition-all duration-300 tracking-[0.1em]"
+              >
+                Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
       {open && (
         <>
           {/* Invisible bridge so the cursor can travel from the icon down to

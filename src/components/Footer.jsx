@@ -121,8 +121,8 @@ export function Footer() {
             <p className="text-white text-[13px] heading leading-snug mb-4">
               Join us as a trade partner in the growing water purification market in India.
             </p>
-            <button className="w-full sm:w-auto bg-white text-slate-900 text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-slate-100 active:scale-95 transition-all mb-6">
-              Become Paterner
+            <button className="w-full cursor-pointer sm:w-auto bg-white text-slate-900 text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-slate-100 active:scale-95 transition-all mb-6">
+              Become Partner
             </button>
 
             <p className="text-white font-semibold text-[14px] mb-3">Payment Method</p>

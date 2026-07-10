@@ -28,7 +28,7 @@ export default function OtpVerification() {
   const panelRef = useRef(null);
   const contentRef = useRef(null);
   const submitRef = useRef(null);
-  const firstInputRef = useRef(null); // ← anchor for scroll/focus
+  const firstInputRef = useRef(null);
 
   // const { state } = useLocation();
   const navigate = useNavigate();
@@ -39,10 +39,9 @@ export default function OtpVerification() {
   //   if (!mobile) navigate("/login", { replace: true });
   // }, [mobile, navigate]);
 
-  //   const { mutate: verifyOtp, isPending: verifying } = useVerifyOtp();
+  // const { mutate: verifyOtp, isPending: verifying } = useVerifyOtp();
   // const { mutate: resendOtpMutation, isPending: resending } = useResendOtp();
 
-  // +91-{mobile}
   const PHONE = "+91-8345678930";
 
   /* ── countdown ── */
@@ -93,16 +92,12 @@ export default function OtpVerification() {
     return () => ctx.revert();
   }, []);
 
-  /* ── scroll card to center + focus first OTP box on mount ── */
+  /* ── focus first OTP box on mount ── */
   useEffect(() => {
-    const timer = setTimeout(() => {
-      containerRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+    const t = setTimeout(() => {
       firstInputRef.current?.focus({ preventScroll: true });
     }, 300);
-    return () => clearTimeout(timer);
+    return () => clearTimeout(t);
   }, []);
 
   /* ── input handlers ── */
@@ -158,15 +153,14 @@ export default function OtpVerification() {
       });
   };
 
-  //  auto-redirect to home a moment after success
+  /* ── auto-redirect to home after success ── */
   useEffect(() => {
-  if (!success) return;
-  const t = setTimeout(() => navigate("/", { replace: true }), 1500);
-  return () => clearTimeout(t);
-}, [success, navigate]);
+    if (!success) return;
+    const t = setTimeout(() => navigate("/", { replace: true }), 1500);
+    return () => clearTimeout(t);
+  }, [success, navigate]);
 
-
-  //   const handleSubmit = () => {
+  // const handleSubmit = () => {
   //   setSubmitted(true);
   //   const code = otp.join("");
   //   if (code.length < OTP_LENGTH) {
@@ -175,7 +169,6 @@ export default function OtpVerification() {
   //     return;
   //   }
   //   pressBtn();
-
   //   verifyOtp(
   //     { mobile, otp: code },
   //     {
@@ -213,9 +206,8 @@ export default function OtpVerification() {
     }
   };
 
-  //   const handleResend = () => {
+  // const handleResend = () => {
   //   if (!canResend) return;
-
   //   resendOtpMutation(mobile, {
   //     onSuccess: () => {
   //       setOtp(Array(OTP_LENGTH).fill(""));
@@ -264,239 +256,252 @@ export default function OtpVerification() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBFBFB] flex items-center justify-center pt-14 sm:p-6 lg:pt-30">
+    <>
+      {/*
+        ── Full-viewport wrapper ──
+        On phones the 80px navbar assumption can be too tall (many mobile navbars
+        are ~64px). We keep the 80px offset for md+ (matches the desktop navbar)
+        but fall back to a safer 64px subtraction on small screens, and always
+        allow the wrapper itself to scroll as a last resort so nothing is ever
+        clipped on very short viewports (e.g. landscape phones).
+      */}
       <div
-        ref={containerRef}
-        className="w-full flex flex-col md:flex-row md:h-[580px] lg:h-[720px] 2xl:h-[1100px]"
+        className="primary-container flex items-center justify-center overflow-y-auto overflow-x-hidden"
+        style={{
+          marginTop: "80px",
+          minHeight: "calc(100dvh - 80px)",
+        }}
       >
-        {/* LEFT BANNER */}
+        {/* ── Inner flex column on mobile, row from md up ── */}
         <div
-          ref={bannerRef}
-          className="relative shrink-0 w-full h-[400px] md:h-auto md:w-[50%]"
+          ref={containerRef}
+          className="w-full min-h-[calc(100dvh-80px)] md:h-full flex flex-col md:flex-row"
         >
-          <img
-            src={sideBanner}
-            loading="lazy"
-            alt="Aqualife-Ever – Pure Water. Pure Life."
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: "top center",
-              display: "block",
-            }}
-          />
-        </div>
+          {/* ── LEFT BANNER ── */}
+          <div
+            ref={bannerRef}
+            className="relative shrink-0 w-full h-[400px] xs:h-[260px] sm:h-[320px] md:h-auto md:w-[42%] lg:w-[50%] 2xl:w-[58%]"
+          >
+            <img
+              src={sideBanner}
+              loading="lazy"
+              alt="Aqualife-Ever – Pure Water. Pure Life."
+              className="absolute inset-0 w-full h-full object-cover object-top block"
+            />
+          </div>
 
-        {/* RIGHT PANEL */}
-        <div
-          ref={panelRef}
-          className="flex-1 min-w-0 bg-white flex flex-col justify-center px-6 py-8 sm:px-10 sm:py-10"
-        >
-          {success ? (
-            /* SUCCESS */
-            <div className="flex flex-col items-center gap-5 text-center otp-fade-in">
-              <div
-                className="w-20 h-20 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: "#EFF6FC" }}
-              >
-                <svg
-                  className="w-10 h-10"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke={BRAND}
-                  strokeWidth={2.5}
+          {/* ── RIGHT PANEL ── */}
+          <div
+            ref={panelRef}
+            className="flex-1 min-w-0 min-h-0 bg-white flex flex-col justify-center px-5 py-8 xs:px-6 sm:px-10 sm:py-10"
+          >
+            {success ? (
+              /* ── SUCCESS STATE ── */
+              <div className="flex flex-col items-center gap-5 text-center otp-fade-in">
+                <div
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "#EFF6FC" }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p className="text-xl font-bold text-gray-800">Verified!</p>
-                <p className="text-gray-500 text-sm mt-1">
-                  Your number has been verified successfully.
-                </p>
-              </div>
-            </div>
-          ) : (
-            /* OTP FORM */
-            <div
-              ref={contentRef}
-              className="flex flex-col gap-6 w-full max-w-sm mx-auto"
-            >
-              {/* heading */}
-              <div className="text-center">
-                <p className="text-gray-600 text-sm md:text-[15px] leading-relaxed">
-                  Please Enter the {OTP_LENGTH}-digit OTP That was sent to the
-                  number below
-                </p>
-                <div className="mt-2.5 flex items-center justify-center gap-2">
-                  <span className="text-gray-900 font-bold text-sm md:text-base">
-                    {PHONE}
-                  </span>
-                  <button
-                    className="text-sm font-semibold underline underline-offset-2"
-                    style={{ color: ORANGE }}
+                  <svg
+                    className="w-8 h-8 sm:w-10 sm:h-10"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke={BRAND}
+                    strokeWidth={2.5}
                   >
-                    Edit
-                  </button>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-lg sm:text-xl font-bold text-gray-800">
+                    Verified!
+                  </p>
+                  <p className="text-gray-500 text-sm mt-1">
+                    Your number has been verified successfully.
+                  </p>
                 </div>
               </div>
-
-              {/* OTP boxes */}
+            ) : (
+              /* ── OTP FORM ── */
               <div
-                className={`flex justify-center gap-3 sm:gap-4 ${shake ? "otp-shake" : ""}`}
-                onPaste={handlePaste}
+                ref={contentRef}
+                className="flex flex-col gap-5 sm:gap-6 w-full max-w-sm mx-auto"
               >
-                {otp.map((digit, i) => (
-                  <input
-                    key={i}
-                    ref={(el) => {
-                      inputRefs.current[i] = el;
-                      if (i === 0) firstInputRef.current = el; // ← attach firstInputRef to box 0
-                    }}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleChange(i, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(i, e)}
-                    autoComplete="one-time-code"
+                {/* heading */}
+                <div className="text-center">
+                  <p className="text-gray-600 text-sm md:text-[15px] leading-relaxed">
+                    Please Enter the {OTP_LENGTH}-digit OTP That was sent to
+                    the number below
+                  </p>
+                  <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+                    <span className="text-gray-900 font-bold text-sm sm:text-base break-all">
+                      {PHONE}
+                    </span>
+                    <button
+                      className="text-sm font-semibold underline underline-offset-2 shrink-0"
+                      style={{ color: ORANGE }}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </div>
+
+                {/* OTP boxes */}
+                <div
+                  className={`flex justify-center gap-2.5 xs:gap-3 sm:gap-4 ${
+                    shake ? "otp-shake" : ""
+                  }`}
+                  onPaste={handlePaste}
+                >
+                  {otp.map((digit, i) => (
+                    <input
+                      key={i}
+                      ref={(el) => {
+                        inputRefs.current[i] = el;
+                        if (i === 0) firstInputRef.current = el;
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleChange(i, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(i, e)}
+                      autoComplete="one-time-code"
+                      className="otp-box w-12 h-12 xs:w-14 xs:h-14 sm:w-[60px] sm:h-[60px] text-lg xs:text-xl sm:text-[1.25rem]"
+                      style={{
+                        textAlign: "center",
+                        fontWeight: "700",
+                        borderRadius: "10px",
+                        border: `2px solid ${
+                          submitted && !digit
+                            ? "#EF4444"
+                            : digit
+                              ? BRAND
+                              : "#E5E7EB"
+                        }`,
+                        backgroundColor:
+                          submitted && !digit
+                            ? "#FEF2F2"
+                            : digit
+                              ? "#EFF6FC"
+                              : "#F9FAFB",
+                        color: digit ? BRAND : "#1F2937",
+                        outline: "none",
+                        transition:
+                          "border-color 0.2s, box-shadow 0.2s, background-color 0.2s",
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = BRAND;
+                        e.currentTarget.style.boxShadow = `0 0 0 3px ${BRAND}30`;
+                      }}
+                      onBlur={(e) => {
+                        if (!otp[i]) {
+                          e.currentTarget.style.borderColor = "#E5E7EB";
+                          e.currentTarget.style.boxShadow = "none";
+                        }
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* progress bar */}
+                <div className="h-1 bg-gray-100 rounded-full overflow-hidden -mt-2">
+                  <div
+                    className="h-full rounded-full transition-all duration-300"
                     style={{
-                      width: "60px",
-                      height: "60px",
-                      textAlign: "center",
-                      fontSize: "1.25rem",
-                      fontWeight: "700",
-                      borderRadius: "10px",
-                      border: `2px solid ${
-                        submitted && !digit
-                          ? "#EF4444"
-                          : digit
-                            ? BRAND
-                            : "#E5E7EB"
-                      }`,
-                      backgroundColor:
-                        submitted && !digit
-                          ? "#FEF2F2"
-                          : digit
-                            ? "#EFF6FC"
-                            : "#F9FAFB",
-                      color: digit ? BRAND : "#1F2937",
-                      outline: "none",
-                      transition:
-                        "border-color 0.2s, box-shadow 0.2s, background-color 0.2s",
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = BRAND;
-                      e.currentTarget.style.boxShadow = `0 0 0 3px ${BRAND}30`;
-                    }}
-                    onBlur={(e) => {
-                      if (!otp[i]) {
-                        e.currentTarget.style.borderColor = "#E5E7EB";
-                        e.currentTarget.style.boxShadow = "none";
-                      }
+                      width: `${(filled / OTP_LENGTH) * 100}%`,
+                      backgroundColor: BRAND,
                     }}
                   />
-                ))}
-              </div>
+                </div>
 
-              {/* progress bar */}
-              <div className="h-1 bg-gray-100 rounded-full overflow-hidden -mt-2">
-                <div
-                  className="h-full rounded-full transition-all duration-300"
-                  style={{
-                    width: `${(filled / OTP_LENGTH) * 100}%`,
-                    backgroundColor: BRAND,
-                  }}
-                />
-              </div>
+                {/* feedback */}
+                <div className="min-h-[18px] text-center -mt-3">
+                  {resent && (
+                    <p
+                      className="text-xs font-medium otp-fade-in"
+                      style={{ color: "#16A34A" }}
+                    >
+                      OTP resent via WhatsApp &amp; SMS to alternate number
+                    </p>
+                  )}
+                  {error && (
+                    <p className="text-red-500 text-xs font-medium otp-fade-in">
+                      {error}
+                    </p>
+                  )}
+                </div>
 
-              {/* feedback */}
-              <div className="min-h-[18px] text-center -mt-3">
-                {resent && (
-                  <p
-                    className="text-xs font-medium otp-fade-in"
-                    style={{ color: "#16A34A" }}
-                  >
-                    OTP resent via WhatsApp &amp; SMS to alternate number
-                  </p>
-                )}
-                {error && (
-                  <p className="text-red-500 text-xs font-medium otp-fade-in">
-                    {error}
-                  </p>
-                )}
-              </div>
-
-              {/* submit */}
-              <button
-                ref={submitRef}
-                onClick={handleSubmit}
-                className="w-full py-3.5 rounded-lg text-white font-semibold text-sm sm:text-base"
-                style={{
-                  backgroundColor: isComplete ? BRAND : `${BRAND}70`,
-                  cursor: isComplete ? "pointer" : "not-allowed",
-                }}
-                onMouseEnter={isComplete ? btnEnter : undefined}
-                onMouseLeave={isComplete ? btnLeave : undefined}
-              >
-                Submit
-              </button>
-
-              {/* <button
-                ref={submitRef}
-                onClick={handleSubmit}
-                disabled={!isComplete || verifying}
-                className="w-full py-3.5 rounded-lg text-white font-semibold text-sm sm:text-base"
-                style={{
-                  backgroundColor: isComplete ? BRAND : `${BRAND}70`,
-                  cursor: isComplete ? "pointer" : "not-allowed",
-                }}
-                onMouseEnter={isComplete ? btnEnter : undefined}
-                onMouseLeave={isComplete ? btnLeave : undefined}
-              >
-                {verifying ? "Verifying..." : "Submit"}
-              </button> */}
-
-              {/* resend */}
-              <p className="text-center text-sm text-gray-500 -mt-2">
-                Did Not Receive Verification Code?{" "}
-                {canResend ? (
-                  <button
-                    onClick={handleResend}
-                    className="font-bold"
-                    style={{ color: ORANGE }}
-                  >
-                    Resend OTP
-                  </button>
-                ) : (
-                  <span className="font-medium text-gray-400">
-                    Resend in {timer}s
-                  </span>
-                )}
-                {/*   {canResend ? (
+                {/* submit */}
                 <button
-                  onClick={handleResend}
-                  disabled={resending}
-                  className="font-bold"
-                  style={{ color: ORANGE }}
+                  ref={submitRef}
+                  onClick={handleSubmit}
+                  className="w-full py-3 sm:py-3.5 rounded-lg text-white font-semibold text-sm sm:text-base"
+                  style={{
+                    backgroundColor: isComplete ? BRAND : `${BRAND}70`,
+                    cursor: isComplete ? "pointer" : "not-allowed",
+                  }}
+                  onMouseEnter={isComplete ? btnEnter : undefined}
+                  onMouseLeave={isComplete ? btnLeave : undefined}
                 >
-                  {resending ? "Resending..." : "Resend OTP"}
+                  Submit
                 </button>
-              ) : (
-                <span className="font-medium text-gray-400">
-                  Resend in {timer}s
-                </span>
-              )} */}
-              </p>
-            </div>
-          )}
+
+                {/* submit with API (swap in when ready):
+                <button
+                  ref={submitRef}
+                  onClick={handleSubmit}
+                  disabled={!isComplete || verifying}
+                  className="w-full py-3.5 rounded-lg text-white font-semibold text-sm sm:text-base"
+                  style={{
+                    backgroundColor: isComplete ? BRAND : `${BRAND}70`,
+                    cursor: isComplete ? "pointer" : "not-allowed",
+                  }}
+                  onMouseEnter={isComplete ? btnEnter : undefined}
+                  onMouseLeave={isComplete ? btnLeave : undefined}
+                >
+                  {verifying ? "Verifying..." : "Submit"}
+                </button> */}
+
+                {/* resend */}
+                <p className="text-center text-sm text-gray-500 -mt-2">
+                  Did Not Receive Verification Code?{" "}
+                  {canResend ? (
+                    <button
+                      onClick={handleResend}
+                      className="font-bold"
+                      style={{ color: ORANGE }}
+                    >
+                      Resend OTP
+                    </button>
+                  ) : (
+                    <span className="font-medium text-gray-400">
+                      Resend in {timer}s
+                    </span>
+                  )}
+                  {/* resend with API (swap in when ready):
+                  {canResend ? (
+                    <button
+                      onClick={handleResend}
+                      disabled={resending}
+                      className="font-bold"
+                      style={{ color: ORANGE }}
+                    >
+                      {resending ? "Resending..." : "Resend OTP"}
+                    </button>
+                  ) : (
+                    <span className="font-medium text-gray-400">
+                      Resend in {timer}s
+                    </span>
+                  )} */}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -514,7 +519,8 @@ export default function OtpVerification() {
         }
         .otp-shake   { animation: otp-shake 0.5s ease; }
         .otp-fade-in { animation: otp-fade-in-kf 0.35s ease forwards; }
+        .otp-box     { min-width: 0; }
       `}</style>
-    </div>
+    </>
   );
 }

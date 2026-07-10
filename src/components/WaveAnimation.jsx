@@ -7,7 +7,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function WaveAnimation({
   imageUrl,
-  height      = "clamp(200px, 26vw, 380px)",
+  height      = "",
   amplitude   = 0.03,
   frequency   = 1.2,
   speed       = 0.5,
@@ -83,7 +83,6 @@ export default function WaveAnimation({
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, width < 640 ? 1.5 : 2));
     renderer.setSize(width, heightPx);
-    renderer.domElement.style.cssText = "display:block;width:100%;height:100%;";
     container.appendChild(renderer.domElement);
 
     let imageAspect = null;
