@@ -35,7 +35,7 @@ const MOBILE_NAV_LINKS = [
   { label: "Blogs", to: "/blogs" },
 ];
 
-export default function Navbar({ cartCount = 0, isLoggedIn = false }) {
+export default function Navbar({ cartCount = 0, isLoggedIn = true }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);

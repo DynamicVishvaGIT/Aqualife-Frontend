@@ -15,10 +15,10 @@ const ProfileInfo = () => {
   const sectionRefs = useRef([]);
 
   const [form, setForm] = useState({
-    firstName: "Ken",
-    lastName: "Williams",
-    email: "williams2000@gmail.com",
-    mobile: "9123456789",
+    firstName: "",
+    lastName: "",
+    email: "",
+    mobile: "",
     gender: "male",
   });
 

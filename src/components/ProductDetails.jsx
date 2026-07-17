@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
-import { ShoppingCart, Heart, ChevronDown, ZoomIn, X } from "lucide-react";
+import { ShoppingCart, Heart, ChevronDown, X } from "lucide-react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -19,6 +19,7 @@ import FaqSection from "../components/FaqSection";
 import DownloadPdf from "./DownloadPdf";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
+import useCartFly from "../hook/useCartFly";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,7 +37,6 @@ const allSpecs = [
   { label: "Input Water Chlorine (Max)", value: "1 ppm" },
   { label: "Input Water Turbidity (Max)", value: "5 NTU" },
   { label: "Input Water Iron", value: "0.2 ppm" },
-  // hidden rows (shown after "Show More")
   { label: "Voltage", value: "220V / 50Hz" },
   { label: "Power Consumption", value: "60 W" },
   { label: "Warranty", value: "1 Year" },
@@ -97,15 +97,13 @@ const TESTIMONIALS = [
   },
 ];
 
-/* ── Mock products ── */
 const PRODUCTS = [
   {
     id: 1,
     image: product1,
     badge: "New launch",
     name: "Venus",
-    description:
-      "UV+UF+Copper & zinc water purifier UV+UF+Copper & zinc water purifier",
+    description: "UV+UF+Copper & zinc water purifier UV+UF+Copper & zinc water purifier",
     price: 28999,
     mrp: 39000,
     discount: 25,
@@ -132,7 +130,6 @@ const PRODUCTS = [
   },
 ];
 
-/* ── Product card ── */
 function ProductCard({ product }) {
   const navigate = useNavigate();
   const cardRef = useRef(null);
@@ -173,7 +170,6 @@ function ProductCard({ product }) {
         <p className="text-slate-400 text-[11px] sm:text-[13px] mt-0.5 mb-2 sm:mb-3 line-clamp-2">
           {product.description}
         </p>
-
         <div className="mb-3 sm:mb-4">
           <p className="text-lg sm:text-[22px] font-bold text-slate-900 leading-none mb-1">
             ₹{product.price.toLocaleString("en-IN")}
@@ -190,7 +186,6 @@ function ProductCard({ product }) {
         </div>
       </div>
 
-      {/* Action row */}
       <div className="flex gap-2 mt-auto">
         <WaterButton
           variant="primary"
@@ -199,7 +194,6 @@ function ProductCard({ product }) {
         >
           Book Demo
         </WaterButton>
-
         <button
           onClick={bumpButton}
           className="flex-1 text-slate-500 text-[10px] sm:text-sm border border-[#F0F3F6]
@@ -216,46 +210,39 @@ function ProductCard({ product }) {
 export default function ProductDetail() {
   const product = singleProduct;
   const images = singleProduct.galleryImages;
+  const flyToCart = useCartFly();
 
+  // ── all state ──
   const [mainImg, setMainImg] = useState(0);
   const [qty, setQty] = useState(1);
   const [showMore, setShowMore] = useState(false);
-
-  const rootRef = useRef(null);
-  const imgRef = useRef(null);
-  const galleryImgContainerRef = useRef(null);
-  const swiperRef = useRef(null);
-
-  // Used ONLY by the mobile lightbox's single-finger swipe (no Swiper
-  // instance runs inside the lightbox, so manual touch tracking is
-  // needed there). The main gallery no longer uses these — Swiper's own
-  // touch engine handles swiping there (see note above the Swiper below).
-  const touchStartX = useRef(0);
-  const touchDeltaX = useRef(0);
-  const isSwiping = useRef(false);
-
-  // Desktop hover-zoom (Amazon-style lens + side panel)
-  const ZOOM_LEVEL = 2.5;
-  const LENS_SIZE = 160;
+  const [showAll, setShowAll] = useState(false);
   const [showZoomPane, setShowZoomPane] = useState(false);
   const [zoomBgPos, setZoomBgPos] = useState("50% 50%");
   const [lensPos, setLensPos] = useState({ x: 0, y: 0 });
   const [paneRect, setPaneRect] = useState(null);
-
-  // Mobile tap-to-zoom lightbox (pinch + double-tap)
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [zoomScale, setZoomScale] = useState(1);
   const [transformOrigin, setTransformOrigin] = useState("center center");
+
+  // ── refs ──
+  const rootRef = useRef(null);
+  const imgRef = useRef(null);
+  const galleryImgContainerRef = useRef(null);
+  const swiperRef = useRef(null);
+  const touchStartX = useRef(0);
+  const touchDeltaX = useRef(0);
+  const isSwiping = useRef(false);
   const lastTapRef = useRef(0);
   const pinchStartDistRef = useRef(null);
   const pinchStartScaleRef = useRef(1);
 
-  /* ── Go to a given slide.
-     Single source of truth: `mainImg` is only ever set from Swiper's
-     `onSlideChange` (via realIndex). goToSlide just tells Swiper where
-     to go; it never sets `mainImg` directly, so there's no race between
-     two writers desyncing the thumbnail/dot highlight from what's
-     actually on screen. */
+  const ZOOM_LEVEL = 2.5;
+  const LENS_SIZE = 160;
+  const VISIBLE_COUNT = 13;
+
+  const specs = showAll ? allSpecs : allSpecs.slice(0, VISIBLE_COUNT);
+
   const goToSlide = (index) => {
     const wrapped = (index + images.length) % images.length;
     if (swiperRef.current) {
@@ -268,11 +255,6 @@ export default function ProductDetail() {
   const prevImg = () => goToSlide(mainImg - 1);
   const nextImg = () => goToSlide(mainImg + 1);
 
-  /* ── Single-finger swipe tracking used ONLY inside the mobile lightbox
-     (when not pinch-zoomed). Kept separate from the main gallery, which
-     now relies entirely on Swiper's built-in touch handling — running
-     both a manual touch tracker and Swiper's native one on the same
-     element caused janky/conflicting swipes. ── */
   const handleTouchMove = (e) => {
     if (!isSwiping.current) return;
     touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
@@ -282,24 +264,16 @@ export default function ProductDetail() {
     if (!isSwiping.current) return;
     isSwiping.current = false;
     const SWIPE_THRESHOLD = 45;
-    if (touchDeltaX.current > SWIPE_THRESHOLD) {
-      prevImg();
-    } else if (touchDeltaX.current < -SWIPE_THRESHOLD) {
-      nextImg();
-    }
+    if (touchDeltaX.current > SWIPE_THRESHOLD) prevImg();
+    else if (touchDeltaX.current < -SWIPE_THRESHOLD) nextImg();
     touchDeltaX.current = 0;
   };
 
   const bumpButton = (el) => {
     if (!el) return;
-    gsap.fromTo(
-      el,
-      { scale: 0.9 },
-      { scale: 1, duration: 0.35, ease: "back.out(3)" },
-    );
+    gsap.fromTo(el, { scale: 0.9 }, { scale: 1, duration: 0.35, ease: "back.out(3)" });
   };
 
-  /* ── Desktop hover-zoom: lens + side zoom pane (lg and up only) ── */
   const handleGalleryMouseEnter = () => {
     if (window.innerWidth < 1024 || !galleryImgContainerRef.current) return;
     const rect = galleryImgContainerRef.current.getBoundingClientRect();
@@ -312,25 +286,15 @@ export default function ProductDetail() {
     const rect = galleryImgContainerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-
-    const lensX = Math.min(
-      Math.max(x - LENS_SIZE / 2, 0),
-      rect.width - LENS_SIZE,
-    );
-    const lensY = Math.min(
-      Math.max(y - LENS_SIZE / 2, 0),
-      rect.height - LENS_SIZE,
-    );
-    setLensPos({ x: lensX, y: lensY });
-
-    const bgX = (x / rect.width) * 100;
-    const bgY = (y / rect.height) * 100;
-    setZoomBgPos(`${bgX}% ${bgY}%`);
+    setLensPos({
+      x: Math.min(Math.max(x - LENS_SIZE / 2, 0), rect.width - LENS_SIZE),
+      y: Math.min(Math.max(y - LENS_SIZE / 2, 0), rect.height - LENS_SIZE),
+    });
+    setZoomBgPos(`${(x / rect.width) * 100}% ${(y / rect.height) * 100}%`);
   };
 
   const handleGalleryMouseLeave = () => setShowZoomPane(false);
 
-  /* ── Mobile lightbox: open/close ── */
   const openLightbox = () => {
     if (window.innerWidth >= 1024) return;
     setZoomScale(1);
@@ -342,7 +306,6 @@ export default function ProductDetail() {
     setZoomScale(1);
   };
 
-  /* ── Mobile lightbox: pinch-to-zoom + double-tap-to-zoom + swipe ── */
   const getTouchDistance = (touches) => {
     const [a, b] = touches;
     return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
@@ -354,17 +317,14 @@ export default function ProductDetail() {
       pinchStartScaleRef.current = zoomScale;
       return;
     }
-
     if (e.touches.length === 1) {
       touchStartX.current = e.touches[0].clientX;
       touchDeltaX.current = 0;
       isSwiping.current = true;
-
       const now = Date.now();
       const rect = e.currentTarget.getBoundingClientRect();
       const tapX = ((e.touches[0].clientX - rect.left) / rect.width) * 100;
       const tapY = ((e.touches[0].clientY - rect.top) / rect.height) * 100;
-
       if (now - lastTapRef.current < 300) {
         setTransformOrigin(`${tapX}% ${tapY}%`);
         setZoomScale((s) => (s > 1 ? 1 : 2.5));
@@ -376,193 +336,77 @@ export default function ProductDetail() {
   const handleLightboxTouchMove = (e) => {
     if (e.touches.length === 2 && pinchStartDistRef.current) {
       const newDist = getTouchDistance(e.touches);
-      const scale = Math.min(
-        Math.max(
-          (newDist / pinchStartDistRef.current) * pinchStartScaleRef.current,
-          1,
-        ),
-        3,
-      );
-      setZoomScale(scale);
+      setZoomScale(Math.min(Math.max((newDist / pinchStartDistRef.current) * pinchStartScaleRef.current, 1), 3));
       return;
     }
-
-    if (e.touches.length === 1 && zoomScale === 1) {
-      handleTouchMove(e);
-    }
+    if (e.touches.length === 1 && zoomScale === 1) handleTouchMove(e);
   };
 
   const handleLightboxTouchEnd = (e) => {
     if (e.touches.length === 0) {
       pinchStartDistRef.current = null;
-      if (zoomScale === 1) {
-        handleTouchEnd();
-      } else {
-        isSwiping.current = false;
-      }
+      if (zoomScale === 1) handleTouchEnd();
+      else isSwiping.current = false;
     }
   };
 
-  // product info
-  const VISIBLE_COUNT = 13;
-  const [showAll, setShowAll] = useState(false);
-
-  const specs = showAll ? allSpecs : allSpecs.slice(0, VISIBLE_COUNT);
-
-  /* ── Crossfade the main gallery image whenever it changes ── */
   useLayoutEffect(() => {
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion || !imgRef.current) return;
-
-    gsap.fromTo(
-      imgRef.current,
-      { opacity: 0, scale: 1.04 },
-      { opacity: 1, scale: 1, duration: 0.45, ease: "power2.out" },
-    );
+    gsap.fromTo(imgRef.current, { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.45, ease: "power2.out" });
   }, [mainImg]);
 
-  /* ── Lock background scroll while the zoom lightbox is open ── */
   useLayoutEffect(() => {
     document.body.style.overflow = lightboxOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [lightboxOpen]);
 
-  /* ── Reveal newly expanded spec rows ── */
   useLayoutEffect(() => {
     if (!showAll) return;
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
-
-    gsap.fromTo(
-      ".pd-extra-row",
-      { opacity: 0, y: -8 },
-      { opacity: 1, y: 0, duration: 0.4, stagger: 0.04, ease: "power2.out" },
-    );
+    gsap.fromTo(".pd-extra-row", { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.04, ease: "power2.out" });
   }, [showAll]);
 
-  /* ── Page load reveal + scroll-triggered sections ── */
   useLayoutEffect(() => {
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 
     const ctx = gsap.context(() => {
-      const heroTl = gsap.timeline({
-        defaults: { ease: "power3.out", duration: 0.7 },
-      });
-
-      heroTl
+      gsap.timeline({ defaults: { ease: "power3.out", duration: 0.7 } })
         .fromTo(".pd-gallery", { opacity: 0, y: 24 }, { opacity: 1, y: 0 })
-        .fromTo(
-          ".pd-title",
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0 },
-          "-=0.45",
-        )
-        .fromTo(
-          ".pd-desc",
-          { opacity: 0, y: 16 },
-          { opacity: 1, y: 0 },
-          "-=0.45",
-        )
-        .fromTo(
-          ".pd-feature",
-          { opacity: 0, y: 14 },
-          { opacity: 1, y: 0, stagger: 0.12 },
-          "-=0.35",
-        )
-        .fromTo(
-          ".pd-price",
-          { opacity: 0, y: 14 },
-          { opacity: 1, y: 0 },
-          "-=0.3",
-        )
-        .fromTo(
-          ".pd-actions",
-          { opacity: 0, y: 14 },
-          { opacity: 1, y: 0 },
-          "-=0.35",
-        );
+        .fromTo(".pd-title", { opacity: 0, y: 20 }, { opacity: 1, y: 0 }, "-=0.45")
+        .fromTo(".pd-desc", { opacity: 0, y: 16 }, { opacity: 1, y: 0 }, "-=0.45")
+        .fromTo(".pd-feature", { opacity: 0, y: 14 }, { opacity: 1, y: 0, stagger: 0.12 }, "-=0.35")
+        .fromTo(".pd-price", { opacity: 0, y: 14 }, { opacity: 1, y: 0 }, "-=0.3")
+        .fromTo(".pd-actions", { opacity: 0, y: 14 }, { opacity: 1, y: 0 }, "-=0.35");
 
-      // Generic fade-up reveal for below-the-fold sections
       gsap.utils.toArray(".pd-scroll-section").forEach((section) => {
-        gsap.fromTo(
-          section,
-          { opacity: 0, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: section,
-              start: "top 82%",
-              once: true,
-            },
-          },
-        );
+        gsap.fromTo(section, { opacity: 0, y: 40 }, {
+          opacity: 1, y: 0, duration: 0.8, ease: "power3.out",
+          scrollTrigger: { trigger: section, start: "top 82%", once: true },
+        });
       });
 
-      // Spec table rows, staggered in on first scroll into view
-      gsap.fromTo(
-        ".pd-spec-row",
-        { opacity: 0, x: -12 },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.5,
-          stagger: 0.05,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".pd-spec-table",
-            start: "top 80%",
-            once: true,
-          },
-        },
-      );
+      gsap.fromTo(".pd-spec-row", { opacity: 0, x: -12 }, {
+        opacity: 1, x: 0, duration: 0.5, stagger: 0.05, ease: "power2.out",
+        scrollTrigger: { trigger: ".pd-spec-table", start: "top 80%", once: true },
+      });
 
-      // Testimonials
       ScrollTrigger.batch(".pd-testimonial-card", {
-        start: "top 85%",
-        once: true,
-        onEnter: (batch) =>
-          gsap.fromTo(
-            batch,
-            { opacity: 0, y: 30, scale: 0.96 },
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.6,
-              stagger: 0.12,
-              ease: "power2.out",
-            },
-          ),
+        start: "top 85%", once: true,
+        onEnter: (batch) => gsap.fromTo(batch,
+          { opacity: 0, y: 30, scale: 0.96 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.12, ease: "power2.out" }
+        ),
       });
 
-      // Top purifiers grid
       ScrollTrigger.batch(".pd-product-card", {
-        start: "top 88%",
-        once: true,
-        onEnter: (batch) =>
-          gsap.fromTo(
-            batch,
-            { opacity: 0, y: 30 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.6,
-              stagger: 0.1,
-              ease: "power2.out",
-            },
-          ),
+        start: "top 88%", once: true,
+        onEnter: (batch) => gsap.fromTo(batch,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out" }
+        ),
       });
     }, rootRef);
 
@@ -570,11 +414,7 @@ export default function ProductDetail() {
   }, []);
 
   return (
-    <div
-      ref={rootRef}
-      className="relative min-h-screen pt-25 lg:pt-33 bg-white"
-    >
-      {/* Breadcrumb */}
+    <div ref={rootRef} className="relative min-h-screen pt-25 lg:pt-33 bg-white">
       <div className="absolute left-0 w-full z-10">
         <div className="primary-container">
           <Breadcrumb />
@@ -582,14 +422,9 @@ export default function ProductDetail() {
       </div>
 
       <div className="primary-container py-8 sm:py-12">
-        {/* product details */}
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           {/* ── LEFT: Image Gallery ── */}
           <div className="pd-gallery relative w-full lg:w-[45%] flex-shrink-0">
-            {/* Main image — swipe handling is delegated entirely to
-                Swiper's own touch engine (see Swiper props below). No
-                manual onTouchStart/Move/End here anymore, since running
-                both at once caused conflicting/janky swipe behaviour. */}
             <div
               ref={galleryImgContainerRef}
               className="relative overflow-hidden flex items-center justify-center w-full h-[340px] sm:h-[420px] lg:h-[500px] bg-white touch-pan-y lg:cursor-zoom-in"
@@ -608,28 +443,16 @@ export default function ProductDetail() {
               </button>
 
               <Swiper
-                onSwiper={(swiper) => {
-                  swiperRef.current = swiper;
-                }}
-                slidesPerView={1}
-                spaceBetween={0}
-                speed={350}
-                resistanceRatio={0.85}
-                threshold={10}
-                touchRatio={1}
-                longSwipes={true}
-                longSwipesRatio={0.5}
-                shortSwipes={true}
-                followFinger={true}
-                allowTouchMove={true}
+                onSwiper={(swiper) => { swiperRef.current = swiper; }}
+                slidesPerView={1} spaceBetween={0} speed={350}
+                resistanceRatio={0.85} threshold={10} touchRatio={1}
+                longSwipes longSwipesRatio={0.5} shortSwipes
+                followFinger allowTouchMove
                 onSlideChange={(swiper) => setMainImg(swiper.realIndex)}
                 className="w-full h-full"
               >
                 {images.map((img, index) => (
-                  <SwiperSlide
-                    key={index}
-                    className="flex items-center justify-center"
-                  >
+                  <SwiperSlide key={index} className="flex items-center justify-center">
                     <img
                       ref={index === mainImg ? imgRef : null}
                       src={img}
@@ -642,7 +465,6 @@ export default function ProductDetail() {
                 ))}
               </Swiper>
 
-              {/* Mobile Image Counter */}
               <div className="absolute top-3 right-3 lg:hidden z-[999]">
                 <div className="bg-black/60 text-white text-xs font-medium px-3 py-1 rounded-full">
                   {mainImg + 1} / {images.length}
@@ -659,86 +481,55 @@ export default function ProductDetail() {
                 <ArrowRight size={20} />
               </button>
 
-              {/* Lens overlay — follows the cursor, desktop only */}
               {showZoomPane && (
                 <div
                   className="hidden lg:block absolute pointer-events-none border-2 border-white/90 bg-white/20 shadow-inner"
-                  style={{
-                    width: LENS_SIZE,
-                    height: LENS_SIZE,
-                    left: lensPos.x,
-                    top: lensPos.y,
-                  }}
+                  style={{ width: LENS_SIZE, height: LENS_SIZE, left: lensPos.x, top: lensPos.y }}
                 />
               )}
             </div>
 
-            {/* Desktop zoom pane — portaled to <body> so it always paints
-                above the page, no matter what stacking context any GSAP
-                transform elsewhere on the page creates */}
-            {showZoomPane &&
-              paneRect &&
-              createPortal(
-                <div
-                  className="hidden lg:block fixed border border-gray-200 shadow-2xl rounded-xl overflow-hidden pointer-events-none"
-                  style={{
-                    top: paneRect.top,
-                    left: paneRect.left,
-                    width: 500,
-                    height: 440,
-                    backgroundColor: "#ffffff",
-                    backgroundImage: `url(${images[mainImg]})`,
-                    backgroundSize: `${ZOOM_LEVEL * 100}%`,
-                    backgroundPosition: zoomBgPos,
-                    backgroundRepeat: "no-repeat",
-                    zIndex: 9999,
-                  }}
-                />,
-                document.body,
-              )}
+            {showZoomPane && paneRect && createPortal(
+              <div
+                className="hidden lg:block fixed border border-gray-200 shadow-2xl rounded-xl overflow-hidden pointer-events-none"
+                style={{
+                  top: paneRect.top, left: paneRect.left,
+                  width: 500, height: 440,
+                  backgroundColor: "#ffffff",
+                  backgroundImage: `url(${images[mainImg]})`,
+                  backgroundSize: `${ZOOM_LEVEL * 100}%`,
+                  backgroundPosition: zoomBgPos,
+                  backgroundRepeat: "no-repeat",
+                  zIndex: 9999,
+                }}
+              />,
+              document.body,
+            )}
 
-            {/* Mobile dot navigation — swipe the image above or tap a dot */}
             <div className="flex lg:hidden justify-center items-center gap-1.5 mt-3">
               {images.map((_, i) => (
                 <button
-                  key={i}
-                  onClick={() => goToSlide(i)}
-                  aria-label={`Go to image ${i + 1}`}
-                  aria-current={mainImg === i}
+                  key={i} onClick={() => goToSlide(i)}
+                  aria-label={`Go to image ${i + 1}`} aria-current={mainImg === i}
                   className={`h-1.5 rounded-full cursor-pointer transition-all duration-300 active:scale-90 ${
-                    mainImg === i
-                      ? "w-6 bg-[#0061C2]"
-                      : "w-1.5 bg-gray-300 hover:bg-gray-400"
+                    mainImg === i ? "w-6 bg-[#0061C2]" : "w-1.5 bg-gray-300 hover:bg-gray-400"
                   }`}
                 />
               ))}
             </div>
 
-            {/* Thumbnails */}
             <div className="hidden lg:flex gap-2 sm:gap-3 mt-4 overflow-x-auto pb-2 scrollbar-hide">
               {images.map((img, i) => (
                 <button
-                  key={i}
-                  onClick={() => goToSlide(i)}
-                  aria-current={mainImg === i}
+                  key={i} onClick={() => goToSlide(i)} aria-current={mainImg === i}
                   className={`flex-shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 transition-all duration-300 active:scale-95
-        w-16 h-16
-        sm:w-20 sm:h-20
-        md:w-20 md:h-20
-        lg:w-20 lg:h-20
-        xl:w-22 xl:h-22
-        ${
-          mainImg === i
-            ? "border-[#0061C2] opacity-100 shadow-md shadow-blue-100"
-            : "border-gray-200 opacity-60 hover:opacity-100 hover:border-gray-400"
-        }`}
+                    w-16 h-16 sm:w-20 sm:h-20 md:w-20 md:h-20 lg:w-20 lg:h-20 xl:w-22 xl:h-22
+                    ${mainImg === i
+                      ? "border-[#0061C2] opacity-100 shadow-md shadow-blue-100"
+                      : "border-gray-200 opacity-60 hover:opacity-100 hover:border-gray-400"
+                    }`}
                 >
-                  <img
-                    src={img}
-                    alt={`Thumbnail ${i + 1}`}
-                    className="w-full h-full object-contain bg-white p-1"
-                    draggable={false}
-                  />
+                  <img src={img} alt={`Thumbnail ${i + 1}`} className="w-full h-full object-contain bg-white p-1" draggable={false} />
                 </button>
               ))}
             </div>
@@ -746,54 +537,32 @@ export default function ProductDetail() {
 
           {/* ── RIGHT: Product Info ── */}
           <div className="w-full lg:w-[55%]">
-            {/* Title */}
             <h1 className="pd-title text-2xl heading sm:text-3xl font-semibold text-gray-900 leading-tight">
               {product.title}
             </h1>
-
-            {/* Short desc */}
             <p className="pd-desc mt-3 text-sm sm:text-base text-gray-600 leading-relaxed">
               {product.description}
             </p>
 
-            {/* Divider */}
             <hr className="my-5 border-gray-100" />
 
-            {/* Top Features */}
-            <h2 className="text-base heading sm:text-lg font-bold text-[#0061C2] mb-4">
-              Top Features
-            </h2>
-
+            <h2 className="text-base heading sm:text-lg font-bold text-[#0061C2] mb-4">Top Features</h2>
             <div className="space-y-4">
               {product.features.map((feature, idx) => {
                 const isLast = idx === product.features.length - 1;
                 return (
                   <div className="pd-feature" key={idx}>
-                    <h3 className="text-sm heading sm:text-base font-bold text-gray-900">
-                      {feature.title}
-                    </h3>
-                    <p
-                      className={`text-sm text-gray-500 mt-1 leading-relaxed ${
-                        isLast && !showMore ? "line-clamp-3" : ""
-                      }`}
-                    >
+                    <h3 className="text-sm heading sm:text-base font-bold text-gray-900">{feature.title}</h3>
+                    <p className={`text-sm text-gray-500 mt-1 leading-relaxed ${isLast && !showMore ? "line-clamp-3" : ""}`}>
                       {feature.description}
                     </p>
                     {isLast && (
                       <button
-                        onClick={(e) => {
-                          setShowMore(!showMore);
-                          bumpButton(e.currentTarget);
-                        }}
+                        onClick={(e) => { setShowMore(!showMore); bumpButton(e.currentTarget); }}
                         className="mt-2 flex items-center gap-1 text-sm font-medium text-[#0061C2] cursor-pointer transition-colors hover:text-[#004A99] active:scale-95"
                       >
                         {showMore ? "Show Less" : "Show More"}
-                        <ChevronDown
-                          size={15}
-                          className={`transition-transform duration-300 ${
-                            showMore ? "rotate-180" : ""
-                          }`}
-                        />
+                        <ChevronDown size={15} className={`transition-transform duration-300 ${showMore ? "rotate-180" : ""}`} />
                       </button>
                     )}
                   </div>
@@ -801,70 +570,60 @@ export default function ProductDetail() {
               })}
             </div>
 
-            {/* Divider */}
             <hr className="my-5 border-gray-100" />
 
-            {/* Color */}
             <p className="pd-feature text-sm heading sm:text-base font-semibold text-gray-800">
               Color: <span className="font-semibold">{product.color}</span>
             </p>
 
-            {/* Divider */}
             <hr className="my-5 border-gray-100" />
 
-            {/* Pricing */}
             <div className="pd-price flex flex-wrap items-baseline gap-4 mb-3">
-              <span className="text-sm font-medium line-through">
-                MRP ₹ {product.mrp}
-              </span>
-              <span className="text-xl sm:text-2xl heading font-semibold text-gray-900">
-                ₹ {product.price}
-              </span>
+              <span className="text-sm font-medium line-through">MRP ₹ {product.mrp}</span>
+              <span className="text-xl sm:text-2xl heading font-semibold text-gray-900">₹ {product.price}</span>
               <span className="text-sm font-semibold text-green-600 bg-[#E9FFF4] rounded-sm px-1.5">
                 ({product.discount})
               </span>
             </div>
             <p className="text-xs text-gray-400 mt-1">Tax included.</p>
 
-            {/* Qty + Buttons */}
             <div className="pd-actions mt-5 flex flex-wrap items-center gap-3 sm:gap-4">
               {/* Quantity */}
               <div className="inline-flex items-center border border-gray-300 rounded-xl overflow-hidden bg-white shadow-sm">
                 <button
-                  onClick={(e) => {
-                    setQty((q) => Math.max(1, q - 1));
-                    bumpButton(e.currentTarget);
-                  }}
+                  onClick={(e) => { setQty((q) => Math.max(1, q - 1)); bumpButton(e.currentTarget); }}
                   className="w-11 h-11 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
                 >
                   <FiMinus size={16} />
                 </button>
-
                 <span className="min-w-[45px] h-11 flex items-center justify-center border-x border-gray-300 text-sm font-semibold text-gray-900">
                   {qty}
                 </span>
-
                 <button
-                  onClick={(e) => {
-                    setQty((q) => q + 1);
-                    bumpButton(e.currentTarget);
-                  }}
+                  onClick={(e) => { setQty((q) => q + 1); bumpButton(e.currentTarget); }}
                   className="w-11 h-11 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
                 >
                   <FiPlus size={16} />
                 </button>
               </div>
 
-              {/* Add to Cart */}
+              {/* Add to Cart — fires fly-to-cart animation */}
               <button
-                onClick={(e) => bumpButton(e.currentTarget)}
-                className="flex cursor-pointer items-center gap-2 bg-[#0061C2] hover:bg-[#0052A6] text-white text-sm font-medium px-5 py-3 rounded-xl transition-colors active:scale-95 duration-200"
+                onClick={(e) => {
+                  bumpButton(e.currentTarget);
+                  flyToCart({
+                    image: images[mainImg],
+                    name: product.title,
+                    buttonEl: e.currentTarget,
+                  });
+                }}
+                className="flex cursor-pointer items-center gap-2 bg-[#0061C2] hover:bg-[#0052A6] text-white text-sm font-medium px-5 py-3 rounded-xl transition-colors active:scale-95 duration-300"
               >
                 <ShoppingCart size={16} />
                 Add to Cart
               </button>
 
-              {/* Add to Wishlist */}
+              {/* Wishlist */}
               <button
                 onClick={(e) => bumpButton(e.currentTarget)}
                 className="flex items-center cursor-pointer gap-2 border border-gray-300 hover:border-gray-500 text-gray-700 hover:text-gray-900 text-sm font-medium px-5 py-3 rounded-xl transition-all active:scale-95 duration-200"
@@ -877,100 +636,53 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* product info section */}
+      {/* Specs */}
       <div className="bg-[#F5F9FF] min-h-screen py-10">
         <div className="primary-container">
-          {/* Heading */}
-          <h2 className="pd-scroll-section text-2xl sm:text-3xl font-bold heading text-gray-900">
-            Product information
-          </h2>
+          <h2 className="pd-scroll-section text-2xl sm:text-3xl font-bold heading text-gray-900">Product information</h2>
           <p className="text-sm text-gray-400 mt-1 mb-6">Technical Details</p>
-          {/* Specs table */}
           <div className="pd-spec-table divide-y divide-[#626C7A24]">
             {specs.map(({ label, value }, idx) => (
               <div
                 key={label}
-                className={`pd-spec-row flex items-center py-3.5 gap-4 ${
-                  idx >= VISIBLE_COUNT ? "pd-extra-row" : ""
-                }`}
+                className={`pd-spec-row flex items-center py-3.5 gap-4 ${idx >= VISIBLE_COUNT ? "pd-extra-row" : ""}`}
               >
-                <span className="w-1/2 text-sm text-[#191919] font-semibold leading-snug">
-                  {label}
-                </span>
-                <span className="w-1/2 text-sm text-[#626C7A] leading-snug">
-                  {value}
-                </span>
+                <span className="w-1/2 text-sm text-[#191919] font-semibold leading-snug">{label}</span>
+                <span className="w-1/2 text-sm text-[#626C7A] leading-snug">{value}</span>
               </div>
             ))}
           </div>
-          {/* Show More / Less */}
           <button
-            onClick={(e) => {
-              setShowAll((s) => !s);
-              bumpButton(e.currentTarget);
-            }}
+            onClick={(e) => { setShowAll((s) => !s); bumpButton(e.currentTarget); }}
             className="mt-5 flex cursor-pointer items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors active:scale-95"
           >
             {showAll ? "Show Less" : "Show More"}
-            <ChevronDown
-              size={15}
-              className={`transition-transform duration-300 ${showAll ? "rotate-180" : ""}`}
-            />
+            <ChevronDown size={15} className={`transition-transform duration-300 ${showAll ? "rotate-180" : ""}`} />
           </button>
         </div>
       </div>
 
-      {/* info banner */}
       <AlkalineWaterBanner />
-
       <DownloadPdf />
 
-      {/* What Customers Are Saying */}
+      {/* Testimonials */}
       <section className="bg-[#FFF9F9] py-10 sm:py-12">
         <div className="primary-container">
-          {/* Heading */}
           <div className="pd-scroll-section max-w-4xl mb-10">
-            <h2 className="heading text-3xl lg:text-4xl font-semibold text-[#191919]">
-              What Customers Are Saying
-            </h2>
-
-            <p className="mt-3 text-[#191919]">
-              Real experiences from real users. Discover why families trust
-              Aqualife for their water and home needs.
-            </p>
+            <h2 className="heading text-3xl lg:text-4xl font-semibold text-[#191919]">What Customers Are Saying</h2>
+            <p className="mt-3 text-[#191919]">Real experiences from real users. Discover why families trust Aqualife for their water and home needs.</p>
           </div>
-
-          {/* Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {TESTIMONIALS.map((item) => (
-              <div
-                key={item.id}
-                className="pd-testimonial-card overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-100 hover:shadow-lg transition duration-300"
-              >
-                {/* Image */}
+              <div key={item.id} className="pd-testimonial-card overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-100 hover:shadow-lg transition duration-300">
                 <div className="aspect-[4/3] overflow-hidden">
-                  <img
-                  loading="lazy"
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-cover hover:scale-105 transition duration-500"
-                  />
+                  <img loading="lazy" src={item.image} alt={item.name} className="w-full h-full object-cover hover:scale-105 transition duration-500" />
                 </div>
-
-                {/* Content */}
                 <div className="p-4 sm:p-6 flex flex-col min-h-[200px] sm:min-h-[220px]">
-                  <p className="text-sm sm:text-[15px] leading-6 text-[#626C7A] line-clamp-4 sm:line-clamp-5">
-                    {item.text}
-                  </p>
-
+                  <p className="text-sm sm:text-[15px] leading-6 text-[#626C7A] line-clamp-4 sm:line-clamp-5">{item.text}</p>
                   <div className="mt-auto pt-4 sm:pt-5">
-                    <h4 className="font-semibold text-base sm:text-lg text-[#191919]">
-                      {item.name}
-                    </h4>
-
-                    <p className="text-xs sm:text-sm text-[#7A7A7A]">
-                      {item.location}
-                    </p>
+                    <h4 className="font-semibold text-base sm:text-lg text-[#191919]">{item.name}</h4>
+                    <p className="text-xs sm:text-sm text-[#7A7A7A]">{item.location}</p>
                   </div>
                 </div>
               </div>
@@ -979,34 +691,22 @@ export default function ProductDetail() {
         </div>
       </section>
 
-      {/* top Water Purifiers */}
+      {/* Top purifiers */}
       <section className="bg-[#FFFFFF] py-10 sm:py-12">
         <div className="primary-container">
-          {/* Heading */}
           <div className="pd-scroll-section max-w-4xl mb-10">
-            <h2 className="heading text-3xl lg:text-4xl font-semibold text-[#191919]">
-              Explore our Top Water Purifiers
-            </h2>
-
-            <p className="mt-3 text-[#191919]">
-              Find our top-selling water purifiers designed to offer unmatched
-              purity and long-lasting performance.
-            </p>
+            <h2 className="heading text-3xl lg:text-4xl font-semibold text-[#191919]">Explore our Top Water Purifiers</h2>
+            <p className="mt-3 text-[#191919]">Find our top-selling water purifiers designed to offer unmatched purity and long-lasting performance.</p>
           </div>
-
-          {/* Cards */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-4 lg:gap-6">
-            {PRODUCTS.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {PRODUCTS.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
         </div>
       </section>
 
-      {/* faq */}
       <FaqSection className="pb-15" />
 
-      {/* ── Mobile zoom lightbox: pinch, double-tap, or swipe ── */}
+      {/* Mobile zoom lightbox */}
       {lightboxOpen && (
         <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col lg:hidden">
           <button
@@ -1016,7 +716,6 @@ export default function ProductDetail() {
           >
             <X size={22} />
           </button>
-
           <div
             className="flex-1 flex items-center justify-center overflow-hidden"
             style={{ touchAction: "none" }}
@@ -1025,31 +724,17 @@ export default function ProductDetail() {
             onTouchEnd={handleLightboxTouchEnd}
           >
             <img
-            loading="lazy"
-              src={images[mainImg]}
-              alt="Product zoomed"
-              draggable={false}
+              loading="lazy" src={images[mainImg]} alt="Product zoomed" draggable={false}
               className="max-h-full max-w-full object-contain select-none"
-              style={{
-                transform: `scale(${zoomScale})`,
-                transformOrigin,
-                transition: "transform 0.2s ease-out",
-              }}
+              style={{ transform: `scale(${zoomScale})`, transformOrigin, transition: "transform 0.2s ease-out" }}
             />
           </div>
-
-          <p className="text-center text-white/50 text-xs pb-2">
-            Pinch or double-tap to zoom · swipe to change image
-          </p>
-
-          {/* Dot navigation inside the lightbox */}
+          <p className="text-center text-white/50 text-xs pb-2">Pinch or double-tap to zoom · swipe to change image</p>
           <div className="flex justify-center items-center gap-1.5 pb-6">
             {images.map((_, i) => (
               <button
-                key={i}
-                onClick={() => goToSlide(i)}
-                aria-label={`Go to image ${i + 1}`}
-                aria-current={mainImg === i}
+                key={i} onClick={() => goToSlide(i)}
+                aria-label={`Go to image ${i + 1}`} aria-current={mainImg === i}
                 className={`h-1.5 rounded-full cursor-pointer transition-all duration-300 active:scale-90 ${
                   mainImg === i ? "w-6 bg-white" : "w-1.5 bg-white/30"
                 }`}

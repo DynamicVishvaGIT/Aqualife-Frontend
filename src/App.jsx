@@ -21,6 +21,8 @@ const Orders = lazy(() => import("./pages/MyOrders"));
 const Blogs = lazy(() => import("./pages/Blogs"));
 const BlogDetails = lazy(() => import("./pages/BlogDetails"));
 const PageNotFound = lazy(() => import("./pages/PageNotFound"));
+const AddressForm = lazy(() => import("./pages/AddressForm"));
+const SelectAddress = lazy(() => import("./pages/SelectAddress"));
 
 import "./App.css";
 import Loader from "./components/Loader";
@@ -28,14 +30,13 @@ import Loader from "./components/Loader";
 function App() {
   const location = useLocation();
 
-  // Pages where Navbar/Footer should be hidden
   const hideLayout = ["/otp-verification"].includes(location.pathname);
   const notFoundPage = ["*"].includes(location.pathname);
 
   return (
     <>
       <ScrollToTop />
-      {!notFoundPage &&   <Navbar />}
+      {!notFoundPage && <Navbar />}
 
       <Suspense fallback={<Loader />}>
         <Routes>
@@ -54,11 +55,13 @@ function App() {
           <Route path="/orders" element={<Orders />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/blog-details" element={<BlogDetails />} />
+          <Route path="/checkout-address" element={<AddressForm />} />
+          <Route path="/select-address" element={<SelectAddress />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </Suspense>
 
-    {!hideLayout && !notFoundPage && <Footer />}
+      {!hideLayout && !notFoundPage && <Footer />}
     </>
   );
 }

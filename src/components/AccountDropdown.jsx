@@ -1,61 +1,37 @@
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
-import { User, LogIn, UserCircle2 } from "lucide-react";
+import { User, LogIn, UserCircle2, LogOut } from "lucide-react";
 
 /**
  * AccountDropdown
  *
- * Drop-in replacement for the plain Account icon button.
- * - Desktop (hover-capable pointers): a solid-blue "flip card" tooltip
- *   previews immediately on hover (rotates open around its top edge).
- *   If the cursor lingers past `openDelay`, the full menu panel opens —
- *   same hover-intent pattern already used for the close delay, just
- *   mirrored for opening.
- * - The tooltip only EXISTS in the DOM while `tooltipOpen` is true — it's
- *   mounted on hover-enter and unmounted only after its own fade-out tween
- *   finishes (same mount/unmount pattern the menu panel already uses via
- *   `closingRef` + `onComplete`). It is NOT rendered up-front and hidden
- *   with opacity: 0, because that approach is fragile — anything that
- *   overrides that inline style makes it visible before any hover.
- * - The tooltip is rendered through a React portal straight into
- *   document.body, positioned with fixed coordinates computed from the
- *   trigger's bounding box. This is what makes it escape ANY parent
- *   `overflow-hidden`/`overflow-x-clip` clipping.
- * - Touch devices: opens/closes on tap only (hover/tooltip skipped entirely).
- * - On every breakpoint the panel is a small menu anchored directly under
- *   the trigger icon (right-aligned) — same "dropdown" shape on mobile as
- *   on desktop, just clamped so it never overflows the viewport edge.
- * - GSAP handles all open/close/tooltip choreography (respects
- *   prefers-reduced-motion)
+ * Desktop (hover-capable pointers): hover opens the menu after a short
+ * intent delay; leaving closes it after a short grace delay so the
+ * cursor can travel from the icon to the panel without it snapping shut.
+ * Touch devices: opens/closes on tap only.
  *
- * Menu only has two items by design:
- *  - Login   → /login
- *  - Profile → /profile
+ * Menu content depends on `isLoggedIn`:
+ *  - Logged out → Login
+ *  - Logged in  → Profile, Logout
  *
  * Props:
- *  - isWhiteText: bool — pass the same flag your header uses to flip
- *                 icon color over hero/dark backgrounds vs a white header
- *  - isLoggedIn:  bool — flips the tooltip label between "Login" and
- *                 "My Account"
+ *  - isWhiteText: bool — match the header's icon color over hero vs white bg
+ *  - isLoggedIn:  bool — flips between the logged-out and logged-in menu
+ *  - onLogout:    fn   — optional callback fired when "Logout" is clicked
  */
 export default function AccountDropdown({
   isWhiteText = false,
   isLoggedIn = false,
+  onLogout,
 }) {
   const [open, setOpen] = useState(false);
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-  const [tooltipPos, setTooltipPos] = useState({ top: 0, right: 0 });
   const navigate = useNavigate();
 
   const wrapperRef = useRef(null);
   const panelRef = useRef(null);
-  const tooltipRef = useRef(null);
-  const arrowRef = useRef(null);
   const itemsRef = useRef([]);
   const closingRef = useRef(false);
-  const tooltipClosingRef = useRef(false);
   const closeTimeoutRef = useRef(null);
   const openTimeoutRef = useRef(null);
 
@@ -72,30 +48,7 @@ export default function AccountDropdown({
     typeof window !== "undefined" &&
     window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-  /* Recompute the tooltip's fixed screen position from the trigger's
-     current bounding box — called right before it's shown, and kept in
-     sync on scroll/resize while it's open. */
-  const updateTooltipPos = () => {
-    if (!wrapperRef.current) return;
-    const rect = wrapperRef.current.getBoundingClientRect();
-    setTooltipPos({
-      top: rect.bottom + 8,
-      right: window.innerWidth - rect.right,
-    });
-  };
-
-  useEffect(() => {
-    if (!tooltipOpen) return;
-    const handler = () => updateTooltipPos();
-    window.addEventListener("scroll", handler, true);
-    window.addEventListener("resize", handler);
-    return () => {
-      window.removeEventListener("scroll", handler, true);
-      window.removeEventListener("resize", handler);
-    };
-  }, [tooltipOpen]);
-
-  /* ── Open animation (panel) ── */
+  /* ── Open animation ── */
   useEffect(() => {
     if (!open || !panelRef.current) return;
 
@@ -116,81 +69,11 @@ export default function AccountDropdown({
     ).fromTo(
       itemsRef.current,
       { opacity: 0, x: -8 },
-      {
-        opacity: 1,
-        x: 0,
-        duration: 0.25,
-        stagger: 0.05,
-        ease: "power2.out",
-      },
+      { opacity: 1, x: 0, duration: 0.25, stagger: 0.05, ease: "power2.out" },
       "-=0.12",
     );
 
     return () => tl.kill();
-  }, [open]);
-
-  /* ── Tooltip flip-in animation ──
-     Runs the moment the tooltip mounts. Solid blue "flip card" — rotates
-     open around its top edge like a card lid. */
-  useEffect(() => {
-    if (!tooltipOpen || !tooltipRef.current) return;
-
-    const targets = [tooltipRef.current, arrowRef.current].filter(Boolean);
-
-    if (prefersReducedMotion()) {
-      gsap.set(targets, { opacity: 1 });
-      return;
-    }
-
-    gsap.set(tooltipRef.current, {
-      transformPerspective: 400,
-      transformOrigin: "top center",
-    });
-
-    gsap.fromTo(
-      targets,
-      { opacity: 0, rotateX: -90, scale: 0.92 },
-      {
-        opacity: 1,
-        rotateX: 0,
-        scale: 1,
-        duration: 0.4,
-        ease: "back.out(1.7)",
-      },
-    );
-  }, [tooltipOpen]);
-
-  /* ── Tooltip close: fade out, THEN unmount ── */
-  const closeTooltip = () => {
-    if (!tooltipOpen || tooltipClosingRef.current) return;
-
-    if (prefersReducedMotion() || !tooltipRef.current) {
-      setTooltipOpen(false);
-      return;
-    }
-
-    tooltipClosingRef.current = true;
-
-    gsap.to([tooltipRef.current, arrowRef.current].filter(Boolean), {
-      opacity: 0,
-      duration: 0.15,
-      ease: "power2.in",
-      onComplete: () => {
-        tooltipClosingRef.current = false;
-        setTooltipOpen(false);
-      },
-    });
-  };
-
-  const openTooltip = () => {
-    updateTooltipPos();
-    setTooltipOpen(true);
-  };
-
-  /* Hide the tooltip the moment the full panel opens */
-  useEffect(() => {
-    if (open) closeTooltip();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   /* ── Close animation, then actually unmount ── */
@@ -235,16 +118,11 @@ export default function AccountDropdown({
 
   const toggleMenu = () => (open ? closeMenu() : openMenu());
 
-  /* ── Hover-intent handlers (desktop only — no-ops on touch) ──
-     Tooltip mounts instantly; the full panel only opens if the cursor
-     lingers past `openDelay`. */
-  const openDelay = 300;
+  /* ── Hover-intent handlers (desktop only — no-ops on touch) ── */
+  const openDelay = 200;
 
   const handleMouseEnter = () => {
     if (!supportsHover()) return;
-
-    openTooltip();
-
     if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
     openTimeoutRef.current = setTimeout(() => {
       openTimeoutRef.current = null;
@@ -254,9 +132,6 @@ export default function AccountDropdown({
 
   const handleMouseLeave = () => {
     if (!supportsHover()) return;
-
-    closeTooltip();
-
     if (openTimeoutRef.current) {
       clearTimeout(openTimeoutRef.current);
       openTimeoutRef.current = null;
@@ -264,7 +139,7 @@ export default function AccountDropdown({
     scheduleClose();
   };
 
-  /* ── Outside click + Escape (covers touch/keyboard) ── */
+  /* ── Outside click + Escape ── */
   useEffect(() => {
     if (!open) return;
 
@@ -289,7 +164,7 @@ export default function AccountDropdown({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  /* ── Cleanup any pending timeouts on unmount ── */
+  /* ── Cleanup pending timeouts on unmount ── */
   useEffect(() => {
     return () => {
       if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
@@ -302,47 +177,19 @@ export default function AccountDropdown({
     navigate(path);
   };
 
-  const menuItems = [
-    {
-      icon: LogIn,
-      label: "Login",
-      onClick: () => go("/login"),
-    },
-    {
-      icon: UserCircle2,
-      label: "Profile",
-      onClick: () => go("/profile"),
-    },
-    // {
-    //   icon: LogOut,
-    //   label: "Logout",
-    // },
-  ];
+  const handleLogout = () => {
+    closeMenu();
+    if (onLogout) onLogout();
+    else navigate("/");
+  };
 
-  const loginBtnRef = useRef(null);
-
-  useEffect(() => {
-    if (!loginBtnRef.current || prefersReducedMotion()) return;
-
-    const tl = gsap.timeline({
-      repeat: -1,
-      repeatDelay: 2.5,
-    });
-
-    tl.to(loginBtnRef.current, {
-      y: -6,
-      duration: 0.15,
-      ease: "power2.out",
-    }).to(loginBtnRef.current, {
-      y: 0,
-      duration: 0.55,
-      ease: "bounce.out",
-    });
-
-    return () => tl.kill();
-  }, []);
-
-
+  const menuItems = isLoggedIn
+    ? [
+        { icon: UserCircle2, label: "Profile", onClick: () => go("/profile") },
+        { icon: UserCircle2, label: "Wishlist", onClick: () => go("/wishlist") },
+        { icon: UserCircle2, label: "Orders", onClick: () => go("/wishlist") },
+      ]
+    : [{ icon: LogIn, label: "Login", onClick: () => go("/login") }];
 
   return (
     <div
@@ -351,50 +198,23 @@ export default function AccountDropdown({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Account menu trigger + dropdown — wrap BOTH in one relative container */}
-      <div className="relative">
-        {/* Trigger button */}
-        <button
-          onClick={toggleMenu}
-          aria-label="Account"
-          aria-haspopup="menu"
-          aria-expanded={open}
-          className={`p-1.5 rounded-lg transition-all duration-200 cursor-pointer active:scale-95
-      [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-110
-      ${
-        isWhiteText
-          ? "hover:text-white hover:bg-white/10"
-          : "hover:text-[#0061C2] hover:bg-blue-50"
-      }`}
-        >
-          <User size={20} />
-        </button>
+      {/* Trigger button */}
+      <button
+        onClick={toggleMenu}
+        aria-label="Account"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className={`p-1.5 rounded-lg transition-all duration-200 cursor-pointer active:scale-95
+          [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-110
+          ${
+            isWhiteText
+              ? "hover:text-white hover:bg-white/10"
+              : "hover:text-[#0061C2] hover:bg-blue-50"
+          }`}
+      >
+        <User size={20} />
+      </button>
 
-        {/* Dropdown panel */}
-        <div
-          ref={loginBtnRef}
-          className="absolute top-full  right-[-35px] mt-2 z-50"
-        >
-          {/* Caret: attached to the TOP of the panel, centered */}
-          <span
-            className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-3 rotate-45
-          bg-[#0061C2] border-l border-t border-white/20"
-          />
-
-          {/* Panel */}
-          <div className="relative flex gap-3 p-[6px] rounded-full bg-[#0061C2] min-w-[100px]">
-            <div className="flex-1">
-              <button
-                type="button"
-                className="w-full heading cursor-pointer rounded-full font-semibold text-sm sm:text-sm
-               text-[#FFFF] transition-all duration-300 tracking-[0.1em]"
-              >
-                Login
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
       {open && (
         <>
           {/* Invisible bridge so the cursor can travel from the icon down to
@@ -402,9 +222,8 @@ export default function AccountDropdown({
               (desktop hover only — irrelevant on touch) */}
           <div className="hidden sm:block absolute right-0 top-full w-full h-2" />
 
-          {/* Panel: a compact menu anchored under the trigger, right-aligned,
-              on every breakpoint — clamped so it can't run off a narrow
-              viewport. No full-screen sheet, no backdrop. */}
+          {/* Panel: compact menu anchored under the trigger, right-aligned,
+              clamped so it can't overflow a narrow viewport */}
           <div
             ref={panelRef}
             role="menu"
@@ -415,6 +234,16 @@ export default function AccountDropdown({
               overflow-hidden
             "
           >
+            {/* Header */}
+            <div className="flex items-center gap-2 px-4 py-3 bg-blue-50/60 border-b border-slate-100">
+              <div className="w-8 h-8 rounded-full bg-[#0061C2] flex items-center justify-center shrink-0">
+                <User size={16} className="text-white" />
+              </div>
+              <span className="text-sm font-semibold select-none text-[#191919] truncate">
+                {isLoggedIn ? "Hello Aqua User" : "Hello Aqua User"}
+              </span>
+            </div>
+
             <div className="py-2">
               {menuItems.map(({ icon: Icon, label, onClick }) => (
                 <button
