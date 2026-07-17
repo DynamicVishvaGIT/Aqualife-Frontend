@@ -8,7 +8,7 @@ import AddressFormModal from "../components/AddressFormModal";
 const DEMO_ADDRESSES = [
   {
     id: "addr-1",
-    name: "Priya Sharma",
+    name: "Om Shinde",
     mobile: "9876543210",
     house: "B-402, Lakeview Residency",
     address: "Scott Woodward Road",
@@ -19,19 +19,7 @@ const DEMO_ADDRESSES = [
     addressType: "Home",
     makeDefault: true,
   },
-  {
-    id: "addr-2",
-    name: "Priya Sharma",
-    mobile: "9876543210",
-    house: "Tower C, 12th Floor",
-    address: "Corporate Park",
-    locality: "Bandra Kurla Complex",
-    city: "Mumbai",
-    state: "Maharashtra",
-    pincode: "400051",
-    addressType: "Office",
-    makeDefault: false,
-  },
+
 ];
 
 export default function SelectDeliveryAddress({
