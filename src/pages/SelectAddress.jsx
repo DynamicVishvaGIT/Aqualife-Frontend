@@ -1,50 +1,42 @@
 // pages/SelectDeliveryAddress.jsx
 import { useState, useRef, useLayoutEffect } from "react";
-import { ShieldCheck, MapPin, Home as HomeIcon, Building2, Plus, Pencil, Trash2, Truck } from "lucide-react";
+import { ShieldCheck, MapPin, Home as HomeIcon, Building2, Plus, Pencil, Trash2 } from "lucide-react";
 import gsap from "gsap";
 import { useNavigate } from "react-router-dom";
-import { WaterButton } from "../components/WaterButton";
-import product1 from "../assets/Purifier_1.png";
+import AddressFormModal from "../components/AddressFormModal";
 
-/**
- * SelectDeliveryAddress
- *
- * Shown right after CheckoutAddress saves successfully. Same functional
- * shape as the reference: BAG → ADDRESS → PAYMENT stepper, a list of saved
- * addresses (radio-select, one can be default), Add New Address, a
- * delivery-estimate card with the ordered product, price summary, and a
- * Continue CTA. Styled to Aqualife's blue (#0061C2) theme.
- *
- * Expects addresses in the shape saved by CheckoutAddress's `form` state:
- * { name, mobile, house, address, locality, city, state, pincode,
- *   addressType, makeDefault }
- * Pass real saved addresses via the `addresses` prop; falls back to a
- * single demo address if none are provided so the page is viewable
- * standalone.
- */
-
-const STEPS = ["Bag", "Address", "Payment"];
-
-const DEMO_ADDRESS = {
-  id: "addr-1",
-  name: "Priya Sharma",
-  mobile: "9876543210",
-  house: "B-402, Lakeview Residency",
-  address: "Scott Woodward Road",
-  locality: "Andheri West",
-  city: "Mumbai",
-  state: "Maharashtra",
-  pincode: "400058",
-  addressType: "Home",
-  makeDefault: true,
-};
+const DEMO_ADDRESSES = [
+  {
+    id: "addr-1",
+    name: "Priya Sharma",
+    mobile: "9876543210",
+    house: "B-402, Lakeview Residency",
+    address: "Scott Woodward Road",
+    locality: "Andheri West",
+    city: "Mumbai",
+    state: "Maharashtra",
+    pincode: "400058",
+    addressType: "Home",
+    makeDefault: true,
+  },
+  {
+    id: "addr-2",
+    name: "Priya Sharma",
+    mobile: "9876543210",
+    house: "Tower C, 12th Floor",
+    address: "Corporate Park",
+    locality: "Bandra Kurla Complex",
+    city: "Mumbai",
+    state: "Maharashtra",
+    pincode: "400051",
+    addressType: "Office",
+    makeDefault: false,
+  },
+];
 
 export default function SelectDeliveryAddress({
-  addresses = [DEMO_ADDRESS],
+  addresses = DEMO_ADDRESSES,
   onContinue,
-  onAddNew,
-  onEdit,
-  onRemove,
 }) {
   const navigate = useNavigate();
   const rootRef = useRef(null);
@@ -53,6 +45,10 @@ export default function SelectDeliveryAddress({
     () => addresses.find((a) => a.makeDefault)?.id ?? addresses[0]?.id ?? null,
   );
   const [removingId, setRemovingId] = useState(null);
+
+  // Modal state — same modal serves both Add and Edit
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
 
   const priceRows = [
     { label: "Total MRP", value: "₹12,599" },
@@ -67,6 +63,64 @@ export default function SelectDeliveryAddress({
     gsap.fromTo(el, { scale: 0.94 }, { scale: 1, duration: 0.35, ease: "back.out(3)" });
   };
 
+  const openAddModal = () => {
+    setEditingAddress(null);
+    setModalOpen(true);
+  };
+
+  const openEditModal = (addr) => {
+    setEditingAddress(addr);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingAddress(null);
+  };
+
+  // Called by AddressFormModal with the validated form data — decides
+  // create vs update based on whether we opened it for editing.
+  const handleModalSave = (formData) => {
+    setList((prev) => {
+      let next;
+      if (editingAddress) {
+        next = prev.map((a) => (a.id === editingAddress.id ? { ...formData, id: editingAddress.id } : a));
+      } else {
+        const newAddress = { ...formData, id: `addr-${Date.now()}` };
+        next = [...prev, newAddress];
+      }
+      // Only one default at a time
+      if (formData.makeDefault) {
+        const savedId = editingAddress ? editingAddress.id : next[next.length - 1].id;
+        next = next.map((a) => ({ ...a, makeDefault: a.id === savedId }));
+      }
+      return next;
+    });
+
+    // Select whichever address was just added/edited
+    setSelectedId(editingAddress ? editingAddress.id : null); // temp; corrected below once list updates
+  };
+
+  // After a save, make sure the just-saved address becomes selected even
+  // for new adds (where we don't have the generated id until list updates)
+  const handleModalSaveAndSelect = (formData) => {
+    if (editingAddress) {
+      handleModalSave(formData);
+      setSelectedId(editingAddress.id);
+    } else {
+      const newId = `addr-${Date.now()}`;
+      setList((prev) => {
+        const newAddress = { ...formData, id: newId };
+        let next = [...prev, newAddress];
+        if (formData.makeDefault) {
+          next = next.map((a) => ({ ...a, makeDefault: a.id === newId }));
+        }
+        return next;
+      });
+      setSelectedId(newId);
+    }
+  };
+
   const handleRemove = (id) => {
     const el = document.querySelector(`[data-address-id="${id}"]`);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -79,7 +133,6 @@ export default function SelectDeliveryAddress({
         return remaining[0]?.id ?? null;
       });
       setRemovingId(null);
-      onRemove?.(id);
     };
 
     if (prefersReducedMotion || !el) {
@@ -107,11 +160,6 @@ export default function SelectDeliveryAddress({
     else navigate("/checkout/payment");
   };
 
-  const handleAddNew = () => {
-    if (onAddNew) onAddNew();
-    else navigate("/checkout/address");
-  };
-
   useLayoutEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
@@ -130,7 +178,6 @@ export default function SelectDeliveryAddress({
   return (
     <div ref={rootRef} className="relative min-h-screen pt-25 lg:pt-33 bg-[#F7FAFF]">
       <div className="primary-container pb-16">
-    
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-start">
           {/* ── LEFT: Address list ── */}
           <div className="w-full lg:w-[62%]">
@@ -141,7 +188,7 @@ export default function SelectDeliveryAddress({
               <button
                 onClick={(e) => {
                   bumpButton(e.currentTarget);
-                  handleAddNew();
+                  openAddModal();
                 }}
                 className="hidden sm:flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#0061C2] text-[#0061C2] text-sm font-semibold hover:bg-blue-50 transition-all active:scale-95 cursor-pointer"
               >
@@ -150,7 +197,6 @@ export default function SelectDeliveryAddress({
               </button>
             </div>
 
-
             <div className="space-y-4">
               {list.map((addr) => (
                 <AddressCard
@@ -158,18 +204,17 @@ export default function SelectDeliveryAddress({
                   addr={addr}
                   selected={selectedId === addr.id}
                   onSelect={() => setSelectedId(addr.id)}
-                  onEdit={() => onEdit?.(addr)}
+                  onEdit={() => openEditModal(addr)}
                   onRemove={() => handleRemove(addr.id)}
                   isRemoving={removingId === addr.id}
                   bumpButton={bumpButton}
                 />
               ))}
 
-              {/* Add new address — inline card */}
               <button
                 onClick={(e) => {
                   bumpButton(e.currentTarget);
-                  handleAddNew();
+                  openAddModal();
                 }}
                 className="sda-card w-full flex items-center justify-center gap-2 py-6 rounded-2xl border-2 border-dashed border-slate-200 text-[#0061C2] font-semibold text-sm hover:border-[#0061C2] hover:bg-blue-50/40 transition-all cursor-pointer active:scale-[0.99]"
               >
@@ -179,10 +224,8 @@ export default function SelectDeliveryAddress({
             </div>
           </div>
 
-          {/* ── RIGHT: Delivery estimate + price summary ── */}
+          {/* ── RIGHT: Price summary ── */}
           <aside className="sda-summary w-full lg:w-[38%] lg:sticky lg:top-28 space-y-4">
-         
-            {/* Price details */}
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 sm:p-6">
               <h3 className="heading text-base sm:text-lg font-bold text-slate-900 mb-5">
                 Price Details (1 Item)
@@ -205,21 +248,26 @@ export default function SelectDeliveryAddress({
               </div>
 
               <button
-                variant="primary"
                 disabled={!selectedId}
                 onClick={(e) => {
                   bumpButton(e.currentTarget);
                   handleContinue();
                 }}
-                className="w-full py-3.5 text-sm tracking-[0.05em] active:scale-95 transition-transform disabled:opacity-40  disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer bg-[#0061C2] text-white rounded-full"
+                className="w-full py-3.5 text-sm tracking-[0.05em] active:scale-95 transition-transform disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer bg-[#0061C2] text-white rounded-full font-semibold"
               >
                 Continue
               </button>
-
             </div>
           </aside>
         </div>
       </div>
+
+      <AddressFormModal
+        isOpen={modalOpen}
+        initialData={editingAddress}
+        onClose={closeModal}
+        onSave={handleModalSaveAndSelect}
+      />
     </div>
   );
 }
@@ -250,7 +298,6 @@ function AddressCard({ addr, selected, onSelect, onEdit, onRemove, isRemoving, b
         }`}
     >
       <div className="flex items-start gap-3">
-        {/* Radio dot */}
         <span
           className={`mt-0.5 shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors duration-200
             ${selected ? "border-[#0061C2]" : "border-slate-300"}`}
@@ -265,6 +312,11 @@ function AddressCard({ addr, selected, onSelect, onEdit, onRemove, isRemoving, b
               <TypeIcon size={10} />
               {addr.addressType.toUpperCase()}
             </span>
+            {addr.makeDefault && (
+              <span className="text-[10px] font-bold tracking-wide text-emerald-600 border border-emerald-300 rounded-full px-2 py-0.5">
+                DEFAULT
+              </span>
+            )}
           </div>
 
           <p className="text-sm text-slate-500 leading-relaxed">
@@ -277,6 +329,11 @@ function AddressCard({ addr, selected, onSelect, onEdit, onRemove, isRemoving, b
           <p className="text-sm text-slate-500 mt-2">
             Mobile: <span className="font-semibold text-slate-800">{addr.mobile}</span>
           </p>
+
+          <div className="flex items-center gap-1.5 mt-3 text-xs text-emerald-600 font-medium">
+            <MapPin size={12} />
+            Pay on Delivery available
+          </div>
 
           <div className="flex items-center gap-3 mt-4">
             <button
