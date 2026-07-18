@@ -361,7 +361,7 @@ export default function AppLoader({ onComplete }) {
     /* ── auto complete at 3s ── */
     const loadTimer = setTimeout(() => {
       cancelAnimationFrame(rafRef.current);
-      const start = progressRef.current, t0 = performance.now(), dur = 1000;
+      const start = progressRef.current, t0 = performance.now(), dur = 800;
       function finishFill(now) {
         const t = Math.min((now - t0) / dur, 1);
         const e = t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
@@ -370,7 +370,7 @@ export default function AppLoader({ onComplete }) {
         t < 1 ? requestAnimationFrame(finishFill) : finish();
       }
       requestAnimationFrame(finishFill);
-    }, 3000);
+    }, 1000);
 
     /* ── tap to boost ── */
     function onTap() {

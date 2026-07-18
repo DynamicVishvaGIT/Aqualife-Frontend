@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { SlidersHorizontal, ChevronDown, ChevronRight } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { SlidersHorizontal, ChevronDown, ChevronRight, X } from "lucide-react";
 import product1 from "../assets/Purifier_1.png";
 import product2 from "../assets/Purifier_2.png";
 import product3 from "../assets/Purifier_3.png";
@@ -8,16 +8,21 @@ import { WaterButton } from "../components/WaterButton";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import FilterDrawer, { FILTER_GROUPS } from "../components/FilterDrawer";
+import SortModal from "../components/SortModal";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/* ── Brand color ── */
+const BRAND = "#1A6FC4";
+
 /* ── Category tabs ── */
 const CATEGORIES = [
-  { label: "All", img: product1 },
+  { label: "All",           img: product1 },
   { label: "Just Launched", img: product2 },
-  { label: "Copper Range", img: product3 },
-  { label: "UV", img: product4 },
-  { label: "RO", img: product2 },
+  { label: "Copper Range",  img: product3 },
+  { label: "UV",            img: product4 },
+  { label: "RO",            img: product2 },
 ];
 
 /* ── Mock products ── */
@@ -74,18 +79,26 @@ const PRODUCTS = [
   },
 ];
 
+// [fix1] expanded to match FilterDrawer's full key set
+const emptyFilters = {
+  priceRange:   [],
+  discount:     [],
+  category:     [],
+  purification: [],
+  tds:          [],
+  capacity:     [],
+};
+
 /* ── Product card ── */
 function ProductCard({ product, setCardRef }) {
-  const navigate = useNavigate();
-  const imgRef = useRef(null);
-  const cardRef = useRef(null);
-  const priceRef = useRef(null);
+  const navigate  = useNavigate();
+  const imgRef    = useRef(null);
+  const cardRef   = useRef(null);
+  const priceRef  = useRef(null);
 
   useEffect(() => {
-    if (cardRef.current) {
-      setCardRef(cardRef.current);
-    }
-  }, [setCardRef]);
+    if (cardRef.current) setCardRef(cardRef.current);
+  }, [setCardRef]); // safe now that setCardRef is stable (useCallback in parent)
 
   const prefersReducedMotion = () =>
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -98,15 +111,11 @@ function ProductCard({ product, setCardRef }) {
       duration: 0.35,
       ease: "power2.out",
     });
-    gsap.to(imgRef.current, {
-      scale: 1.08,
-      duration: 0.5,
-      ease: "power2.out",
-    });
+    gsap.to(imgRef.current, { scale: 1.08, duration: 0.5, ease: "power2.out" });
     gsap.fromTo(
       priceRef.current,
       { scale: 1 },
-      { scale: 1.04, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 1 }
+      { scale: 1.04, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 1 },
     );
   };
 
@@ -118,11 +127,7 @@ function ProductCard({ product, setCardRef }) {
       duration: 0.35,
       ease: "power2.out",
     });
-    gsap.to(imgRef.current, {
-      scale: 1,
-      duration: 0.5,
-      ease: "power2.out",
-    });
+    gsap.to(imgRef.current, { scale: 1, duration: 0.5, ease: "power2.out" });
   };
 
   return (
@@ -133,7 +138,7 @@ function ProductCard({ product, setCardRef }) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="relative  bg-white rounded-xl flex items-center justify-center h-25 sm:h-52 mb-3 sm:mb-4 overflow-hidden">
+      <div className="relative bg-white rounded-xl flex items-center justify-center h-25 sm:h-52 mb-3 sm:mb-4 overflow-hidden">
         {product.badge && (
           <span className="absolute top-1.5 left-1.5 z-10 bg-slate-100 text-slate-500 text-[10px] sm:text-[11px] font-medium px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
             {product.badge}
@@ -173,7 +178,6 @@ function ProductCard({ product, setCardRef }) {
         </div>
       </div>
 
-      {/* Action row — optimized touch target sizing on mobile */}
       <div className="flex gap-2 mt-auto">
         <WaterButton
           variant="primary"
@@ -181,7 +185,6 @@ function ProductCard({ product, setCardRef }) {
         >
           Book Demo
         </WaterButton>
-
         <button
           className="flex-1 text-slate-500 text-[10px] sm:text-sm border border-[#F0F3F6]
           rounded-full cursor-pointer hover:text-blue-600 hover:border-[#155DFC] font-medium transition-colors
@@ -198,9 +201,27 @@ function ProductCard({ product, setCardRef }) {
 export default function WaterPurifierListing() {
   const [activeCategory, setActiveCategory] = useState("All");
 
+  /* ── Filter + sort state ── */
+  const [filters,    setFilters]    = useState(emptyFilters);
+  const [sortBy,     setSortBy]     = useState("popularity");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [sortOpen,   setSortOpen]   = useState(false);
+  const sortBtnRef = useRef(null);
+
+  const activeFilterCount = Object.values(filters).reduce((sum, arr) => sum + arr.length, 0);
+
+  const removeFilterChip = (groupKey, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [groupKey]: prev[groupKey].filter((v) => v !== value),
+    }));
+  };
+
+  const clearAllFilters = () => setFilters(emptyFilters);
+
   /* ── Category tab animation refs ── */
-  const tabRefs = useRef({});
-  const iconRefs = useRef({});
+  const tabRefs      = useRef({});
+  const iconRefs     = useRef({});
   const indicatorRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -208,11 +229,9 @@ export default function WaterPurifierListing() {
     const activeTab = tabRefs.current[activeCategory];
     const indicator = indicatorRef.current;
     const container = containerRef.current;
-
     if (activeTab && indicator && container) {
-      const tabRect = activeTab.getBoundingClientRect();
+      const tabRect       = activeTab.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
-
       gsap.to(indicator, {
         x: tabRect.left - containerRect.left + container.scrollLeft,
         width: tabRect.width,
@@ -220,20 +239,19 @@ export default function WaterPurifierListing() {
         ease: "power3.out",
       });
     }
-
     const activeIcon = iconRefs.current[activeCategory];
     if (activeIcon) {
       gsap.fromTo(
         activeIcon,
         { scale: 1 },
-        { scale: 1.15, duration: 0.2, yoyo: true, repeat: 1, ease: "power1.inOut" }
+        { scale: 1.15, duration: 0.2, yoyo: true, repeat: 1, ease: "power1.inOut" },
       );
     }
   }, [activeCategory]);
 
   /* ── Scroll-triggered staggered reveal: Category tabs ── */
   useEffect(() => {
-    const tabs = tabRefs.current;
+    const tabs     = tabRefs.current;
     const elements = CATEGORIES.map((cat) => tabs[cat.label]).filter(Boolean);
     if (!elements.length) return;
 
@@ -252,23 +270,30 @@ export default function WaterPurifierListing() {
             start: "top 90%",
             toggleActions: "play reverse play reverse",
           },
-        }
+        },
       );
     });
 
     return () => ctx.revert();
   }, []);
 
-  /* ── Product grid: collect refs via callback ── */
+  /* ── Product grid refs ── */
   const cardRefs = useRef([]);
-  const gridRef = useRef(null);
-  const addCardRef = (el) => {
+  const gridRef  = useRef(null);
+
+  // [fix3] stable ref so ProductCard's useEffect dep doesn't fire every render
+  const addCardRef = useCallback((el) => {
     if (el && !cardRefs.current.includes(el)) {
       cardRefs.current.push(el);
     }
-  };
+  }, []);
 
   /* ── Scroll-triggered staggered reveal: Product cards ── */
+  useEffect(() => {
+    // [fix4] clear stale refs from the previous category before collecting new ones
+    cardRefs.current = [];
+  }, [activeCategory]);
+
   useEffect(() => {
     if (!cardRefs.current.length) return;
 
@@ -288,7 +313,7 @@ export default function WaterPurifierListing() {
             start: "top 88%",
             toggleActions: "play reverse play reverse",
           },
-        }
+        },
       );
     });
 
@@ -299,7 +324,7 @@ export default function WaterPurifierListing() {
     <div className="min-h-screen bg-[#fff7f6]">
       {/* ── Category tabs ── */}
       <div className="bg-white border-b border-slate-100 sticky top-0 z-10 shadow-sm">
-        <div className="primary-container  lm-auto">
+        <div className="primary-container lm-auto">
           <div
             ref={containerRef}
             className="relative flex items-end justify-start sm:justify-center gap-3 sm:gap-8 overflow-x-auto scrollbar-hide unique-scroll-container"
@@ -313,26 +338,22 @@ export default function WaterPurifierListing() {
                   onClick={() => setActiveCategory(cat.label)}
                   className={`flex flex-col items-center gap-1.5 pt-4 sm:pt-7 cursor-pointer shrink-0
                   border-b-2 sm:border-b-3 duration-500 hover:scale-105 min-w-[90px] sm:min-w-[120px]
-                  2xl:min-w-[160px]
-                  border-transparent`}
+                  2xl:min-w-[160px] border-transparent`}
                 >
-                  {/* Image */}
                   <div
                     ref={(el) => (iconRefs.current[cat.label] = el)}
                     className="w-12 sm:w-16 h-14 sm:h-20 flex items-end justify-center"
                   >
                     <img
-                    loading="lazy"
+                      loading="lazy"
                       src={cat.img}
                       alt={cat.label}
                       className="max-h-full max-w-full object-contain transition-all duration-200"
                     />
                   </div>
-
-                  {/* Label */}
                   <span
                     className={`text-[12px] sm:text-[13px] font-semibold whitespace-nowrap transition-colors pb-3 sm:pb-4 duration-200
-                  ${active ? "text-[#0061C2]" : "text-slate-800 hover:text-slate-600"}`}
+                    ${active ? "text-[#1A6FC4]" : "text-slate-800 hover:text-slate-600"}`}
                   >
                     {cat.label}
                   </span>
@@ -340,11 +361,10 @@ export default function WaterPurifierListing() {
               );
             })}
 
-            {/* Sliding underline indicator */}
             <div
               ref={indicatorRef}
-              className="absolute bottom-0 left-0 h-[2px] sm:h-[3px] bg-[#0061C2] rounded-full pointer-events-none"
-              style={{ width: 0 }}
+              className="absolute bottom-0 left-0 h-[2px] sm:h-[3px] rounded-full pointer-events-none"
+              style={{ width: 0, background: BRAND }}
             />
           </div>
         </div>
@@ -363,27 +383,80 @@ export default function WaterPurifierListing() {
         </div>
 
         {/* Filter / Sort bar */}
-        <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+        <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
           <button
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-[#D4D4D4]
-             text-slate-700 text-xs sm:text-sm font-medium hover:border-blue-300 hover:text-[#155DFC]
-            transition-all duration-150 cursor-pointer"
+            onClick={() => setFilterOpen(true)}
+            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border text-xs sm:text-sm font-medium
+              transition-all duration-150 cursor-pointer
+              ${activeFilterCount > 0
+                ? "border-[#1A6FC4] text-[#1A6FC4] bg-blue-50"
+                : "border-[#D4D4D4] text-slate-700 hover:border-blue-300 hover:text-[#1A6FC4]"
+              }`}
           >
             <SlidersHorizontal size={13} />
             Filters
+            {activeFilterCount > 0 && (
+              <span
+                className="text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center"
+                style={{ background: BRAND }}
+              >
+                {activeFilterCount}
+              </span>
+            )}
             <ChevronDown size={13} />
           </button>
+
           <button
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-[#D4D4D4]
-             text-slate-700 text-xs sm:text-sm font-medium hover:border-blue-300 hover:text-[#155DFC]
-            transition-all duration-150 cursor-pointer"
+            ref={sortBtnRef}
+            onClick={() => setSortOpen(true)}
+            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border text-xs sm:text-sm font-medium
+              transition-all duration-150 cursor-pointer
+              ${sortBy !== "popularity"
+                ? "border-[#1A6FC4] text-[#1A6FC4] bg-blue-50"
+                : "border-[#D4D4D4] text-slate-700 hover:border-blue-300 hover:text-[#1A6FC4]"
+              }`}
           >
             Sort By
             <ChevronDown size={13} />
           </button>
         </div>
 
-        {/* Product grid — 2 columns on mobile, scaling up smoothly */}
+        {/* Active filter chips */}
+        {activeFilterCount > 0 && (
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-6 sm:mb-8">
+            {Object.entries(filters).flatMap(([groupKey, values]) => {
+              // Look up the human-readable label from FILTER_GROUPS
+              const group = FILTER_GROUPS.find((g) => g.key === groupKey);
+              return values.map((value) => {
+                const opt = group?.options.find((o) => o.value === value);
+                const chipLabel = opt?.label ?? value.replace(/-/g, " ");
+                return (
+                  <span
+                    key={`${groupKey}-${value}`}
+                    className="flex items-center gap-1.5 pl-3 pr-1.5 py-1 rounded-full bg-blue-50 text-[#1A6FC4] text-xs font-medium"
+                  >
+                    {chipLabel}
+                    <button
+                      onClick={() => removeFilterChip(groupKey, value)}
+                      aria-label={`Remove ${chipLabel} filter`}
+                      className="p-0.5 rounded-full hover:bg-blue-100 transition-colors cursor-pointer"
+                    >
+                      <X size={11} />
+                    </button>
+                  </span>
+                );
+              });
+            })}
+            <button
+              onClick={clearAllFilters}
+              className="text-xs font-semibold text-slate-400 hover:text-red-500 transition-colors cursor-pointer px-2"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
+
+        {/* Product grid */}
         <div
           ref={gridRef}
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-5"
@@ -399,25 +472,34 @@ export default function WaterPurifierListing() {
             Showing {PRODUCTS.length} of 49 results
           </p>
           <button
-            className="flex items-center gap-2 px-8 sm:px-10 py-2.5 sm:py-3.5 rounded-full border cursor-pointer border-[#0061C2]
-            text-[#0061C2] font-semibold text-xs sm:text-sm
-            hover:border-[#155DFC] hover:shadow-[0_0_20px_rgba(21,93,252,0.15)]
-            transition-all duration-200 active:scale-95"
+            className="flex items-center gap-2 px-8 sm:px-10 py-2.5 sm:py-3.5 rounded-full border cursor-pointer
+            font-semibold text-xs sm:text-sm transition-all duration-200 active:scale-95"
+            style={{ borderColor: BRAND, color: BRAND }}
           >
             View more results
             <ChevronRight size={14} />
           </button>
         </div>
       </div>
-      {/* Scoped CSS Fallback */}
+
+      {/* ── Filter drawer + Sort modal ── */}
+      <FilterDrawer
+        isOpen={filterOpen}
+        filters={filters}
+        onApply={(f) => { setFilters(f); setFilterOpen(false); }}
+        onClose={() => setFilterOpen(false)}
+      />
+      <SortModal
+        isOpen={sortOpen}
+        value={sortBy}
+        onSelect={setSortBy}
+        onClose={() => setSortOpen(false)}
+        anchorRef={sortBtnRef}
+      />
+
       <style>{`
-        .scrollbar-hide {
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
+        .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
       `}</style>
     </div>
   );
