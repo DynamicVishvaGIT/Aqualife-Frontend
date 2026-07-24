@@ -9,11 +9,11 @@ export const sendLoginOtp = async (mobile) => {
 export const verifyLoginOtp = async ({ mobile, otp }) => {
   const { data } = await axiosInstance.post("/auth/login/verify-otp", { mobile, otp });
   // set token in cookies
-    Cookies.set("token", data.token, {
-    expires: 7,
-    secure: true,
-    sameSite: "Strict",
-  });
+  //   Cookies.set("token", data.token, {
+  //   expires: 7,
+  //   secure: true,
+  //   sameSite: "Strict",
+  // });
   return data; // backend sets httpOnly cookie + returns { user }
 }
 

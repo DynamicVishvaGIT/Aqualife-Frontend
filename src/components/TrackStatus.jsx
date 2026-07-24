@@ -82,7 +82,7 @@ const TrackStatus = () => {
           <span className="font-medium text-gray-700">Tomorrow, 4 Jul</span>
         </p>
 
-        <div className="relative pl-2">
+        <div className="relative">
           {/* track line */}
           <div
             className="absolute left-[15px] top-1 bottom-1 w-[2px] rounded-full bg-gray-200"

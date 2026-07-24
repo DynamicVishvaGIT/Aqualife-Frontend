@@ -1,12 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-    registerUser,
     sendLoginOtp,
     verifyLoginOtp,
     resendOtp,
     getCurrentUser,
     logoutUser,
-} from "../auth";
+} from "../auth/auth";
 
 
 // LOGIN step 1 — send OTP to mobile
@@ -22,10 +21,11 @@ export const useVerifyOtp = () => {
 
     return useMutation({
         mutationFn: verifyLoginOtp,
-        onSuccess: (data) => {
-            queryClient.setQueryData(["currentUser"], data.user);
-            queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["currentUser"],
+            });
+        }
     });
 };
 
@@ -52,9 +52,10 @@ export const useLogout = () => {
     return useMutation({
         mutationFn: logoutUser,
         onSuccess: () => {
-            queryClient.setQueryData(["currentUser"], null);
-            queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-            queryClient.clear();
+            queryClient.setQueryData(
+                ["currentUser"],
+                null
+            );
         },
     });
 };

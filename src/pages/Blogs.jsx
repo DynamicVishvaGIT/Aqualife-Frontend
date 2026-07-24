@@ -16,15 +16,87 @@ const THEME = "#0061C2";
 const PAGE_SIZE = 6;
 
 const BLOG_DATA = [
-  { id: 1, image: img_1, category: "Technology", title: "Air Purifier for Babies & Toddlers: What Parents Need to Know", author: "Tracey Wilson", date: "August 20, 2022", avatar: "https://i.pravatar.cc/32?img=1" },
-  { id: 2, image: img_2, category: "Technology", title: "Air Purifier for Babies & Toddlers: What Parents Need to Know", author: "Tracey Wilson", date: "August 20, 2022", avatar: "https://i.pravatar.cc/32?img=2" },
-  { id: 3, image: img_3, category: "Technology", title: "Air Purifier for Babies & Toddlers: What Parents Need to Know", author: "Tracey Wilson", date: "August 20, 2022", avatar: "https://i.pravatar.cc/32?img=3" },
-  { id: 4, image: img_4, category: "Technology", title: "Air Purifier for Babies & Toddlers: What Parents Need to Know", author: "Tracey Wilson", date: "August 20, 2022", avatar: "https://i.pravatar.cc/32?img=4" },
-  { id: 5, image: img_3, category: "Technology", title: "Air Purifier for Babies & Toddlers: What Parents Need to Know", author: "Tracey Wilson", date: "August 20, 2022", avatar: "https://i.pravatar.cc/32?img=5" },
-  { id: 6, image: img_1, category: "Technology", title: "Air Purifier for Babies & Toddlers: What Parents Need to Know", author: "Tracey Wilson", date: "August 20, 2022", avatar: "https://i.pravatar.cc/32?img=6" },
-  { id: 7, image: img_3, category: "Technology", title: "Air Purifier for Babies & Toddlers: What Parents Need to Know", author: "Tracey Wilson", date: "August 20, 2022", avatar: "https://i.pravatar.cc/32?img=7" },
-  { id: 8, image: img_2, category: "Technology", title: "Air Purifier for Babies & Toddlers: What Parents Need to Know", author: "Tracey Wilson", date: "August 20, 2022", avatar: "https://i.pravatar.cc/32?img=8" },
-  { id: 9, image: img_3, category: "Technology", title: "Air Purifier for Babies & Toddlers: What Parents Need to Know", author: "Tracey Wilson", date: "August 20, 2022", avatar: "https://i.pravatar.cc/32?img=9" },
+  {
+    id: 1,
+    image: img_1,
+    category: "Technology",
+    title: "Air Purifier for Babies & Toddlers: What Parents Need to Know",
+    author: "Tracey Wilson",
+    date: "August 20, 2022",
+    avatar: "https://i.pravatar.cc/32?img=1",
+  },
+  {
+    id: 2,
+    image: img_2,
+    category: "Technology",
+    title: "Air Purifier for Babies & Toddlers: What Parents Need to Know",
+    author: "Tracey Wilson",
+    date: "August 20, 2022",
+    avatar: "https://i.pravatar.cc/32?img=2",
+  },
+  {
+    id: 3,
+    image: img_3,
+    category: "Technology",
+    title: "Air Purifier for Babies & Toddlers: What Parents Need to Know",
+    author: "Tracey Wilson",
+    date: "August 20, 2022",
+    avatar: "https://i.pravatar.cc/32?img=3",
+  },
+  {
+    id: 4,
+    image: img_4,
+    category: "Technology",
+    title: "Air Purifier for Babies & Toddlers: What Parents Need to Know",
+    author: "Tracey Wilson",
+    date: "August 20, 2022",
+    avatar: "https://i.pravatar.cc/32?img=4",
+  },
+  {
+    id: 5,
+    image: img_3,
+    category: "Technology",
+    title: "Air Purifier for Babies & Toddlers: What Parents Need to Know",
+    author: "Tracey Wilson",
+    date: "August 20, 2022",
+    avatar: "https://i.pravatar.cc/32?img=5",
+  },
+  {
+    id: 6,
+    image: img_1,
+    category: "Technology",
+    title: "Air Purifier for Babies & Toddlers: What Parents Need to Know",
+    author: "Tracey Wilson",
+    date: "August 20, 2022",
+    avatar: "https://i.pravatar.cc/32?img=6",
+  },
+  {
+    id: 7,
+    image: img_3,
+    category: "Technology",
+    title: "Air Purifier for Babies & Toddlers: What Parents Need to Know",
+    author: "Tracey Wilson",
+    date: "August 20, 2022",
+    avatar: "https://i.pravatar.cc/32?img=7",
+  },
+  {
+    id: 8,
+    image: img_2,
+    category: "Technology",
+    title: "Air Purifier for Babies & Toddlers: What Parents Need to Know",
+    author: "Tracey Wilson",
+    date: "August 20, 2022",
+    avatar: "https://i.pravatar.cc/32?img=8",
+  },
+  {
+    id: 9,
+    image: img_3,
+    category: "Technology",
+    title: "Air Purifier for Babies & Toddlers: What Parents Need to Know",
+    author: "Tracey Wilson",
+    date: "August 20, 2022",
+    avatar: "https://i.pravatar.cc/32?img=9",
+  },
 ];
 
 /* ─────────────────────────────────────────
@@ -80,13 +152,15 @@ function BlogCard({ post, cardRef }) {
         <div className="flex justify-between items-center gap-4 mt-1">
           <div className="flex justify-between gap-2 items-center">
             <img
-            loading="lazy"
+              loading="lazy"
               src={post.avatar}
               alt={post.author}
               className="w-7 h-7 rounded-full object-cover border-2 transition-colors duration-300"
               style={{ borderColor: "rgba(255,255,255,0.4)" }}
             />
-            <span className="text-sm text-white/90 font-medium">{post.author}</span>
+            <span className="text-sm text-white/90 font-medium">
+              {post.author}
+            </span>
           </div>
           <div className="flex justify-between gap-2 items-center">
             <span className="text-white/50">•</span>
@@ -102,13 +176,13 @@ function BlogCard({ post, cardRef }) {
    Page
 ───────────────────────────────────────── */
 const Blogs = () => {
-  const heroWrapRef     = useRef(null);
-  const heroImgRef      = useRef(null);
+  const heroWrapRef = useRef(null);
+  const heroImgRef = useRef(null);
   const heroGradientRef = useRef(null);
-  const breadcrumbRef   = useRef(null);
-  const heroTitleRef    = useRef(null);
-  const cardRefs        = useRef([]);
-  const prevCountRef    = useRef(0);
+  const breadcrumbRef = useRef(null);
+  const heroTitleRef = useRef(null);
+  const cardRefs = useRef([]);
+  const prevCountRef = useRef(0);
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const visiblePosts = BLOG_DATA.slice(0, visibleCount);
@@ -118,25 +192,30 @@ const Blogs = () => {
   useEffect(() => {
     if (prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
-      gsap.timeline({ defaults: { ease: "power3.out" } })
-        .fromTo(heroImgRef.current,
+      gsap
+        .timeline({ defaults: { ease: "power3.out" } })
+        .fromTo(
+          heroImgRef.current,
           { scale: 1.12, transformOrigin: "center center" },
-          { scale: 1, duration: 1.8 }
+          { scale: 1, duration: 1.8 },
         )
-        .fromTo(heroGradientRef.current,
+        .fromTo(
+          heroGradientRef.current,
           { opacity: 0 },
           { opacity: 1, duration: 1.1 },
-          "-=1.5"
+          "-=1.5",
         )
-        .fromTo(breadcrumbRef.current,
+        .fromTo(
+          breadcrumbRef.current,
           { y: -16, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.6 },
-          "-=0.9"
+          "-=0.9",
         )
-        .fromTo(heroTitleRef.current,
+        .fromTo(
+          heroTitleRef.current,
           { y: 40, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.85 },
-          "-=0.5"
+          "-=0.5",
         );
     }, heroWrapRef);
     return () => ctx.revert();
@@ -163,7 +242,7 @@ const Blogs = () => {
         stagger: 0.08,
         ease: "power3.out",
         delay: prevCountRef.current === 0 ? 0.3 : 0,
-      }
+      },
     );
     prevCountRef.current = visibleCount;
   }, [visibleCount]);
@@ -174,7 +253,6 @@ const Blogs = () => {
 
   return (
     <section className="w-full mt-20">
-
       {/* ── Hero ── */}
       <div
         ref={heroWrapRef}
@@ -188,9 +266,17 @@ const Blogs = () => {
         />
         <div ref={heroGradientRef} className="absolute inset-0 bg-black/40" />
 
-        <div ref={breadcrumbRef} className="absolute top-2 lg:top-14 left-0 w-full z-10">
+        <div
+          ref={breadcrumbRef}
+          className="absolute top-2 lg:top-14 left-0 w-full z-10"
+        >
           <div className="primary-container">
-            <Breadcrumb />
+            <Breadcrumb
+              homeColor="text-white"
+              linkColor="text-gray-300"
+              activeColor="text-white"
+              separatorColor="text-white"
+            />
           </div>
         </div>
 
@@ -237,13 +323,15 @@ const Blogs = () => {
                   animate-bounce group-hover:animate-none"
                 style={{ borderColor: THEME, "--theme": THEME }}
               >
-                <ChevronDown size={18} className="transition-transform duration-300 group-hover:translate-y-0.5" />
+                <ChevronDown
+                  size={18}
+                  className="transition-transform duration-300 group-hover:translate-y-0.5"
+                />
               </span>
             </button>
           </div>
         )}
       </div>
-
     </section>
   );
 };

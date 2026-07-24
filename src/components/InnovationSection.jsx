@@ -62,7 +62,7 @@ export default function InnovationSection() {
            start: "top 80%",
           end: "center 30%",
           scrub: false,   // fire once, not scrubbed — matches CSS animation feel
-          toggleActions: "play reverse play reverse",
+          toggleActions: "play play play play",
         },
       });
 

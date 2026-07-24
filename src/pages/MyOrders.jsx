@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "https://cdn.skypack.dev/gsap";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, SlidersHorizontal, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import product1 from "../assets/Purifier_1.png";
 import product2 from "../assets/Purifier_2.png";
@@ -23,16 +23,24 @@ const STATUS_COLORS = {
   Returned: "#f59e0b",
 };
 
+const STATUS_BG = {
+  "On the way": "#eff6ff",
+  Delivered: "#f0fdf4",
+  Cancelled: "#fef2f2",
+  Returned: "#fffbeb",
+};
+
 const ORDERS = [
   {
     id: "ord-1",
-    name: "Aqualife Ever LEGO+ Water Purifier Aqualife",
+    name: "Aqualife Ever LEGO+ Water Purifier",
     img: product1,
     color: "Black",
     price: "12,599.00",
     status: "Cancelled",
-    statusLabel: "Cancelled by 22 May",
-    note: "Your order has been canceled as requested during the automated order confirmation call.",
+    statusLabel: "Cancelled on 22 May",
+    note: "Cancelled as requested during the order confirmation call.",
+    date: "22 May 2025",
   },
   {
     id: "ord-2",
@@ -41,18 +49,20 @@ const ORDERS = [
     color: "Black",
     price: "12,599.00",
     status: "Delivered",
-    statusLabel: "Delivered by 6 Jun",
-    note: "Your item has been delivered.",
+    statusLabel: "Delivered on 6 Jun",
+    note: "Your item has been delivered successfully.",
+    date: "6 Jun 2025",
   },
   {
     id: "ord-3",
-    name: "Aqualife Ever LEGO+ Water Purifier  Aqualife Ever LEGO+ Water Purifier",
+    name: "Aqualife Ever LEGO+ Water Purifier Pro",
     img: product4,
     color: "Black",
     price: "12,599.00",
     status: "Cancelled",
-    statusLabel: "Cancelled by 22 May",
-    note: "Your order has been canceled as requested during the automated order confirmation call.",
+    statusLabel: "Cancelled on 22 May",
+    note: "Cancelled as requested during the order confirmation call.",
+    date: "22 May 2025",
   },
   {
     id: "ord-4",
@@ -61,18 +71,20 @@ const ORDERS = [
     color: "Black",
     price: "12,599.00",
     status: "Cancelled",
-    statusLabel: "Cancelled by 22 May",
-    note: "Your order has been canceled as requested during the automated order confirmation call.",
+    statusLabel: "Cancelled on 22 May",
+    note: "Cancelled as requested during the order confirmation call.",
+    date: "22 May 2025",
   },
   {
     id: "ord-5",
-    name: "Aqualife Ever LEGO+ Water Softener",
+    name: "Aqualife Ever Water Softener",
     img: product2,
     color: "Black",
     price: "18,999.00",
     status: "On the way",
     statusLabel: "Arriving tomorrow",
-    note: "Your order has been shipped and is on its way.",
+    note: "Shipped and on its way to you.",
+    date: "24 Jul 2025",
   },
   {
     id: "ord-6",
@@ -82,7 +94,8 @@ const ORDERS = [
     price: "9,499.00",
     status: "Returned",
     statusLabel: "Returned on 10 May",
-    note: "Your return has been picked up and refund is being processed.",
+    note: "Return picked up — refund is being processed.",
+    date: "10 May 2025",
   },
   {
     id: "ord-7",
@@ -91,20 +104,20 @@ const ORDERS = [
     color: "Black",
     price: "12,599.00",
     status: "Delivered",
-    statusLabel: "Delivered by 15 Apr",
-    note: "Your item has been delivered.",
+    statusLabel: "Delivered on 15 Apr",
+    note: "Your item has been delivered successfully.",
+    date: "15 Apr 2025",
   },
 ];
 
 const PAGE_SIZE = 4;
 
+// ── Icons ─────────────────────────────────────────────────────────────────────
+
 const ChevronIcon = ({ open }) => (
   <svg
-    className="w-4 h-4 text-gray-500 flex-shrink-0"
-    style={{
-      transform: open ? "rotate(0deg)" : "rotate(-180deg)",
-      transition: "transform 0.3s",
-    }}
+    className="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300"
+    style={{ transform: open ? "rotate(0deg)" : "rotate(-180deg)" }}
     fill="none"
     stroke="currentColor"
     strokeWidth={2}
@@ -115,21 +128,14 @@ const ChevronIcon = ({ open }) => (
 );
 
 const SearchIcon = () => (
-  <svg
-    className="w-4 h-4"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2.2}
-    viewBox="0 0 24 24"
-  >
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
     <circle cx="11" cy="11" r="7" />
     <path strokeLinecap="round" d="M21 21l-4.3-4.3" />
   </svg>
 );
 
+// ── FilterGroup ────────────────────────────────────────────────────────────────
 
-
-// Reusable collapsible filter card (Orders status / Orders Time)
 const FilterGroup = ({ title, options, selected, onToggle, itemRef }) => {
   const [open, setOpen] = useState(true);
   const panelRef = useRef(null);
@@ -145,61 +151,207 @@ const FilterGroup = ({ title, options, selected, onToggle, itemRef }) => {
       return;
     }
 
-    const targetHeight = inner.scrollHeight;
     gsap.killTweensOf(panel);
-
     if (open) {
-      gsap.fromTo(
-        panel,
-        { height: 0 },
-        {
-          height: targetHeight,
-          duration: 0.35,
-          ease: "power2.out",
-          onComplete: () => {
-            panel.style.height = "auto";
-          },
-        },
-      );
+      gsap.fromTo(panel, { height: 0 }, {
+        height: inner.scrollHeight,
+        duration: 0.32,
+        ease: "power2.out",
+        onComplete: () => { panel.style.height = "auto"; },
+      });
     } else {
-      gsap.to(panel, { height: 0, duration: 0.3, ease: "power2.in" });
+      gsap.to(panel, { height: 0, duration: 0.28, ease: "power2.in" });
     }
   }, [open]);
 
   return (
-    <div
-      ref={itemRef}
-      className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
-    >
+    <div ref={itemRef} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <button
-        onClick={() => setOpen((prev) => !prev)}
-        className="w-full flex items-center justify-between px-5 py-4"
+        onClick={() => setOpen((p) => !p)}
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors"
       >
-        <h3 className="text-base font-semibold text-gray-800">{title}</h3>
+        <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
         <ChevronIcon open={open} />
       </button>
-      <div ref={panelRef} className="overflow-hidden select-none " style={{ height: 0 }}>
-        <div ref={innerRef} className="px-5 pb-4 flex flex-col gap-3 font-semibold">
-          {options.map((option) => (
-            <label
-              key={option}
-              className="flex items-center heading select-none gap-2.5 cursor-pointer text-sm"
-            >
-              <input
-                type="checkbox"
-                checked={selected.includes(option)}
-                onChange={() => onToggle(option)}
-                className="w-4 h-4 rounded cursor-pointer"
-                style={{ accentColor: BRAND }}
-              />
-              {option}
-            </label>
-          ))}
+      <div ref={panelRef} className="overflow-hidden" style={{ height: 0 }}>
+        <div ref={innerRef} className="px-5 pb-4 flex flex-col gap-2.5">
+          {options.map((option) => {
+            const active = selected.includes(option);
+            return (
+              <label key={option} className="flex items-center gap-3 cursor-pointer group select-none">
+                <div
+                  className="w-4 h-4 rounded flex-shrink-0 border-2 flex items-center justify-center transition-all duration-150"
+                  style={{
+                    borderColor: active ? BRAND : "#D1D5DB",
+                    backgroundColor: active ? BRAND : "white",
+                  }}
+                >
+                  {active && (
+                    <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                  <input
+                    type="checkbox"
+                    checked={active}
+                    onChange={() => onToggle(option)}
+                    className="sr-only"
+                  />
+                </div>
+                <span className={`text-sm transition-colors ${active ? "text-gray-800 font-medium" : "text-gray-500 group-hover:text-gray-700"}`}>
+                  {option}
+                </span>
+                {STATUS_COLORS[option] && (
+                  <span
+                    className="ml-auto w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: STATUS_COLORS[option] }}
+                  />
+                )}
+              </label>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 };
+
+// ── OrderCard ─────────────────────────────────────────────────────────────────
+
+const OrderCard = ({ order, cardRef }) => (
+  <div
+    ref={cardRef}
+    className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-md transition-all duration-200"
+  >
+    <div className="flex flex-col sm:flex-row">
+      {/* Image */}
+      <div className="flex-shrink-0 w-full sm:w-28 h-40 sm:h-auto bg-gray-50 flex items-center justify-center p-3 sm:border-r border-b sm:border-b-0 border-gray-100">
+        <img
+          src={order.img}
+          loading="lazy"
+          alt={order.name}
+          className="w-24 h-24 object-contain"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0 p-4 sm:p-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+        {/* Name + meta */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm heading font-semibold text-gray-900 leading-snug line-clamp-2 mb-1">
+            {order.name}
+          </p>
+          <p className="text-xs text-gray-400">Color: {order.color}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{order.date}</p>
+        </div>
+
+        {/* Price */}
+        <div className="sm:w-32 flex-shrink-0">
+          <p className="text-base heading font-bold text-gray-900">₹{order.price}</p>
+        </div>
+
+        {/* Status */}
+        <div className="sm:w-56 flex-shrink-0">
+          <div
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold mb-1.5"
+            style={{
+              backgroundColor: STATUS_BG[order.status],
+              color: STATUS_COLORS[order.status],
+            }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+              style={{ backgroundColor: STATUS_COLORS[order.status] }}
+            />
+            {order.statusLabel}
+          </div>
+          <p className="text-xs text-gray-400 leading-relaxed">{order.note}</p>
+        </div>
+
+        {/* Action */}
+        <div className="sm:w-24 flex-shrink-0 flex sm:flex-col gap-2 sm:items-end">
+          <button
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 transition-all cursor-pointer whitespace-nowrap"
+          >
+            View details
+          </button>
+          {order.status === "Delivered" && (
+            <button
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white transition-all cursor-pointer whitespace-nowrap"
+              style={{ backgroundColor: BRAND }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = BRAND_DARK)}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = BRAND)}
+            >
+              Buy again
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// ── Mobile Filter Drawer ───────────────────────────────────────────────────────
+
+const MobileFilterDrawer = ({ open, onClose, children }) => {
+  const overlayRef = useRef(null);
+  const drawerRef = useRef(null);
+
+  useEffect(() => {
+    if (!overlayRef.current || !drawerRef.current) return;
+    if (open) {
+      document.body.style.overflow = "hidden";
+      if (!prefersReducedMotion()) {
+        gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.2 });
+        gsap.fromTo(drawerRef.current, { x: "-100%" }, { x: "0%", duration: 0.3, ease: "power3.out" });
+      }
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 lg:hidden">
+      <div
+        ref={overlayRef}
+        className="absolute inset-0 bg-black/40"
+        onClick={onClose}
+      />
+      <div
+        ref={drawerRef}
+        className="absolute left-0 top-0 h-full w-[min(320px,85vw)] bg-white flex flex-col"
+        style={{ transform: prefersReducedMotion() ? "none" : "translateX(-100%)" }}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <h2 className="text-base font-semibold text-gray-800">Filters</h2>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 transition-colors cursor-pointer"
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+          {children}
+        </div>
+        <div className="p-4 border-t border-gray-100">
+          <button
+            onClick={onClose}
+            className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-colors cursor-pointer"
+            style={{ backgroundColor: BRAND }}
+          >
+            Show results
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── OrdersPage ────────────────────────────────────────────────────────────────
 
 const OrdersPage = () => {
   const sidebarRef = useRef(null);
@@ -211,256 +363,245 @@ const OrdersPage = () => {
   const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [selectedTimes, setSelectedTimes] = useState([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        sidebarRef.current,
-        { opacity: 0, x: -40 },
-        { opacity: 1, x: 0, duration: 0.55, ease: "power3.out" },
-      );
+      gsap.fromTo(sidebarRef.current, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" });
       gsap.fromTo(
         sidebarItemsRef.current,
-        { opacity: 0, y: 16 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.4,
-          stagger: 0.1,
-          ease: "power2.out",
-          delay: 0.15,
-        },
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.35, stagger: 0.08, ease: "power2.out", delay: 0.12 }
       );
-      gsap.fromTo(
-        mainRef.current,
-        { opacity: 0, x: 40 },
-        { opacity: 1, x: 0, duration: 0.55, ease: "power3.out", delay: 0.1 },
-      );
+      gsap.fromTo(mainRef.current, { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out", delay: 0.1 });
     });
     return () => ctx.revert();
   }, []);
 
   const addSidebarItem = (el) => {
-    if (el && !sidebarItemsRef.current.includes(el)) {
-      sidebarItemsRef.current.push(el);
-    }
+    if (el && !sidebarItemsRef.current.includes(el)) sidebarItemsRef.current.push(el);
   };
 
-  const toggleStatus = (option) => {
-    setSelectedStatuses((prev) =>
-      prev.includes(option)
-        ? prev.filter((o) => o !== option)
-        : [...prev, option],
-    );
+  const toggleStatus = (opt) => {
+    setSelectedStatuses((p) => p.includes(opt) ? p.filter((o) => o !== opt) : [...p, opt]);
     setVisibleCount(PAGE_SIZE);
   };
 
-  const toggleTime = (option) => {
-    // Time filtering is UI-only here — wire this up to real order timestamps
-    // once order data comes from the API.
-    setSelectedTimes((prev) =>
-      prev.includes(option)
-        ? prev.filter((o) => o !== option)
-        : [...prev, option],
-    );
+  const toggleTime = (opt) => {
+    setSelectedTimes((p) => p.includes(opt) ? p.filter((o) => o !== opt) : [...p, opt]);
   };
 
   const filteredOrders = useMemo(() => {
     return ORDERS.filter((order) => {
-      const matchesSearch = order.name
-        .toLowerCase()
-        .includes(searchQuery.trim().toLowerCase());
-      const matchesStatus =
-        selectedStatuses.length === 0 ||
-        selectedStatuses.includes(order.status);
+      const matchesSearch = order.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
+      const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(order.status);
       return matchesSearch && matchesStatus;
     });
   }, [searchQuery, selectedStatuses]);
 
   const visibleOrders = filteredOrders.slice(0, visibleCount);
   const allShown = visibleCount >= filteredOrders.length;
+  const activeFilterCount = selectedStatuses.length + selectedTimes.length;
 
-  const bumpButton = (el) => {
-    if (!el || prefersReducedMotion()) return;
-    gsap.fromTo(
-      el,
-      { scale: 1 },
-      { scale: 0.95, duration: 0.1, ease: "power2.out", yoyo: true, repeat: 1 },
-    );
-  };
-
-  // reset the card ref list each render, populated as cards mount below
   cardRefs.current = [];
-  const addCardRef = (el) => {
-    if (el) cardRefs.current.push(el);
-  };
+  const addCardRef = (el) => { if (el) cardRefs.current.push(el); };
 
   const visibleIdsKey = visibleOrders.map((o) => o.id).join(",");
   useEffect(() => {
     if (prefersReducedMotion() || !cardRefs.current.length) return;
     gsap.fromTo(
       cardRefs.current,
-      { opacity: 0, y: 16 },
-      { opacity: 1, y: 0, duration: 0.4, stagger: 0.06, ease: "power2.out" },
+      { opacity: 0, y: 14 },
+      { opacity: 1, y: 0, duration: 0.38, stagger: 0.06, ease: "power2.out" }
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleIdsKey]);
 
+  const clearAllFilters = () => {
+    setSelectedStatuses([]);
+    setSelectedTimes([]);
+    setSearchQuery("");
+    setVisibleCount(PAGE_SIZE);
+  };
+
+  const filterPanels = (
+    <>
+      <FilterGroup
+        title="Order Status"
+        options={STATUS_OPTIONS}
+        selected={selectedStatuses}
+        onToggle={toggleStatus}
+        itemRef={addSidebarItem}
+      />
+      <FilterGroup
+        title="Order Time"
+        options={TIME_OPTIONS}
+        selected={selectedTimes}
+        onToggle={toggleTime}
+        itemRef={addSidebarItem}
+      />
+      {activeFilterCount > 0 && (
+        <button
+          onClick={clearAllFilters}
+          className="text-xs font-semibold text-red-500 hover:text-red-600 transition-colors text-left px-1 cursor-pointer"
+        >
+          Clear all filters
+        </button>
+      )}
+    </>
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50 font-sans overflow-x-clip">
-      <div className="absolute top-22 lg:top-30 left-0 w-full z-10">
+    <div className="min-h-screen bg-[#F7FAFF] font-sans overflow-x-clip">
+      {/* Mobile filter drawer */}
+      <MobileFilterDrawer open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)}>
+        {filterPanels}
+      </MobileFilterDrawer>
+
+      {/* Back button */}
+      {/* <div className="absolute top-22 lg:top-30 left-0 w-full z-10">
         <div className="primary-container">
           <button
             onClick={() => navigate(-1)}
-            className="group cursor-pointer w-10 h-10 flex items-center justify-center rounded-full text-gray-700 transition-all duration-200 hover:bg-gray-100 hover:text-[#0061C2] active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0061C2]/30"
+            className="group cursor-pointer w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:bg-white hover:text-[#0061C2] hover:shadow-sm transition-all duration-200 active:scale-90"
           >
-            <ArrowLeft
-              size={22}
-              className="transition-transform duration-200 group-hover:-translate-x-0.5"
-            />
+            <ArrowLeft size={20} className="transition-transform duration-200 group-hover:-translate-x-0.5" />
           </button>
         </div>
-      </div>
-      <div className="primary-container  pt-33 pb-5 lg:pt-[170px]">
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-5 items-start">
-          {/* Sidebar filters */}
+      </div> */}
+
+      <div className="primary-container pb-10 lg:pt-[1px]">
+    
+        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5 items-start">
+          {/* ── Desktop sidebar ── */}
           <aside
             ref={sidebarRef}
             style={{ opacity: 0 }}
-            className="flex flex-col gap-4"
+            className="hidden lg:flex flex-col gap-3 lg:sticky lg:top-28"
           >
-            <div
-              ref={addSidebarItem}
-              className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4"
-            >
-              <h2 className="heading text-lg font-semibold text-gray-800">Filters</h2>
+            <div ref={addSidebarItem} className="bg-white rounded-xl border border-gray-200 px-5 py-4 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-gray-800 tracking-wide uppercase">Filters</h2>
+              {activeFilterCount > 0 && (
+                <span
+                  className="text-xs font-semibold px-2 py-0.5 rounded-full text-white"
+                  style={{ backgroundColor: BRAND }}
+                >
+                  {activeFilterCount}
+                </span>
+              )}
             </div>
-
-            <FilterGroup
-              title="Orders status"
-              options={STATUS_OPTIONS}
-              selected={selectedStatuses}
-              onToggle={toggleStatus}
-              itemRef={addSidebarItem}
-            />
-
-            <FilterGroup
-              title="Orders Time"
-              options={TIME_OPTIONS}
-              selected={selectedTimes}
-              onToggle={toggleTime}
-              itemRef={addSidebarItem}
-            />
+            {filterPanels}
           </aside>
 
-          {/* Main content */}
+          {/* ── Main ── */}
           <main ref={mainRef} style={{ opacity: 0 }}>
-            {/* Search bar */}
-            <div className="flex flex-col sm:flex-row rounded-xl border border-gray-200 overflow-hidden bg-white mb-5">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setVisibleCount(PAGE_SIZE);
-                }}
-                placeholder="Search Your order here"
-                className="flex-1 px-4 py-3 text-sm text-gray-700 placeholder-gray-400 outline-none"
-              />
+            {/* Search + mobile filter trigger */}
+            <div className="flex gap-2 mb-4">
+              <div className="flex flex-1 bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors focus-within:border-[#0061C2] focus-within:shadow-[0_0_0_3px_rgba(0,97,194,0.1)]">
+                <div className="flex items-center pl-4 text-gray-400">
+                  <SearchIcon />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setVisibleCount(PAGE_SIZE);
+                  }}
+                  placeholder="Search your orders…"
+                  className="flex-1 px-3 py-3 text-sm text-gray-700 placeholder-gray-400 outline-none bg-transparent"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => { setSearchQuery(""); setVisibleCount(PAGE_SIZE); }}
+                    className="pr-4 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
+              {/* Mobile filter toggle */}
               <button
-                className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white transition-colors"
-                style={{ backgroundColor: BRAND }}
-                onClick={(e) => bumpButton(e.currentTarget)}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = BRAND_DARK)
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = BRAND)
-                }
+                onClick={() => setMobileFiltersOpen(true)}
+                className="lg:hidden flex-shrink-0 flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer relative"
               >
-                <SearchIcon />
-                Search
+                <SlidersHorizontal size={15} />
+                <span>Filters</span>
+                {activeFilterCount > 0 && (
+                  <span
+                    className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
+                    style={{ backgroundColor: BRAND }}
+                  >
+                    {activeFilterCount}
+                  </span>
+                )}
               </button>
             </div>
 
-            {/* Order list */}
-            {visibleOrders.length === 0 ? (
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-12 text-center">
-                <p className="text-sm text-gray-500">
-                  No orders match your filters.
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {visibleOrders.map((order) => (
-                  <div
-                    key={order.id}
-                    ref={addCardRef}
-                    className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4 transition-shadow hover:shadow-md flex flex-col sm:flex-row sm:items-center gap-4"
+            {/* Active filter chips */}
+            {(selectedStatuses.length > 0 || selectedTimes.length > 0) && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {[...selectedStatuses, ...selectedTimes].map((chip) => (
+                  <button
+                    key={chip}
+                    onClick={() => {
+                      if (selectedStatuses.includes(chip)) toggleStatus(chip);
+                      else toggleTime(chip);
+                    }}
+                    className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-all cursor-pointer"
+                    style={{
+                      borderColor: STATUS_COLORS[chip] ? STATUS_COLORS[chip] + "40" : "#E5E7EB",
+                      backgroundColor: STATUS_COLORS[chip] ? STATUS_BG[chip] : "#F9FAFB",
+                      color: STATUS_COLORS[chip] || "#374151",
+                    }}
                   >
-                    {/* Thumbnail + details */}
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className="w-15 h-15 lg:h-24 lg:w-22">
-                       <img src={order.img} loading="lazy" className="w-full h-full" alt="order_img" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm heading font-semibold text-gray-800 truncate max-w-[240px] sm:max-w-[280px]">
-                          {order.name}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          Color: {order.color}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Price */}
-                    <div className="sm:w-28  flex-shrink-0 heading font-semibold">
-                      <p className="text-sm font-semibold text-gray-800">
-                        ₹ {order.price}
-                      </p>
-                    </div>
-
-                    {/* Status */}
-                    <div className="sm:w-72 flex-shrink-0 ">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="w-2 h-2 rounded-full flex-shrink-0"
-                          style={{
-                            backgroundColor: STATUS_COLORS[order.status],
-                          }}
-                        />
-                        <p className="text-sm heading font-semibold font-semibold text-gray-800">
-                          {order.statusLabel}
-                        </p>
-                      </div>
-                      <p className="text-sm text-gray-400 mt-1">{order.note}</p>
-                    </div>
-                  </div>
+                    {chip}
+                    <X size={11} />
+                  </button>
                 ))}
               </div>
             )}
 
-            {/* View more / view less */}
+            {/* Orders */}
+            {visibleOrders.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-200 px-6 py-16 text-center">
+                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                  <SearchIcon />
+                </div>
+                <p className="text-sm font-semibold text-gray-700 mb-1">No orders found</p>
+                <p className="text-xs text-gray-400 mb-4">Try adjusting your search or filters.</p>
+                <button
+                  onClick={clearAllFilters}
+                  className="text-sm font-semibold cursor-pointer transition-colors"
+                  style={{ color: BRAND }}
+                >
+                  Clear filters
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {visibleOrders.map((order) => (
+                  <OrderCard key={order.id} order={order} cardRef={addCardRef} />
+                ))}
+              </div>
+            )}
+
+            {/* View more / less */}
             {filteredOrders.length > PAGE_SIZE && (
               <div className="flex justify-center mt-5">
                 <button
                   onClick={() =>
                     setVisibleCount((prev) =>
-                      allShown
-                        ? PAGE_SIZE
-                        : Math.min(prev + PAGE_SIZE, filteredOrders.length),
+                      allShown ? PAGE_SIZE : Math.min(prev + PAGE_SIZE, filteredOrders.length)
                     )
                   }
-                  className="flex items-center gap-1 text-sm font-medium transition-colors"
-                  style={{ color: BRAND }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = BRAND_DARK)
-                  }
-                  onMouseLeave={(e) => (e.currentTarget.style.color = BRAND)}
+                  className="flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-full border transition-all cursor-pointer hover:shadow-sm"
+                  style={{ color: BRAND, borderColor: BRAND + "40" }}
                 >
-                  {allShown ? "View Less" : "View More"}
+                  {allShown ? "Show less" : `Show more (${filteredOrders.length - visibleCount} remaining)`}
                   <ChevronIcon open={!allShown} />
                 </button>
               </div>

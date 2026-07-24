@@ -110,7 +110,10 @@ function IndustrialWaterPurificationSection({ cardsData = defaultCardsData }) {
                   className="max-w-[240px] xs:max-w-[280px] sm:max-w-xs md:max-w-sm text-left"
                   style={
                     !card.overlayGradient
-                      ? { textShadow: "0 1px 3px rgba(0,0,0,0.55), 0 1px 8px rgba(0,0,0,0.35)" }
+                      ? {
+                          textShadow:
+                            "0 1px 3px rgba(0,0,0,0.55), 0 1px 8px rgba(0,0,0,0.35)",
+                        }
                       : undefined
                   }
                 >
@@ -149,28 +152,71 @@ const TABS = [
     id: "standard",
     label: "Standard Filtration Module",
     rows: [
-      { label: "Skid", description: "MS / SS. quality skid to mount the whole system" },
+      {
+        label: "Skid",
+        description: "MS / SS. quality skid to mount the whole system",
+      },
       { label: "Feed Pump", description: "For Pressurized Feed of RAW water" },
       { label: "Sand Filter", description: "Removes suspended particles." },
-      { label: "Activate Carbon Filter", description: "Removes heavy organic impurities and dissolved gases" },
-      { label: "Activate Scalant System", description: "Anti safe of hardness, iron and silica" },
-      { label: "Micron Filter", description: "Removes 5 micron impurity from RAW Water" },
-      { label: "High Pressure Pump", description: "Create Osmotic pressure of Water" },
-      { label: "Membrane", description: "Reject total dissolved Solids up to 0.0001 micron size" },
-      { label: "Final Polishing Filter", description: "Enhances taste & maintain pH Value of Water" },
-      { label: "Electric Panel", description: "Fully automatic Controlling Board" },
-      { label: "Pipeline", description: "CPVC 55 as a model type to route a water flow" },
-      { label: "Equipment", description: "LP, HP, Pressure Gauge, Flow Meter, Control Valve, CIP System etc." },
+      {
+        label: "Activate Carbon Filter",
+        description: "Removes heavy organic impurities and dissolved gases",
+      },
+      {
+        label: "Activate Scalant System",
+        description: "Anti safe of hardness, iron and silica",
+      },
+      {
+        label: "Micron Filter",
+        description: "Removes 5 micron impurity from RAW Water",
+      },
+      {
+        label: "High Pressure Pump",
+        description: "Create Osmotic pressure of Water",
+      },
+      {
+        label: "Membrane",
+        description: "Reject total dissolved Solids up to 0.0001 micron size",
+      },
+      {
+        label: "Final Polishing Filter",
+        description: "Enhances taste & maintain pH Value of Water",
+      },
+      {
+        label: "Electric Panel",
+        description: "Fully automatic Controlling Board",
+      },
+      {
+        label: "Pipeline",
+        description: "CPVC 55 as a model type to route a water flow",
+      },
+      {
+        label: "Equipment",
+        description:
+          "LP, HP, Pressure Gauge, Flow Meter, Control Valve, CIP System etc.",
+      },
     ],
   },
   {
     id: "optional",
     label: "Optional Modules",
     rows: [
-      { label: "UV Sterilizer", description: "Disinfects water using ultraviolet light" },
-      { label: "Ozone System", description: "Additional oxidation for taste and odor control" },
-      { label: "Remote Monitoring", description: "Track system performance over the network" },
-      { label: "Booster Pump", description: "Boosts pressure for larger distribution networks" },
+      {
+        label: "UV Sterilizer",
+        description: "Disinfects water using ultraviolet light",
+      },
+      {
+        label: "Ozone System",
+        description: "Additional oxidation for taste and odor control",
+      },
+      {
+        label: "Remote Monitoring",
+        description: "Track system performance over the network",
+      },
+      {
+        label: "Booster Pump",
+        description: "Boosts pressure for larger distribution networks",
+      },
     ],
   },
 ];
@@ -216,7 +262,9 @@ function FiltrationModuleSection() {
                 ref={(el) => (tabRefs.current[i] = el)}
                 onClick={() => setActiveTab(tab.id)}
                 className={`relative cursor-pointer heading z-10 px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 text-xs sm:text-sm md:text-base font-semibold whitespace-nowrap transition-colors duration-300 ${
-                  activeTab === tab.id ? "text-[#0061C2]" : "text-gray-900 hover:text-[#0061C2]"
+                  activeTab === tab.id
+                    ? "text-[#0061C2]"
+                    : "text-gray-900 hover:text-[#0061C2]"
                 }`}
               >
                 {tab.label}
@@ -269,16 +317,17 @@ const ROPlant = () => {
     gradient:
       "linear-gradient(80deg, #030C2B 15.44%, #1B2852 43.12%, rgba(27, 40, 82, 0) 70.92%)",
     title: "Industrial RO Plants For Pure Water Performance",
-    description: "Customized RO Solutions Designed For Reliable Industrial Water Treatment.",
+    description:
+      "Customized RO Solutions Designed For Reliable Industrial Water Treatment.",
   };
 
   /* ── Hero animation refs ── */
-  const heroWrapRef     = useRef(null);
-  const heroImgRef      = useRef(null);
+  const heroWrapRef = useRef(null);
+  const heroImgRef = useRef(null);
   const heroGradientRef = useRef(null);
-  const heroTitleRef    = useRef(null);
-  const heroDescRef     = useRef(null);
-  const breadcrumbRef   = useRef(null);
+  const heroTitleRef = useRef(null);
+  const heroDescRef = useRef(null);
+  const breadcrumbRef = useRef(null);
 
   /* ── Hero entrance animation ── */
   useEffect(() => {
@@ -292,35 +341,35 @@ const ROPlant = () => {
         .fromTo(
           heroImgRef.current,
           { scale: 1.12, transformOrigin: "center center" },
-          { scale: 1, duration: 1.8 }
+          { scale: 1, duration: 1.8 },
         )
         /* gradient fades in */
         .fromTo(
           heroGradientRef.current,
           { opacity: 0 },
           { opacity: 1, duration: 1.1 },
-          "-=1.5"
+          "-=1.5",
         )
         /* breadcrumb drops in */
         .fromTo(
           breadcrumbRef.current,
           { y: -16, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.6 },
-          "-=0.9"
+          "-=0.9",
         )
         /* title rises */
         .fromTo(
           heroTitleRef.current,
           { y: 44, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.9 },
-          "-=0.6"
+          "-=0.6",
         )
         /* description follows */
         .fromTo(
           heroDescRef.current,
           { y: 28, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.75 },
-          "-=0.45"
+          "-=0.45",
         );
     }, heroWrapRef);
 
@@ -329,7 +378,6 @@ const ROPlant = () => {
 
   return (
     <section className="min-h-screen overflow-x-hidden">
-
       {/* ── Hero banner ── */}
       <div
         ref={heroWrapRef}
@@ -357,7 +405,12 @@ const ROPlant = () => {
           className="absolute top-4 md:top-20 lg:top-[132px] left-0 w-full z-20"
         >
           <div className="primary-container">
-            <Breadcrumb />
+            <Breadcrumb
+              homeColor="text-white"
+              linkColor="text-gray-300"
+              activeColor="text-white"
+              separatorColor="text-white"
+            />
           </div>
         </div>
 
@@ -405,7 +458,6 @@ const ROPlant = () => {
       <FiltrationModuleSection />
       <PdfDownloadSection />
       <FaqSection />
-
     </section>
   );
 };
