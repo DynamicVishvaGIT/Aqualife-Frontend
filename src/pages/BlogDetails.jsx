@@ -5,7 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import img_1 from "../assets/ro_banner.jpg";
-import img_2 from "../assets/softer_img_2.png";
+import img_2 from "../assets/softer_img_2.webp";
 import img_3 from "../assets/familyImg.png";
 
 const THEME = "#0061C2";

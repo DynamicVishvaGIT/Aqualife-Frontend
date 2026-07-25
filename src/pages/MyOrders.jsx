@@ -170,7 +170,7 @@ const FilterGroup = ({ title, options, selected, onToggle, itemRef }) => {
         onClick={() => setOpen((p) => !p)}
         className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors"
       >
-        <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
+        <h3 className="text-sm heading font-semibold text-gray-700">{title}</h3>
         <ChevronIcon open={open} />
       </button>
       <div ref={panelRef} className="overflow-hidden" style={{ height: 0 }}>
@@ -180,7 +180,7 @@ const FilterGroup = ({ title, options, selected, onToggle, itemRef }) => {
             return (
               <label key={option} className="flex items-center gap-3 cursor-pointer group select-none">
                 <div
-                  className="w-4 h-4 rounded flex-shrink-0 border-2 flex items-center justify-center transition-all duration-150"
+                  className="w-4 h-4 heading font-semibold rounded flex-shrink-0 border-2 flex items-center justify-center transition-all duration-150"
                   style={{
                     borderColor: active ? BRAND : "#D1D5DB",
                     backgroundColor: active ? BRAND : "white",
@@ -198,7 +198,7 @@ const FilterGroup = ({ title, options, selected, onToggle, itemRef }) => {
                     className="sr-only"
                   />
                 </div>
-                <span className={`text-sm transition-colors ${active ? "text-gray-800 font-medium" : "text-gray-500 group-hover:text-gray-700"}`}>
+                <span className={`text-sm heading font-semibold transition-colors ${active ? "text-gray-800 font-medium" : "text-gray-500 group-hover:text-gray-700"}`}>
                   {option}
                 </span>
                 {STATUS_COLORS[option] && (
@@ -277,7 +277,7 @@ const OrderCard = ({ order, cardRef }) => (
           </button>
           {order.status === "Delivered" && (
             <button
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white transition-all cursor-pointer whitespace-nowrap"
+              className="text-xs font-semibold px-4 py-1.5 rounded-lg text-white transition-all cursor-pointer whitespace-nowrap"
               style={{ backgroundColor: BRAND }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = BRAND_DARK)}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = BRAND)}
@@ -472,7 +472,7 @@ const OrdersPage = () => {
         </div>
       </div> */}
 
-      <div className="primary-container pb-10 lg:pt-[1px]">
+      <div className="primary-container pb-10 pt-[100px] lg:pt-[131px]">
     
         <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5 items-start">
           {/* ── Desktop sidebar ── */}
@@ -482,7 +482,7 @@ const OrdersPage = () => {
             className="hidden lg:flex flex-col gap-3 lg:sticky lg:top-28"
           >
             <div ref={addSidebarItem} className="bg-white rounded-xl border border-gray-200 px-5 py-4 flex items-center justify-between">
-              <h2 className="text-sm font-bold text-gray-800 tracking-wide uppercase">Filters</h2>
+              <h2 className="text-sm font-bold heading text-gray-800 tracking-wide uppercase">Filters</h2>
               {activeFilterCount > 0 && (
                 <span
                   className="text-xs font-semibold px-2 py-0.5 rounded-full text-white"

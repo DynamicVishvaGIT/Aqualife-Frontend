@@ -1,5 +1,5 @@
 import Breadcrumb from "../components/Breadcrumb";
-import banner1 from "../assets/softer_img_2.png";
+import banner1 from "../assets/softer_img_2.webp";
 import softer_img_3 from "../assets/softer_img_1.jpg";
 import softer_img_2 from "../assets/softer_img-3.jpg";
 import softer_img_1 from "../assets/softer_img-5.jpg";

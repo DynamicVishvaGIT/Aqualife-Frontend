@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import BlogHeroImg from "../assets/ro_banner_1.png";
+import BlogHeroImg from "../assets/ro_banner_1.webp";
 import img_3 from "../assets/familyImg.png";
 import Breadcrumb from "../components/Breadcrumb";
 import img_1 from "../assets/ro_banner.jpg";
-import img_2 from "../assets/softer_img_2.png";
-import img_4 from "../assets/softer_img_2.png";
+import img_2 from "../assets/softer_img_2.webp";
+import img_4 from "../assets/softer_img_2.webp";
 import gsap from "gsap";
 import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";

@@ -3,7 +3,7 @@ import { Droplets, Wrench, HeadphonesIcon } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import WaveAnimation from "./WaveAnimation";
-import waveImg from "../assets/water_waves.png";
+import waveImg from "../assets/water_waves.webp";
 
 gsap.registerPlugin(ScrollTrigger);
 

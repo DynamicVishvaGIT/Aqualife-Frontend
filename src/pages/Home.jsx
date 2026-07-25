@@ -7,7 +7,7 @@ import ProductShowcase from "../components/ProductShowcase"
 import NewLaunches from "../components/NewLaunches"
 import WhyChoose from "../components/WhyChoose"
 import LegacySection from "../components/LegacySection"
-import waveImg from "../assets/water_waves.png"
+import waveImg from "../assets/water_waves.webp"
 import {CommunitySection} from "../components/CommunitySection"
 
 const Home = () => {

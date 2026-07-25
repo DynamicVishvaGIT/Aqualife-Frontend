@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import "swiper/css";
-import homeBanner from "../assets/Home_Banner.png";
+import homeBanner from "../assets/Home_Banner.webp";
 import gsap from "gsap";
 
 const prefersReducedMotion = () =>

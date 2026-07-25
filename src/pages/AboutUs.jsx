@@ -8,7 +8,7 @@ import aboutImg from "../assets/about_banner_2.png";
 import visionImg from "../assets/about_banner_3.jpg";
 import missionImg from "../assets/about_banner_4.jpg";
 import familyImg from "../assets/familyImg.png";
-import trustImg from "../assets/Home_Banner.png";
+import trustImg from "../assets/Home_Banner.webp";
 import coolerImg from "../assets/water-cooler_2.png";
 import Breadcrumb from "../components/Breadcrumb";
 

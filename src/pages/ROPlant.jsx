@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import banner1 from "../assets/ro_banner_1.png";
+import banner1 from "../assets/ro_banner_1.webp";
 import Breadcrumb from "../components/Breadcrumb";
 import ro_img_1 from "../assets/ro_banner.jpg";
 import ro_img_2 from "../assets/ro_bg_1.png";
