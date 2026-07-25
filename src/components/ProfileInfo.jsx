@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { gsap } from "https://cdn.skypack.dev/gsap";
+import gsap from "gsap";
 
 const BRAND = "#0061C2";
 const BRAND_DARK = "#004a94";

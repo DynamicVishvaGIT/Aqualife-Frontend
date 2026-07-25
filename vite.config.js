@@ -5,8 +5,8 @@ import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   plugins: [
-    tailwindcss(),
     react(),
+    tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
@@ -14,9 +14,7 @@ export default defineConfig({
         enabled: true,
       },
       workbox: {
-        globPatterns: [
-          "**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp}"
-        ],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,ttf}"]
       },
     }),
   ],

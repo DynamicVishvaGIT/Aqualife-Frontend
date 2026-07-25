@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { gsap } from "https://cdn.skypack.dev/gsap";
+import gsap from "gsap";
 import PINCODE_LOOKUP from "../static_data";
 
 const BRAND = "#0061C2";

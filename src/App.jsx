@@ -23,18 +23,17 @@ import PageNotFound from "./pages/PageNotFound";
 import AddressForm from "./pages/AddressForm";
 import SelectAddress from "./pages/SelectAddress";
 
-import "./App.css";
+const HIDE_LAYOUT_PATHS = ["/otp-verification", "/login"];
 
 function App() {
   const location = useLocation();
 
-  const hideLayout = ["/otp-verification"].includes(location.pathname);
-  const notFoundPage = ["*"].includes(location.pathname);
+  const showLayout = !HIDE_LAYOUT_PATHS.includes(location.pathname);
 
   return (
     <>
       <ScrollToTop />
-      {!notFoundPage && <Navbar />}
+      {showLayout && <Navbar />}
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -57,7 +56,7 @@ function App() {
         <Route path="*" element={<PageNotFound />} />
       </Routes>
 
-      {!hideLayout && !notFoundPage && <Footer />}
+      {showLayout && <Footer />}
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { gsap } from "https://cdn.skypack.dev/gsap";
+import gsap from "gsap";
 import { useNavigate } from "react-router-dom";
 import {
   Package,

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { gsap } from "https://cdn.skypack.dev/gsap";
+import gsap from "gsap";
 import { ArrowLeft, SlidersHorizontal, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import product1 from "../assets/Purifier_1.png";
