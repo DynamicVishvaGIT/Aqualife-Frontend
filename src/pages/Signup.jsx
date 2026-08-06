@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import sideBanner from "../assets/side_banner.png";
 import { useNavigate } from "react-router-dom";
-// import { useSendLoginOtp } from "../features/auth/hooks/authHooks";
+import { useSendLoginOtp } from "../features/hooks/authHooks";
 
 const BRAND = "#1A6FC4";
 const BRAND_DARK = "#155AA0";
@@ -13,7 +13,7 @@ const ERROR = "#EF4444";
 const MOBILE_RE = /^[6-9]\d{9}$/;
 const TOTAL_DIGITS = 10;
 
-export default function Login() {
+export default function Signup() {
   const [loginMobile, setLoginMobile] = useState("");
   const [loginErrors, setLoginErrors] = useState({ mobile: "" });
   const [btnVisible, setBtnVisible] = useState(false);
@@ -29,7 +29,7 @@ export default function Login() {
   const firstInputRef = useRef(null);
 
   const navigate = useNavigate();
-  // const { mutate: sendLoginOtp, isPending: loginPending } = useSendLoginOtp();
+  const { mutate: sendLoginOtp, isPending: loginPending } = useSendLoginOtp();
 
   /* ── Mount animation ── */
   useEffect(() => {
@@ -183,22 +183,14 @@ export default function Login() {
     e.preventDefault();
     if (!validateLogin()) { shakeBtn(loginBtnRef); return; }
     pressBtn(loginBtnRef);
-    console.log("Login", { loginMobile });
-    // navigate("/otp-verification", { state: { mobile: loginMobile } });
+    sendLoginOtp(loginMobile, {
+      onSuccess: () => navigate("/otp-verification", { state: { mobile: loginMobile } }),
+      onError: (err) => {
+        setLoginErrors({ mobile: err?.response?.data?.message || "Failed to send OTP, try again" });
+        shakeBtn(loginBtnRef);
+      },
+    });
   };
-
-  // const handleLoginSubmit = (e) => {
-  //   e.preventDefault();
-  //   if (!validateLogin()) { shakeBtn(loginBtnRef); return; }
-  //   pressBtn(loginBtnRef);
-  //   sendLoginOtp(loginMobile, {
-  //     onSuccess: () => navigate("/otp-verification", { state: { mobile: loginMobile } }),
-  //     onError: (err) => {
-  //       setLoginErrors({ mobile: err?.response?.data?.message || "Failed to send OTP, try again" });
-  //       shakeBtn(loginBtnRef);
-  //     },
-  //   });
-  // };
 
   const mobileWrapClass = (hasError) =>
     `flex rounded-lg border overflow-hidden focus-within:ring-2 ${

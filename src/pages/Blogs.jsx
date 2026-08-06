@@ -268,7 +268,7 @@ const Blogs = () => {
 
         <div
           ref={breadcrumbRef}
-          className="absolute top-2 lg:top-14 left-0 w-full z-10"
+          className="absolute top-2 lg:top-14 left-0 w-full z-30"
         >
           <div className="primary-container">
             <Breadcrumb

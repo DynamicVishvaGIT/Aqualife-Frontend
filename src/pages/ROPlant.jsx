@@ -9,6 +9,7 @@ import ro_img_2 from "../assets/ro_bg_1.png";
 import ro_img_3 from "../assets/ro_bg_2.png";
 import PdfDownloadSection from "../components/DownloadPdf";
 import FaqSection from "../components/FaqSection";
+import WaterPurifierInfo from "../components/WaterPurifierInfo";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -107,7 +108,7 @@ function IndustrialWaterPurificationSection({ cardsData = defaultCardsData }) {
                 }`}
               >
                 <div
-                  className="max-w-[240px] xs:max-w-[280px] sm:max-w-xs md:max-w-sm text-left"
+                  className="max-w-[240px] xs:max-w-[280px] sm:max-w-xs md:max-w-md text-left"
                   style={
                     !card.overlayGradient
                       ? {
@@ -118,7 +119,7 @@ function IndustrialWaterPurificationSection({ cardsData = defaultCardsData }) {
                   }
                 >
                   <h1
-                    className={`font-semibold heading leading-tight text-lg sm:text-xl md:text-2xl lg:text-[25px] ${
+                    className={`font-semibold heading leading-tight text-lg sm:text-xl md:text-2xl lg:text-[30px] ${
                       card.theme === "dark" ? "text-white" : "text-gray-900"
                     }`}
                   >
@@ -308,6 +309,47 @@ const sectionData = {
 };
 
 /* ─────────────────────────────────────────────
+   WATER PURIFIER INFO DATA
+───────────────────────────────────────────── */
+const roInfoContent = {
+  eyebrow: "Understanding RO Technology",
+  heroTitle: "Why Do You Need an RO Plant?",
+  heroImageAlt: "Aqualife commercial RO plant",
+  paragraphs: [
+    "Water quality can vary depending on its source, whether it comes from a borewell, municipal supply, tanker, groundwater, or other sources. In many cases, water may contain dissolved salts, minerals, impurities, and other contaminants that can affect its quality and usability. Understanding the condition of your water is important when determining the right treatment solution for your home, business, or facility.",
+    "An RO Plant uses reverse osmosis technology to help improve water quality by reducing dissolved impurities and unwanted contaminants. It is commonly used in residential, commercial, and industrial applications where treated water is required for daily operations, drinking purposes, or process requirements. RO plants are designed to deliver consistent water treatment while supporting different water quality needs.",
+    "Installing an RO Plant can help improve water quality for a wide range of applications. It assists in reducing dissolved impurities, supports consistent water treatment, and helps provide treated water for residential, commercial, and industrial use. RO plants are widely used where water quality management is important for operational efficiency and daily water consumption requirements.",
+    "RO Plants are commonly used in residential communities, hotels, hospitals, educational institutions, commercial buildings, manufacturing facilities, food processing units, and various industrial sectors. Any organization or facility that requires treated water for drinking, operational, or process purposes can benefit from an RO Plant solution designed according to its water treatment requirements.",
+  ],
+  sectionTitle: "How to Choose the Right RO Plant?",
+  sectionSubtitle:
+    "Choosing the right RO Plant depends on factors such as water quality, TDS level, daily water requirements, and the intended application. Understanding these requirements helps ensure that the selected system can effectively meet your water treatment needs.",
+};
+
+const roInfoCards = [
+  {
+    icon: "Droplet",
+    title: "Based on Water Quality",
+    body: "The quality of source water plays an important role in selecting an RO Plant. Water testing can help identify dissolved impurities and treatment requirements, making it easier to choose the most suitable water treatment solution.",
+  },
+  {
+    icon: "Waves",
+    title: "Based on Water Requirements",
+    body: "Different applications require different quantities of treated water. Whether for residential, commercial, or industrial use, selecting an RO Plant that matches your daily water demand helps ensure reliable performance and water availability.",
+  },
+  {
+    icon: "Layers",
+    title: "Based on Application Type",
+    body: "RO Plants are available for residential, commercial, and industrial applications. The right system should be selected based on the specific water treatment requirements of the facility or business.",
+  },
+  {
+    icon: "Users",
+    title: "Based on Future Requirements",
+    body: "When choosing an RO Plant, it is also important to consider future water consumption needs. Selecting a system that can support growing demand helps provide long-term flexibility and operational efficiency.",
+  },
+];
+
+/* ─────────────────────────────────────────────
    MAIN PAGE
 ───────────────────────────────────────────── */
 const ROPlant = () => {
@@ -321,7 +363,6 @@ const ROPlant = () => {
       "Customized RO Solutions Designed For Reliable Industrial Water Treatment.",
   };
 
-  /* ── Hero animation refs ── */
   const heroWrapRef = useRef(null);
   const heroImgRef = useRef(null);
   const heroGradientRef = useRef(null);
@@ -329,42 +370,35 @@ const ROPlant = () => {
   const heroDescRef = useRef(null);
   const breadcrumbRef = useRef(null);
 
-  /* ── Hero entrance animation ── */
   useEffect(() => {
     if (prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      tl
-        /* image zooms from 1.12 → 1 */
-        .fromTo(
-          heroImgRef.current,
-          { scale: 1.12, transformOrigin: "center center" },
-          { scale: 1, duration: 1.8 },
-        )
-        /* gradient fades in */
+      tl.fromTo(
+        heroImgRef.current,
+        { scale: 1.12, transformOrigin: "center center" },
+        { scale: 1, duration: 1.8 },
+      )
         .fromTo(
           heroGradientRef.current,
           { opacity: 0 },
           { opacity: 1, duration: 1.1 },
           "-=1.5",
         )
-        /* breadcrumb drops in */
         .fromTo(
           breadcrumbRef.current,
           { y: -16, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.6 },
           "-=0.9",
         )
-        /* title rises */
         .fromTo(
           heroTitleRef.current,
           { y: 44, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.9 },
           "-=0.6",
         )
-        /* description follows */
         .fromTo(
           heroDescRef.current,
           { y: 28, opacity: 0 },
@@ -383,7 +417,6 @@ const ROPlant = () => {
         ref={heroWrapRef}
         className="relative w-full aspect-[4/5] sm:aspect-[16/10] md:aspect-[16/8] lg:aspect-[1440/700] overflow-hidden"
       >
-        {/* Image */}
         <img
           ref={heroImgRef}
           loading="lazy"
@@ -392,14 +425,12 @@ const ROPlant = () => {
           className="absolute inset-0 w-full h-full object-cover"
         />
 
-        {/* Gradient overlay */}
         <div
           ref={heroGradientRef}
           className="absolute inset-0"
           style={{ background: heroData.gradient }}
         />
 
-        {/* Breadcrumb */}
         <div
           ref={breadcrumbRef}
           className="absolute top-4 md:top-20 lg:top-[132px] left-0 w-full z-20"
@@ -414,7 +445,6 @@ const ROPlant = () => {
           </div>
         </div>
 
-        {/* Text content */}
         <div className="absolute inset-0 z-10 flex items-center">
           <div className="primary-container w-full">
             <div className="max-w-full sm:max-w-[420px] md:max-w-[460px] lg:max-w-[500px] pt-12 sm:pt-14 md:pt-24 lg:pt-40">
@@ -456,6 +486,13 @@ const ROPlant = () => {
 
       <IndustrialWaterPurificationSection />
       <FiltrationModuleSection />
+
+      <WaterPurifierInfo
+        // image={ro_img_1}
+        content={roInfoContent}
+        cards={roInfoCards}
+      />
+
       <PdfDownloadSection />
       <FaqSection />
     </section>

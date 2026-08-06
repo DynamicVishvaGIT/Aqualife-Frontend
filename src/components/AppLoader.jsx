@@ -226,280 +226,281 @@
 //     </>
 //   );
 // }
-// import { useEffect, useRef } from "react";
-// import { Droplets } from "lucide-react";
 
-// export default function AppLoader({ onComplete }) {
-//   const wrapRef       = useRef(null);
-//   const iconBoxRef    = useRef(null);
-//   const iconRef       = useRef(null);
-//   const pctRef        = useRef(null);
-//   const fillCircleRef = useRef(null);
-//   const hintRef       = useRef(null);
-//   const iconWrapRef   = useRef(null);
-//   const progressRef   = useRef(0);
-//   const doneRef       = useRef(false);
-//   const rafRef        = useRef(null);
-//   const timeouts      = useRef([]);
+import { useEffect, useRef } from "react";
+import { Droplets } from "lucide-react";
 
-//   const RADIUS        = 45;
-//   const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+export default function AppLoader({ onComplete }) {
+  const wrapRef       = useRef(null);
+  const iconBoxRef    = useRef(null);
+  const iconRef       = useRef(null);
+  const pctRef        = useRef(null);
+  const fillCircleRef = useRef(null);
+  const hintRef       = useRef(null);
+  const iconWrapRef   = useRef(null);
+  const progressRef   = useRef(0);
+  const doneRef       = useRef(false);
+  const rafRef        = useRef(null);
+  const timeouts      = useRef([]);
 
-//   function safeTimeout(fn, ms) {
-//     const id = setTimeout(fn, ms);
-//     timeouts.current.push(id);
-//     return id;
-//   }
+  const RADIUS        = 45;
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-//   function safeRemove(el) {
-//     if (el && el.parentNode) el.parentNode.removeChild(el);
-//   }
+  function safeTimeout(fn, ms) {
+    const id = setTimeout(fn, ms);
+    timeouts.current.push(id);
+    return id;
+  }
 
-//   useEffect(() => {
-//     const ptContainer = document.createElement("div");
-//     Object.assign(ptContainer.style, {
-//       position: "absolute", inset: "0",
-//       pointerEvents: "none", overflow: "hidden",
-//     });
-//     if (wrapRef.current) wrapRef.current.appendChild(ptContainer);
+  function safeRemove(el) {
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+  }
 
-//     const ptTimer = setInterval(() => {
-//       if (doneRef.current) return;
-//       const p   = document.createElement("div");
-//       const sz  = 3 + Math.random() * 5;
-//       const dur = 4 + Math.random() * 2;
-//       Object.assign(p.style, {
-//         position: "absolute", borderRadius: "50%", background: "#0061C2",
-//         width: `${sz}px`, height: `${sz}px`,
-//         left: `${25 + Math.random() * 50}%`,
-//         bottom: `${5 + Math.random() * 30}%`,
-//         opacity: "0",
-//         animation: `ptFloat ${dur}s ease-out forwards`,
-//       });
-//       ptContainer.appendChild(p);
-//       safeTimeout(() => safeRemove(p), dur * 1000 + 100);
-//     }, 350);
+  useEffect(() => {
+    const ptContainer = document.createElement("div");
+    Object.assign(ptContainer.style, {
+      position: "absolute", inset: "0",
+      pointerEvents: "none", overflow: "hidden",
+    });
+    if (wrapRef.current) wrapRef.current.appendChild(ptContainer);
 
-//     const bubbleSizes = [6, 10, 14, 8, 18, 5, 12, 16, 7, 20];
-//     const bubbleTimer = setInterval(() => {
-//       if (doneRef.current) return;
-//       const b       = document.createElement("div");
-//       const sz      = bubbleSizes[Math.floor(Math.random() * bubbleSizes.length)];
-//       const dur     = 3 + Math.random() * 3;
-//       const opacity = 0.15 + Math.random() * 0.35;
-//       Object.assign(b.style, {
-//         position: "absolute", borderRadius: "50%",
-//         width: `${sz}px`, height: `${sz}px`,
-//         left: `${10 + Math.random() * 80}%`,
-//         bottom: `${Math.random() * 15}%`,
-//         background: `rgba(0, 97, 194, ${opacity})`,
-//         border: `1px solid rgba(0, 97, 194, ${opacity + 0.15})`,
-//         animation: `bubbleRise ${dur}s ease-out forwards`,
-//       });
-//       ptContainer.appendChild(b);
-//       safeTimeout(() => safeRemove(b), dur * 1000 + 100);
-//     }, 220);
+    const ptTimer = setInterval(() => {
+      if (doneRef.current) return;
+      const p   = document.createElement("div");
+      const sz  = 3 + Math.random() * 5;
+      const dur = 4 + Math.random() * 2;
+      Object.assign(p.style, {
+        position: "absolute", borderRadius: "50%", background: "#0061C2",
+        width: `${sz}px`, height: `${sz}px`,
+        left: `${25 + Math.random() * 50}%`,
+        bottom: `${5 + Math.random() * 30}%`,
+        opacity: "0",
+        animation: `ptFloat ${dur}s ease-out forwards`,
+      });
+      ptContainer.appendChild(p);
+      safeTimeout(() => safeRemove(p), dur * 1000 + 100);
+    }, 350);
 
-//     function setProgress(p) {
-//       const offset = CIRCUMFERENCE * (1 - p / 100);
-//       if (fillCircleRef.current)
-//         fillCircleRef.current.style.strokeDashoffset = offset;
-//       if (pctRef.current)
-//         pctRef.current.textContent = Math.round(p) + "%";
-//     }
+    const bubbleSizes = [6, 10, 14, 8, 18, 5, 12, 16, 7, 20];
+    const bubbleTimer = setInterval(() => {
+      if (doneRef.current) return;
+      const b       = document.createElement("div");
+      const sz      = bubbleSizes[Math.floor(Math.random() * bubbleSizes.length)];
+      const dur     = 3 + Math.random() * 3;
+      const opacity = 0.15 + Math.random() * 0.35;
+      Object.assign(b.style, {
+        position: "absolute", borderRadius: "50%",
+        width: `${sz}px`, height: `${sz}px`,
+        left: `${10 + Math.random() * 80}%`,
+        bottom: `${Math.random() * 15}%`,
+        background: `rgba(0, 97, 194, ${opacity})`,
+        border: `1px solid rgba(0, 97, 194, ${opacity + 0.15})`,
+        animation: `bubbleRise ${dur}s ease-out forwards`,
+      });
+      ptContainer.appendChild(b);
+      safeTimeout(() => safeRemove(b), dur * 1000 + 100);
+    }, 220);
 
-//     function tick() {
-//       if (doneRef.current) return;
-//       const rem = 92 - progressRef.current;
-//       progressRef.current = Math.min(92, progressRef.current + Math.max(rem * 0.006, 0.04));
-//       setProgress(progressRef.current);
-//       rafRef.current = requestAnimationFrame(tick);
-//     }
-//     rafRef.current = requestAnimationFrame(tick);
+    function setProgress(p) {
+      const offset = CIRCUMFERENCE * (1 - p / 100);
+      if (fillCircleRef.current)
+        fillCircleRef.current.style.strokeDashoffset = offset;
+      if (pctRef.current)
+        pctRef.current.textContent = Math.round(p) + "%";
+    }
 
-//     function burstRing() {
-//       const r = document.createElement("div");
-//       Object.assign(r.style, {
-//         position: "absolute", top: "50%", left: "50%",
-//         width: "80px", height: "80px", borderRadius: "50%",
-//         border: "1.5px solid #0061C2", pointerEvents: "none",
-//         animation: "burst .5s ease-out forwards",
-//       });
-//       if (iconWrapRef.current) iconWrapRef.current.appendChild(r);
-//       safeTimeout(() => safeRemove(r), 550);
-//     }
+    function tick() {
+      if (doneRef.current) return;
+      const rem = 92 - progressRef.current;
+      progressRef.current = Math.min(92, progressRef.current + Math.max(rem * 0.006, 0.04));
+      setProgress(progressRef.current);
+      rafRef.current = requestAnimationFrame(tick);
+    }
+    rafRef.current = requestAnimationFrame(tick);
 
-//     function finish() {
-//       if (doneRef.current) return;
-//       doneRef.current = true;
-//       clearTimeout(loadTimer);
-//       cancelAnimationFrame(rafRef.current);
-//       clearInterval(ptTimer);
-//       clearInterval(bubbleTimer);
-//       setProgress(100);
+    function burstRing() {
+      const r = document.createElement("div");
+      Object.assign(r.style, {
+        position: "absolute", top: "50%", left: "50%",
+        width: "80px", height: "80px", borderRadius: "50%",
+        border: "1.5px solid #0061C2", pointerEvents: "none",
+        animation: "burst .5s ease-out forwards",
+      });
+      if (iconWrapRef.current) iconWrapRef.current.appendChild(r);
+      safeTimeout(() => safeRemove(r), 550);
+    }
 
-//       if (hintRef.current) hintRef.current.style.opacity = "0";
+    function finish() {
+      if (doneRef.current) return;
+      doneRef.current = true;
+      clearTimeout(loadTimer);
+      cancelAnimationFrame(rafRef.current);
+      clearInterval(ptTimer);
+      clearInterval(bubbleTimer);
+      setProgress(100);
 
-//       const w = wrapRef.current;
-//       if (w) {
-//         w.style.transition = "opacity .4s";
-//         w.style.opacity    = "0";
-//       }
-//       safeTimeout(() => onComplete?.(), 420);
-//     }
+      if (hintRef.current) hintRef.current.style.opacity = "0";
 
-//     const loadTimer = setTimeout(() => {
-//       cancelAnimationFrame(rafRef.current);
-//       const start = progressRef.current;
-//       const t0    = performance.now();
-//       const dur   = 800;
-//       function finishFill(now) {
-//         const t = Math.min((now - t0) / dur, 1);
-//         const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-//         progressRef.current = start + (100 - start) * e;
-//         setProgress(progressRef.current);
-//         t < 1 ? requestAnimationFrame(finishFill) : finish();
-//       }
-//       requestAnimationFrame(finishFill);
-//     }, 1000);
-//     timeouts.current.push(loadTimer);
+      const w = wrapRef.current;
+      if (w) {
+        w.style.transition = "opacity .4s";
+        w.style.opacity    = "0";
+      }
+      safeTimeout(() => onComplete?.(), 420);
+    }
 
-//     function onTap() {
-//       if (doneRef.current) return;
-//       progressRef.current = Math.min(100, progressRef.current + 10);
-//       setProgress(progressRef.current);
-//       burstRing();
-//       const icon = iconRef.current;
-//       if (icon) {
-//         icon.style.transition = "transform .1s";
-//         icon.style.transform  = "scale(1.25)";
-//         safeTimeout(() => {
-//           if (iconRef.current) {
-//             iconRef.current.style.transform  = "scale(1)";
-//             iconRef.current.style.transition = "transform .2s";
-//           }
-//         }, 110);
-//       }
-//       if (progressRef.current >= 100) finish();
-//     }
+    const loadTimer = setTimeout(() => {
+      cancelAnimationFrame(rafRef.current);
+      const start = progressRef.current;
+      const t0    = performance.now();
+      const dur   = 800;
+      function finishFill(now) {
+        const t = Math.min((now - t0) / dur, 1);
+        const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        progressRef.current = start + (100 - start) * e;
+        setProgress(progressRef.current);
+        t < 1 ? requestAnimationFrame(finishFill) : finish();
+      }
+      requestAnimationFrame(finishFill);
+    }, 1000);
+    timeouts.current.push(loadTimer);
 
-//     function onKeyDown(e) {
-//       if (e.key === "Enter" || e.key === " ") {
-//         e.preventDefault();
-//         onTap();
-//       }
-//     }
+    function onTap() {
+      if (doneRef.current) return;
+      progressRef.current = Math.min(100, progressRef.current + 10);
+      setProgress(progressRef.current);
+      burstRing();
+      const icon = iconRef.current;
+      if (icon) {
+        icon.style.transition = "transform .1s";
+        icon.style.transform  = "scale(1.25)";
+        safeTimeout(() => {
+          if (iconRef.current) {
+            iconRef.current.style.transform  = "scale(1)";
+            iconRef.current.style.transition = "transform .2s";
+          }
+        }, 110);
+      }
+      if (progressRef.current >= 100) finish();
+    }
 
-//     const el = iconWrapRef.current;
-//     el?.addEventListener("click", onTap);
-//     el?.addEventListener("keydown", onKeyDown);
-//     setProgress(0);
+    function onKeyDown(e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onTap();
+      }
+    }
 
-//     return () => {
-//       doneRef.current = true;
-//       timeouts.current.forEach(clearTimeout);
-//       timeouts.current = [];
-//       clearInterval(ptTimer);
-//       clearInterval(bubbleTimer);
-//       cancelAnimationFrame(rafRef.current);
-//       el?.removeEventListener("click", onTap);
-//       el?.removeEventListener("keydown", onKeyDown);
-//       safeRemove(ptContainer);
-//     };
-//   }, [onComplete]);
+    const el = iconWrapRef.current;
+    el?.addEventListener("click", onTap);
+    el?.addEventListener("keydown", onKeyDown);
+    setProgress(0);
 
-//   return (
-//     <>
-//       <style>{`
-//         @keyframes ptFloat {
-//           0%   { transform: translateY(0) scale(1);       opacity: .5 }
-//           100% { transform: translateY(-160px) scale(.2); opacity: 0  }
-//         }
-//         @keyframes bubbleRise {
-//           0%   { transform: translateY(0)      scale(1);    opacity: .55 }
-//           40%  { transform: translateY(-60px)  scale(1.05); opacity: .4  }
-//           100% { transform: translateY(-180px) scale(.4);   opacity: 0   }
-//         }
-//         @keyframes pulse {
-//           0%, 100% { transform: scale(1);    }
-//           50%       { transform: scale(1.08); }
-//         }
-//         @keyframes ringPop {
-//           0%   { transform: scale(.6);  opacity: .5 }
-//           100% { transform: scale(2.4); opacity: 0  }
-//         }
-//         @keyframes burst {
-//           0%   { transform: translate(-50%,-50%) scale(0);   opacity: .6 }
-//           100% { transform: translate(-50%,-50%) scale(3.2); opacity: 0  }
-//         }
-//       `}</style>
+    return () => {
+      doneRef.current = true;
+      timeouts.current.forEach(clearTimeout);
+      timeouts.current = [];
+      clearInterval(ptTimer);
+      clearInterval(bubbleTimer);
+      cancelAnimationFrame(rafRef.current);
+      el?.removeEventListener("click", onTap);
+      el?.removeEventListener("keydown", onKeyDown);
+      safeRemove(ptContainer);
+    };
+  }, [onComplete]);
 
-//       <div ref={wrapRef} style={{
-//         position: "fixed", inset: 0, zIndex: 9999,
-//         background: "#f0f6ff",
-//         display: "flex", flexDirection: "column",
-//         alignItems: "center", justifyContent: "center",
-//         overflow: "hidden",
-//       }}>
+  return (
+    <>
+      <style>{`
+        @keyframes ptFloat {
+          0%   { transform: translateY(0) scale(1);       opacity: .5 }
+          100% { transform: translateY(-160px) scale(.2); opacity: 0  }
+        }
+        @keyframes bubbleRise {
+          0%   { transform: translateY(0)      scale(1);    opacity: .55 }
+          40%  { transform: translateY(-60px)  scale(1.05); opacity: .4  }
+          100% { transform: translateY(-180px) scale(.4);   opacity: 0   }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1);    }
+          50%       { transform: scale(1.08); }
+        }
+        @keyframes ringPop {
+          0%   { transform: scale(.6);  opacity: .5 }
+          100% { transform: scale(2.4); opacity: 0  }
+        }
+        @keyframes burst {
+          0%   { transform: translate(-50%,-50%) scale(0);   opacity: .6 }
+          100% { transform: translate(-50%,-50%) scale(3.2); opacity: 0  }
+        }
+      `}</style>
 
-//         <div ref={iconWrapRef}
-//           style={{
-//             position: "relative", width: 110, height: 110,
-//             display: "flex", alignItems: "center", justifyContent: "center",
-//             cursor: "pointer", outline: "none",
-//           }}
-//           role="button" tabIndex={0} aria-label="Loading, tap to speed up"
-//         >
-//           <svg viewBox="0 0 110 110"
-//             style={{ position: "absolute", inset: 0, width: 110, height: 110, transform: "rotate(-90deg)" }}>
-//             <circle cx="55" cy="55" r={RADIUS}
-//               fill="none" stroke="#ccdff7" strokeWidth="3" />
-//             <circle ref={fillCircleRef} cx="55" cy="55" r={RADIUS}
-//               fill="none" stroke="#0061C2" strokeWidth="3"
-//               strokeLinecap="round"
-//               strokeDasharray={CIRCUMFERENCE}
-//               strokeDashoffset={CIRCUMFERENCE}
-//               style={{ transition: "stroke-dashoffset .12s linear" }}
-//             />
-//           </svg>
+      <div ref={wrapRef} style={{
+        position: "fixed", inset: 0, zIndex: 9999,
+        background: "#f0f6ff",
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        overflow: "hidden",
+      }}>
 
-//           {[0, 0.9].map((delay, i) => (
-//             <div key={i} style={{
-//               position: "absolute", inset: 0, borderRadius: "50%",
-//               border: "1.5px solid rgba(0, 97, 194, 0.4)",
-//               animation: `ringPop 2s ease-out ${delay}s infinite`,
-//             }} />
-//           ))}
+        <div ref={iconWrapRef}
+          style={{
+            position: "relative", width: 110, height: 110,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", outline: "none",
+          }}
+          role="button" tabIndex={0} aria-label="Loading, tap to speed up"
+        >
+          <svg viewBox="0 0 110 110"
+            style={{ position: "absolute", inset: 0, width: 110, height: 110, transform: "rotate(-90deg)" }}>
+            <circle cx="55" cy="55" r={RADIUS}
+              fill="none" stroke="#ccdff7" strokeWidth="3" />
+            <circle ref={fillCircleRef} cx="55" cy="55" r={RADIUS}
+              fill="none" stroke="#0061C2" strokeWidth="3"
+              strokeLinecap="round"
+              strokeDasharray={CIRCUMFERENCE}
+              strokeDashoffset={CIRCUMFERENCE}
+              style={{ transition: "stroke-dashoffset .12s linear" }}
+            />
+          </svg>
 
-//           <div ref={iconBoxRef} style={{
-//             width: 72, height: 72, borderRadius: "50%",
-//             background: "#0061C2",
-//             display: "flex", alignItems: "center", justifyContent: "center",
-//             animation: "pulse 2s ease-in-out infinite",
-//             position: "relative", zIndex: 1,
-//           }}>
-//             <div ref={iconRef}>
-//               <Droplets size={40} color="#fff" />
-//             </div>
-//           </div>
-//         </div>
+          {[0, 0.9].map((delay, i) => (
+            <div key={i} style={{
+              position: "absolute", inset: 0, borderRadius: "50%",
+              border: "1.5px solid rgba(0, 97, 194, 0.4)",
+              animation: `ringPop 2s ease-out ${delay}s infinite`,
+            }} />
+          ))}
 
-//         <p ref={pctRef} className="heading" style={{
-//           fontSize: 26, fontWeight: 600,
-//           color: "#0061C2", marginTop: 20, letterSpacing: 1,
-//         }}>
-//           0%
-//         </p>
+          <div ref={iconBoxRef} style={{
+            width: 72, height: 72, borderRadius: "50%",
+            background: "#0061C2",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            animation: "pulse 2s ease-in-out infinite",
+            position: "relative", zIndex: 1,
+          }}>
+            <div ref={iconRef}>
+              <Droplets size={40} color="#fff" />
+            </div>
+          </div>
+        </div>
 
-//         <p ref={hintRef} style={{
-//           fontSize: 10, color: "#6699cc", marginTop: 16,
-//           letterSpacing: 1, textTransform: "uppercase", opacity: 0.6,
-//           transition: "opacity .3s",
-//         }}>
-//           tap to boost
-//         </p>
+        <p ref={pctRef} className="heading" style={{
+          fontSize: 26, fontWeight: 600,
+          color: "#0061C2", marginTop: 20, letterSpacing: 1,
+        }}>
+          0%
+        </p>
 
-//       </div>
-//     </>
-//   );
-// }
+        <p ref={hintRef} style={{
+          fontSize: 10, color: "#6699cc", marginTop: 16,
+          letterSpacing: 1, textTransform: "uppercase", opacity: 0.6,
+          transition: "opacity .3s",
+        }}>
+          tap to boost
+        </p>
+
+      </div>
+    </>
+  );
+}

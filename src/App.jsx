@@ -12,7 +12,7 @@ import WaterSofteners from "./pages/WaterSofteners";
 import ROPlant from "./pages/ROPlant";
 import ContactUs from "./pages/ContactUs";
 import ProductDetail from "./components/ProductDetails";
-import Signup from "./pages/Login";
+import Signup from "./pages/Signup";
 import Cart from "./pages/Cart";
 import OtpVerification from "./pages/OtpVerification";
 import Profile from "./pages/Profile";
@@ -23,7 +23,7 @@ import PageNotFound from "./pages/PageNotFound";
 import AddressForm from "./pages/AddressForm";
 import SelectAddress from "./pages/SelectAddress";
 
-const HIDE_LAYOUT_PATHS = ["/otp-verification", "/login"];
+const HIDE_LAYOUT_PATHS = ["/otp-verification",];
 
 function App() {
   const location = useLocation();

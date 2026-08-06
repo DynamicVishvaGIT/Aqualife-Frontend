@@ -13,7 +13,6 @@ import {
 
 // =================================
 // Blogs List
-// Blogs Page
 // =================================
 
 export const useBlogs = () => {
@@ -53,8 +52,6 @@ export const useBlogDetails = (slug) => {
   });
 
 };
-
-
 
 
 // =================================

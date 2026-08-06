@@ -67,6 +67,21 @@ export default function WaveAnimation({
     let heightPx = container.clientHeight;
     if (width === 0 || heightPx === 0) return;
 
+    // Clear any leftover canvas from a prior mount before creating a new one.
+    container.innerHTML = "";
+
+    // Bail out early if WebGL isn't available at all (context exhaustion,
+    // disabled GPU, etc.) instead of letting WebGLRenderer throw mid-setup.
+    const testCanvas = document.createElement("canvas");
+    const gl =
+      testCanvas.getContext("webgl2") ||
+      testCanvas.getContext("webgl") ||
+      testCanvas.getContext("experimental-webgl");
+    if (!gl) {
+      console.error("WebGL is not supported or no context is available");
+      return;
+    }
+
     const prefersReducedMotion =
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -80,10 +95,20 @@ export default function WaveAnimation({
     const camera = new THREE.PerspectiveCamera(45, width / heightPx, 0.1, 100);
     camera.position.set(0, 0, 5);
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, width < 640 ? 1.5 : 2));
-    renderer.setSize(width, heightPx);
-    container.appendChild(renderer.domElement);
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: "high-performance",
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, width < 640 ? 1.5 : 2));
+      renderer.setSize(width, heightPx);
+      container.appendChild(renderer.domElement);
+    } catch (err) {
+      console.error("WebGL Renderer failed:", err);
+      return;
+    }
 
     let imageAspect = null;
     const textureLoader = new THREE.TextureLoader();
@@ -179,6 +204,7 @@ export default function WaveAnimation({
     };
 
     const buildMesh = () => {
+      if (!imageAspect) return; // guard: skip the pre-load call, only run once aspect is known
       if (mesh) { scene.remove(mesh); geometry.dispose(); }
       const { w, h }         = getVisiblePlaneSize();
       const { x: sx, y: sy } = getSegmentCounts(width);
@@ -190,7 +216,9 @@ export default function WaveAnimation({
       applyCoverUV(w * 1.02, h * 1.02);
     };
 
-    buildMesh();
+    // Removed the unconditional buildMesh() call here — it used to run once
+    // before the image loaded (no-op, imageAspect null) and again on load.
+    // buildMesh() now only fires from the texture-load callback and resize.
 
     // Mouse parallax tilt (desktop only)
     const targetRotation = { x: 0, y: 0 };
@@ -234,7 +262,10 @@ export default function WaveAnimation({
       material.dispose();
       texture.dispose();
       renderer.dispose();
-      if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
+      renderer.forceContextLoss();
+      if (renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageUrl, amplitude, frequency, speed, mouseTilt]);

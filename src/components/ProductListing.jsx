@@ -374,7 +374,7 @@ export default function WaterPurifierListing() {
       <div className="primary-container py-6 sm:py-12">
         {/* Heading */}
         <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-[2rem] font-semibold text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-xl heading sm:text-[2rem] font-semibold text-slate-900 tracking-tight leading-tight">
             Aqualife UV Water Purifiers
           </h1>
           <p className="text-slate-500 text-xs sm:text-sm mt-1.5 max-w-md mx-auto">

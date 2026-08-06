@@ -158,10 +158,15 @@ export default function ContactUs() {
         {/* Breadcrumb */}
         <div
           ref={breadcrumbRef}
-          className="absolute top-2 lg:top-14 left-0 w-full z-10"
+          className="absolute top-2 lg:top-14 left-0 w-full z-30"
         >
           <div className="primary-container">
-            <Breadcrumb />
+             <Breadcrumb
+               homeColor="text-white"
+              linkColor="text-gray-300"
+              activeColor="text-white"
+              separatorColor="text-white"
+            />
           </div>
         </div>
 

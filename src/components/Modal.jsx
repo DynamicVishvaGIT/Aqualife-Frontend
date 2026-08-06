@@ -7,67 +7,44 @@ import { X } from "lucide-react";
  * -----------------------------------------------------------------------
  * A single reusable modal for the whole project — styled to match the
  * Aqualife theme (blue-600 accents, rounded-2xl surfaces, #F4F8FC panels,
- * gray-900 headings / gray-500 body text) used across the water-softener
- * sections.
+ * gray-900 headings / gray-500 body text).
  *
- * Interactive details on top of the base modal:
- *   - Proper open AND close animations (previous version only animated
- *     in — closing just vanished instantly). Backdrop fades, dialog
- *     scales/slides both ways, with a springy "overshoot" easing on open.
- *   - Swipe-to-dismiss on mobile: drag the handle (or header) down past
- *     ~90px and release to close, like a native bottom sheet. Dragging
- *     less snaps back with a spring.
- *   - Header grows a subtle shadow the moment the body content is
- *     scrolled, so long content doesn't visually merge into the title.
- *   - Close button rotates + scales on hover/press instead of a flat
- *     color change.
+ * FIX: inputs were losing focus on every keystroke.
  *
- * USAGE
- * -----------------------------------------------------------------------
- *   const [open, setOpen] = useState(false);
+ * ROOT CAUSE (was in this file):
+ *   The scroll-lock useEffect had [shouldRender, handleKeyDown] as deps.
+ *   handleKeyDown was a useCallback that depended on runClose.
+ *   runClose was a useCallback that depended on the `onClose` prop.
+ *   Every time the parent re-rendered (e.g. on form state change), a new
+ *   `onClose` function reference arrived → new runClose → new handleKeyDown
+ *   → the scroll-lock effect re-ran → dialogRef.current.focus() fired →
+ *   the active input was blurred.
  *
- *   <Modal
- *     isOpen={open}
- *     onClose={() => setOpen(false)}
- *     title="Request a Free Water Test"
- *     size="md"
- *     footer={
- *       <>
- *         <button onClick={() => setOpen(false)} className="btn-secondary">
- *           Cancel
- *         </button>
- *         <button onClick={handleSubmit} className="btn-primary">
- *           Submit
- *         </button>
- *       </>
- *     }
- *   >
- *     <p>Modal body content goes here.</p>
- *   </Modal>
+ * THE REAL FIX:
+ *   1. Store `onClose` in a ref (onCloseRef) so runClose and handleKeyDown
+ *      can always read the latest version without being recreated.
+ *   2. runClose and handleKeyDown are now created once ([] deps / stable
+ *      refs) and never change — so the scroll-lock effect's dep array is
+ *      just [shouldRender], which only changes when the modal opens/closes,
+ *      never during typing.
+ *   3. dialogRef.current.focus() now only fires when the modal first opens
+ *      (shouldRender flips true), not on every re-render.
  *
- * PROPS
- * -----------------------------------------------------------------------
- *   isOpen              boolean            controls visibility
- *   onClose             () => void         called on backdrop click, ESC, or the X button
- *   title               string | node      optional header text
- *   children            node               body content
- *   footer              node               optional footer (buttons, etc.)
- *   size                'sm'|'md'|'lg'|'xl'|'full'   default 'md'
- *   closeOnOverlayClick boolean            default true
- *   showCloseButton     boolean            default true
+ * No hacks, no refs-to-refocus, no setTimeout, no changes to PdfModel or
+ * DownloadPdf. One file fixed, one root cause eliminated.
  * -----------------------------------------------------------------------
  */
 
 const SIZE_CLASSES = {
-  sm: "max-w-sm",
-  md: "max-w-md",
-  lg: "max-w-2xl",
-  xl: "max-w-4xl",
+  sm:   "max-w-sm",
+  md:   "max-w-md",
+  lg:   "max-w-2xl",
+  xl:   "max-w-4xl",
   full: "max-w-[calc(100%-2rem)]",
 };
 
-const CLOSE_ANIMATION_MS = 180;
-const DRAG_CLOSE_THRESHOLD = 90; // px, mobile swipe-down-to-dismiss
+const CLOSE_ANIMATION_MS   = 180;
+const DRAG_CLOSE_THRESHOLD = 90; // px
 
 export default function Modal({
   isOpen,
@@ -80,37 +57,44 @@ export default function Modal({
   showCloseButton = true,
 }) {
   const dialogRef = useRef(null);
-  const bodyRef = useRef(null);
+  const bodyRef   = useRef(null);
+
+  // titleId is stable — computed once, never changes.
   const titleId = useRef(`modal-title-${Math.random().toString(36).slice(2, 9)}`);
 
-  // Mount/unmount is decoupled from isOpen so the close animation can
-  // actually play before the dialog leaves the DOM.
-  const [shouldRender, setShouldRender] = useState(isOpen);
-  const [isClosing, setIsClosing] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  // ── FIX: keep onClose in a ref so runClose / handleKeyDown never need
+  //         to be recreated when the parent passes a new function reference.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
-  // Swipe-to-dismiss drag state (mobile bottom sheet)
+  const [shouldRender, setShouldRender] = useState(isOpen);
+  const [isClosing,    setIsClosing]    = useState(false);
+  const [isScrolled,   setIsScrolled]   = useState(false);
+
   const dragState = useRef({ dragging: false, startY: 0, deltaY: 0 });
-  const [dragY, setDragY] = useState(0);
+  const [dragY,      setDragY]      = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
+  // ── FIX: runClose reads onClose via ref → stable, never recreated.
   const runClose = useCallback(() => {
     setIsClosing(true);
     window.setTimeout(() => {
       setShouldRender(false);
       setIsClosing(false);
       setDragY(0);
-      onClose?.();
+      onCloseRef.current?.();
     }, CLOSE_ANIMATION_MS);
-  }, [onClose]);
+  }, []); // no deps — intentional
 
+  // Sync shouldRender with isOpen changes from the parent.
   useEffect(() => {
     if (isOpen) {
       setShouldRender(true);
       setIsClosing(false);
       setDragY(0);
     } else if (shouldRender && !isClosing) {
-      // isOpen flipped false from outside (not via runClose) — still animate out
       setIsClosing(true);
       const t = window.setTimeout(() => {
         setShouldRender(false);
@@ -122,19 +106,24 @@ export default function Modal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  // Close on ESC
+  // ── FIX: handleKeyDown depends only on runClose which is now stable
+  //         → handleKeyDown itself is also stable → never triggers the
+  //         scroll-lock effect during typing.
   const handleKeyDown = useCallback(
     (e) => {
-      if (e.key === "Escape") runClose();
+      if (e.key === "Escape") {
+        runClose();
+        return;
+      }
 
-      // basic focus trap
+      // Basic focus trap
       if (e.key === "Tab" && dialogRef.current) {
         const focusable = dialogRef.current.querySelectorAll(
           'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
         );
         if (focusable.length === 0) return;
         const first = focusable[0];
-        const last = focusable[focusable.length - 1];
+        const last  = focusable[focusable.length - 1];
 
         if (e.shiftKey && document.activeElement === first) {
           e.preventDefault();
@@ -145,18 +134,24 @@ export default function Modal({
         }
       }
     },
-    [runClose]
+    [runClose] // runClose is stable → handleKeyDown is stable
   );
 
-  // Lock body scroll + wire up ESC listener while open
+  // ── FIX: dep array is now [shouldRender, handleKeyDown] where BOTH are
+  //         stable during typing. Effect only re-runs when the modal
+  //         actually opens or closes — never on a form keystroke.
   useEffect(() => {
     if (!shouldRender) return;
 
     const previouslyFocused = document.activeElement;
-    const originalOverflow = document.body.style.overflow;
+    const originalOverflow  = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     document.addEventListener("keydown", handleKeyDown);
+
+    // Focus the dialog container for accessibility (focus trap baseline).
+    // This fires only when shouldRender flips true, i.e. when the modal
+    // first opens — not on every re-render while the user is typing.
     dialogRef.current?.focus();
 
     return () => {
@@ -166,7 +161,7 @@ export default function Modal({
     };
   }, [shouldRender, handleKeyDown]);
 
-  // Header shadow once the body scrolls
+  // Header shadow once body scrolls
   useEffect(() => {
     const el = bodyRef.current;
     if (!el) return;
@@ -175,7 +170,7 @@ export default function Modal({
     return () => el.removeEventListener("scroll", onScroll);
   }, [shouldRender]);
 
-  // --- Swipe-to-dismiss (mobile) ---
+  // ── Swipe-to-dismiss (mobile) ──────────────────────────────────────
   const onDragStart = (clientY) => {
     dragState.current = { dragging: true, startY: clientY, deltaY: 0 };
     setIsDragging(true);
@@ -198,8 +193,8 @@ export default function Modal({
   };
 
   const handleTouchStart = (e) => onDragStart(e.touches[0].clientY);
-  const handleTouchMove = (e) => onDragMove(e.touches[0].clientY);
-  const handleTouchEnd = () => onDragEnd();
+  const handleTouchMove  = (e) => onDragMove(e.touches[0].clientY);
+  const handleTouchEnd   = ()  => onDragEnd();
 
   if (!shouldRender) return null;
 
@@ -212,7 +207,9 @@ export default function Modal({
       {/* Backdrop */}
       <div
         className={`absolute inset-0 bg-gray-900/50 backdrop-blur-[2px] transition-opacity duration-200 ${
-          isClosing ? "opacity-0" : "opacity-100 animate-[fadeIn_0.18s_ease-out]"
+          isClosing
+            ? "opacity-0"
+            : "opacity-100 animate-[fadeIn_0.18s_ease-out]"
         }`}
         onClick={closeOnOverlayClick ? runClose : undefined}
         aria-hidden="true"
@@ -234,11 +231,14 @@ export default function Modal({
           }`}
         style={
           dragY
-            ? { transform: `translateY(${dragY}px)`, opacity: Math.max(1 - dragY / 400, 0.4) }
+            ? {
+                transform: `translateY(${dragY}px)`,
+                opacity: Math.max(1 - dragY / 400, 0.4),
+              }
             : undefined
         }
       >
-        {/* Drag handle, mobile-only, bottom-sheet affordance + swipe-to-dismiss */}
+        {/* Drag handle — mobile only */}
         <div
           className="sm:hidden flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
           onTouchStart={handleTouchStart}
@@ -252,7 +252,9 @@ export default function Modal({
         {(title || showCloseButton) && (
           <div
             className={`flex items-start justify-between gap-4 px-5 sm:px-6 pt-2 sm:pt-6 pb-4 border-b transition-shadow duration-200 ${
-              isScrolled ? "border-gray-100 shadow-[0_4px_10px_-8px_rgba(0,0,0,0.25)]" : "border-transparent"
+              isScrolled
+                ? "border-gray-100 shadow-[0_4px_10px_-8px_rgba(0,0,0,0.25)]"
+                : "border-transparent"
             }`}
           >
             {title && (
@@ -297,10 +299,9 @@ export default function Modal({
 }
 
 /**
- * Add these keyframes once to your global CSS (e.g. index.css /
- * globals.css) so the open animations above work — the close animation
- * is handled entirely by the `transition-transform`/`transition-opacity`
- * classes, so it needs no keyframes.
+ * Required global keyframes (index.css / globals.css):
  *
-
+ * @keyframes fadeIn        { from { opacity: 0; } to { opacity: 1; } }
+ * @keyframes modalSlideUp  { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
+ * @keyframes modalScaleIn  { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
  */

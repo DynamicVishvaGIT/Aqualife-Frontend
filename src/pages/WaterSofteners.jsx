@@ -10,6 +10,7 @@ import DownloadPdf from "../components/DownloadPdf";
 import FaqSection from "../components/FaqSection";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import WaterPurifierInfo from "../components/WaterPurifierInfo";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -602,7 +603,7 @@ function AutoTechnicalSpecification() {
   return (
     <section ref={sectionRef} className="w-full bg-[#F6FAFF]  py-8 sm:py-10">
       <div className="primary-container bg-[#F6FAFF] rounded-2xl">
-        <h2 ref={headingRef} className="text-xl sm:text-2xl font-bold text-gray-900 mb-5 sm:mb-6">
+        <h2 ref={headingRef} className="text-xl sm:text-2xl heading font-bold text-gray-900 mb-5 sm:mb-6">
           Auto Technical Specification
         </h2>
 
@@ -671,6 +672,52 @@ const pageData = {
     descriptionColor: "#955834",
   },
 };
+
+/* ── What Is Hard Water + How to Choose (content only, icons untouched) ── */
+const softenerInfoContent = {
+  eyebrow: "Understanding Hard Water",
+  heroTitle: "What Is Hard Water and Why Is It a Problem?",
+  heroImageAlt: "Aqualife water softener treating hard water",
+  paragraphs: [
+    "Many homes, apartments, hotels, hospitals, and commercial facilities receive hard water containing high levels of calcium and magnesium minerals. While hard water is generally safe to use, it can create several challenges for plumbing systems, appliances, and everyday water usage.",
+    "Hard water often leads to scale buildup inside pipes, water heaters, taps, showers, and other equipment. Over time, this buildup can reduce efficiency, increase maintenance requirements, and shorten the lifespan of appliances.",
+    "A water softener is designed to reduce hardness-causing minerals from water, helping improve overall water quality for residential and commercial use. By treating hard water before it enters your plumbing system, a water softener helps minimize scale formation and supports the efficient operation of water-using equipment.",
+    "Softened water can also improve the performance of water heaters, washing machines, dishwashers, and other appliances.",
+  ],
+  sectionTitle: "How to Choose the Right Water Softener?",
+  sectionSubtitle:
+    "Choosing the right water softener depends on water hardness levels, daily water consumption, application type, and the number of users. Understanding these factors can help ensure effective hard water treatment and long-term performance.",
+};
+
+// reusing only the icons already registered in WaterPurifierInfo's ICON_MAP
+// (Droplet, Waves, Layers, Users) — no new icons added
+const softenerInfoCards = [
+  {
+    icon: "Droplet",
+    title: "Based on Water Hardness Level",
+    body: "The hardness level of your water is one of the most important factors when selecting a water softener. Water testing can help determine the concentration of hardness-causing minerals and identify the most suitable softening solution.",
+  },
+  {
+    icon: "Layers",
+    title: "Based on Residential or Commercial Usage",
+    body: "Different water softeners are designed for residential, commercial, and industrial applications. Homes typically require compact systems, while hotels, hospitals, and commercial facilities may need larger-capacity water softening systems to handle higher water consumption.",
+  },
+  {
+    icon: "Users",
+    title: "Based on Daily Water Consumption",
+    body: "The daily water requirement of a household or facility helps determine the capacity of the water softener. Choosing the right capacity ensures consistent soft water availability without affecting system performance.",
+  },
+  {
+    icon: "Waves",
+    title: "Based on Plumbing and Equipment Protection",
+    body: "If hard water is causing scale buildup in pipelines, boilers, water heaters, or appliances, selecting a water softener with the appropriate treatment capacity can help support better system efficiency and equipment longevity.",
+  },
+  {
+    icon: "Layers",
+    title: "Based on Installation Requirements",
+    body: "Water softeners are available in different sizes and configurations. The available installation space, water flow rate, and application requirements should be considered when selecting the right system.",
+  },
+];
 
 const WaterSofteners = () => {
   const heroWrapRef = useRef(null);
@@ -778,6 +825,14 @@ lg:aspect-[1440/700]"
       <SoftenerAqualifetSection />
       <WhyChooseAqualife />
       <AutoTechnicalSpecification />
+
+      {/* What is hard water + How to choose */}
+      <WaterPurifierInfo
+        // image={softer_img_1}
+        content={softenerInfoContent}
+        cards={softenerInfoCards}
+      />
+
       <DownloadPdf />
       <FaqSection />
     </div>

@@ -14,6 +14,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import coolerPeople from "../assets/water_cooler_banner_1.jpg";
 import coolerSchool from "../assets/water_cooler_banner_2.jpg";
 import { ChevronDown } from "lucide-react";
+import WaterPurifierInfo from "../components/WaterPurifierInfo";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,7 +22,7 @@ gsap.registerPlugin(ScrollTrigger);
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  
+
 /* ── Mock products ── */
 const PRODUCTS = [
   {
@@ -122,6 +123,51 @@ const SPECS = [
   { label: "Body Material", value: "Mild Steel with Powder Coating" },
   { label: "Net Weight", value: "32 Kg" },
   { label: "Warranty", value: "1 Year Comprehensive" },
+];
+
+/* ── Why you need a water cooler + How to choose (content only, icons untouched) ── */
+const waterCoolerContent = {
+  eyebrow: "Why Choose a Water Cooler",
+  heroTitle: "Why Do You Need a Water Purifier?",
+  heroImageAlt: "Aqualife water cooler in a commercial setting",
+  paragraphs: [
+    "Providing access to clean and chilled drinking water is essential in workplaces, educational institutions, healthcare facilities, commercial buildings, and public spaces. During hot weather and long working hours, people require easy access to drinking water to stay refreshed and hydrated throughout the day.",
+    "A water cooler offers a convenient solution by providing a continuous supply of cool drinking water without the need for refrigeration or storage of bottled water. Whether installed in an office, school, hospital, factory, showroom, or commercial facility, a water cooler helps improve convenience and ensures drinking water is readily available whenever needed.",
+    "Water coolers are designed to deliver chilled drinking water quickly and efficiently, making them suitable for environments with regular water consumption. They can support multiple users throughout the day while reducing the need for individual water bottles and manual cooling methods.",
+    "Modern water coolers are available in different capacities and configurations, allowing businesses and organisations to choose a system based on the number of users, installation space, and daily water requirements.",
+  ],
+  sectionTitle: "How to Choose the Right Water Purifier",
+  sectionSubtitle: "",
+};
+
+// only reusing the icons already defined in WaterPurifierInfo's ICON_MAP:
+// Droplet, Waves, Layers, Users — nothing new added there
+const waterCoolerCards = [
+  {
+    icon: "Users",
+    title: "Based on User Capacity",
+    body: "The number of people using the water cooler is one of the most important considerations. Small offices may require compact water coolers, while schools, hospitals, factories, and commercial facilities often need higher-capacity models capable of serving a larger number of users throughout the day.",
+  },
+  {
+    icon: "Waves",
+    title: "Based on Cooling Capacity",
+    body: "Different water coolers are designed to produce different amounts of chilled water per hour. Choosing the appropriate cooling capacity ensures that users have access to cold drinking water even during peak usage periods.",
+  },
+  {
+    icon: "Layers",
+    title: "Based on Installation Location",
+    body: "Water coolers are available in various designs, including floor-standing and wall-mounted models. The available space and usage environment should be considered when selecting a suitable system for your facility.",
+  },
+  {
+    icon: "Droplet",
+    title: "Based on Water Storage Requirements",
+    body: "Facilities with high daily water consumption may require larger storage tanks to ensure a continuous supply of chilled water. Selecting the right storage capacity helps maintain consistent availability during busy hours.",
+  },
+  {
+    icon: "Layers",
+    title: "Based on Commercial or Industrial Usage",
+    body: "Commercial and industrial environments often require heavy-duty water coolers designed for continuous operation. Choosing a model suited to your usage requirements can help improve efficiency and long-term performance.",
+  },
 ];
 
 /* ── Product card ── */
@@ -403,7 +449,7 @@ const WaterCooler = () => {
   }, []);
 
   /* ── Experience section: heading + feature cards + pinned image ── */
-   const heroWrapRef = useRef(null);
+  const heroWrapRef = useRef(null);
   const heroImgRef = useRef(null);
 
   useLayoutEffect(() => {
@@ -416,8 +462,7 @@ const WaterCooler = () => {
         heroImgRef.current,
         { scale: 1.15 },
         { scale: 1, duration: 1.6 }
-      )
-       
+      );
     }, heroWrapRef);
 
     // Safety net: recalc ScrollTrigger positions once everything (fonts/images) has settled
@@ -429,7 +474,6 @@ const WaterCooler = () => {
       window.removeEventListener("load", onLoad);
     };
   }, []);
-
 
   return (
     <main className="w-full overflow-x-hidden pt-20 lg:pt-20">
@@ -563,7 +607,15 @@ const WaterCooler = () => {
           </div>
         </div>
       </section>
+
       <ProductSpecTable />
+
+      {/* Why you need a water cooler + How to choose */}
+      <WaterPurifierInfo
+        // image={coller1}
+        content={waterCoolerContent}
+        cards={waterCoolerCards}
+      />
     </main>
   );
 };

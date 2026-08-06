@@ -2,7 +2,7 @@ import axiosInstance from "../../api/axiosInstance";
 import Cookies from "js-cookie";
 
 export const sendLoginOtp = async (mobile) => {
-  const { data } = await axiosInstance.post("/auth/login/send-otp", { mobile });
+  const { data } = await axiosInstance.post("auth/login/send-otp", { mobile });
   return data;
 };
 
