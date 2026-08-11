@@ -22,6 +22,7 @@ import BlogDetails from "./pages/BlogDetails";
 import PageNotFound from "./pages/PageNotFound";
 import AddressForm from "./pages/AddressForm";
 import SelectAddress from "./pages/SelectAddress";
+import Wishlist from "./components/Wishlist";
 
 const HIDE_LAYOUT_PATHS = ["/otp-verification",];
 
@@ -33,7 +34,7 @@ function App() {
   return (
     <>
       <ScrollToTop />
-      {showLayout && <Navbar />}
+       <Navbar />
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -53,6 +54,7 @@ function App() {
         <Route path="/blog-details" element={<BlogDetails />} />
         <Route path="/checkout-address" element={<AddressForm />} />
         <Route path="/select-address" element={<SelectAddress />} />
+        <Route path="/wishlist" element={<Wishlist />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
 

@@ -214,10 +214,10 @@ const WaterPurifierInfo = ({
   return (
     <section
       ref={sectionRef}
-      className="w-full px-4 py-16 sm:px-6"
+      className="w-full py-16 "
       style={{ background: COLORS.bg }}
     >
-      <div className="mx-auto max-w-6xl">
+      <div className="primary-container">
         {/* Why section */}
         <div ref={heroRef}>
           <span

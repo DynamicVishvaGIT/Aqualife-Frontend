@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
-import { ShoppingCart, Heart, ChevronDown, X } from "lucide-react";
+import { ShoppingCart, Heart, ChevronDown, X, Share2 } from "lucide-react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -211,6 +211,7 @@ export default function ProductDetail() {
   const product = singleProduct;
   const images = singleProduct.galleryImages;
   const flyToCart = useCartFly();
+  const navigate = useNavigate();
 
   // ── all state ──
   const [mainImg, setMainImg] = useState(0);
@@ -224,6 +225,8 @@ export default function ProductDetail() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [zoomScale, setZoomScale] = useState(1);
   const [transformOrigin, setTransformOrigin] = useState("center center");
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   // ── refs ──
   const rootRef = useRef(null);
@@ -236,6 +239,8 @@ export default function ProductDetail() {
   const lastTapRef = useRef(0);
   const pinchStartDistRef = useRef(null);
   const pinchStartScaleRef = useRef(1);
+  const qtyValueRef = useRef(null);
+  const shareToastRef = useRef(null);
 
   const ZOOM_LEVEL = 2.5;
   const LENS_SIZE = 160;
@@ -272,6 +277,74 @@ export default function ProductDetail() {
   const bumpButton = (el) => {
     if (!el) return;
     gsap.fromTo(el, { scale: 0.9 }, { scale: 1, duration: 0.35, ease: "back.out(3)" });
+  };
+
+  // ── Wishlist: pop + wiggle on activate, soft settle on deactivate ──
+  const toggleWishlist = (e) => {
+    e.stopPropagation();
+    const el = e.currentTarget;
+    const icon = el.querySelector("svg");
+    const nextState = !isWishlisted;
+    setIsWishlisted(nextState);
+
+    if (nextState) {
+      gsap.timeline()
+        .to(el, { scale: 1.25, duration: 0.15, ease: "power2.out" })
+        .to(el, { scale: 1, duration: 0.45, ease: "elastic.out(1, 0.45)" });
+      if (icon) {
+        gsap.fromTo(
+          icon,
+          { rotate: 0, transformOrigin: "center" },
+          { rotate: 14, duration: 0.09, yoyo: true, repeat: 3, ease: "power1.inOut", transformOrigin: "center" }
+        );
+      }
+    } else {
+      gsap.fromTo(el, { scale: 0.85 }, { scale: 1, duration: 0.3, ease: "back.out(2.5)" });
+    }
+  };
+
+  // ── Share: rotate-bump icon, fade the copy toast in via effect below ──
+  const handleShare = async (e) => {
+    e.stopPropagation();
+    const el = e.currentTarget;
+    gsap.fromTo(
+      el,
+      { scale: 0.85, rotate: -18 },
+      { scale: 1, rotate: 0, duration: 0.4, ease: "back.out(3)" }
+    );
+
+    const shareData = {
+      title: product.title,
+      text: product.description,
+      url: typeof window !== "undefined" ? window.location.href : "",
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareData.url);
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 1800);
+      }
+    } catch (err) {
+      // user cancelled the native share sheet — ignore
+    }
+  };
+
+  const decrementQty = (e) => {
+    if (qty <= 1) return;
+    setQty((q) => Math.max(1, q - 1));
+    bumpButton(e.currentTarget);
+  };
+
+  const incrementQty = (e) => {
+    setQty((q) => q + 1);
+    bumpButton(e.currentTarget);
+  };
+
+  const handleBuyNow = (e) => {
+    bumpButton(e.currentTarget);
+    navigate("/address");
   };
 
   const handleGalleryMouseEnter = () => {
@@ -368,6 +441,27 @@ export default function ProductDetail() {
     gsap.fromTo(".pd-extra-row", { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.04, ease: "power2.out" });
   }, [showAll]);
 
+  // ── qty number pop whenever it changes ──
+  useLayoutEffect(() => {
+    if (!qtyValueRef.current) return;
+    gsap.fromTo(
+      qtyValueRef.current,
+      { scale: 1.35, opacity: 0.5 },
+      { scale: 1, opacity: 1, duration: 0.28, ease: "back.out(2.5)" }
+    );
+  }, [qty]);
+
+  // ── share toast fade in ──
+  useLayoutEffect(() => {
+    if (shareCopied && shareToastRef.current) {
+      gsap.fromTo(
+        shareToastRef.current,
+        { opacity: 0, y: 6, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.25, ease: "power2.out" }
+      );
+    }
+  }, [shareCopied]);
+
   useLayoutEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
@@ -418,6 +512,41 @@ export default function ProductDetail() {
       <div className="absolute left-0 w-full z-10">
         <div className="primary-container">
           <Breadcrumb />
+          {/* ── Wishlist / Share — top right ── */}
+          <div className="absolute top-[-5px] right-10 z-20 flex items-center gap-3">
+            <div className="relative">
+              <button
+                onClick={handleShare}
+                onMouseEnter={(e) => e.stopPropagation()}
+                onMouseMove={(e) => e.stopPropagation()}
+                aria-label="Share product"
+                className="w-10 h-10 rounded-full cursor-pointer bg-white shadow-md flex items-center justify-center text-gray-500 hover:text-[#0061C2] hover:shadow-lg transition-shadow"
+              >
+                <Share2 size={16} />
+              </button>
+              {shareCopied && (
+                <span
+                  ref={shareToastRef}
+                  className="absolute top-11 right-0 whitespace-nowrap bg-black/75 text-white text-[11px] font-medium px-2.5 py-1 rounded-md"
+                >
+                  Link copied
+                </span>
+              )}
+            </div>
+            <button
+              onClick={toggleWishlist}
+              onMouseEnter={(e) => e.stopPropagation()}
+              onMouseMove={(e) => e.stopPropagation()}
+              aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              aria-pressed={isWishlisted}
+              className="w-10 h-10 rounded-full cursor-pointer bg-white shadow-md flex items-center justify-center hover:shadow-lg transition-shadow"
+            >
+              <Heart
+                size={16}
+                className={`transition-colors duration-200 ${isWishlisted ? "fill-red-500 text-red-500" : "text-gray-500"}`}
+              />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -465,7 +594,7 @@ export default function ProductDetail() {
                 ))}
               </Swiper>
 
-              <div className="absolute top-3 right-3 lg:hidden z-[999]">
+              <div className="absolute top-3 left-3 lg:hidden z-[999]">
                 <div className="bg-black/60 text-white text-xs font-medium px-3 py-1 rounded-full">
                   {mainImg + 1} / {images.length}
                 </div>
@@ -587,50 +716,59 @@ export default function ProductDetail() {
             </div>
             <p className="text-xs text-gray-400 mt-1">Tax included.</p>
 
-            <div className="pd-actions mt-5 flex flex-wrap items-center gap-3 sm:gap-4">
-              {/* Quantity */}
-              <div className="inline-flex items-center border border-gray-300 rounded-xl overflow-hidden bg-white shadow-sm">
+            <div className="pd-actions mt-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+              {/* Quantity stepper */}
+              <div className="inline-flex items-center h-11 border border-gray-300 rounded-xl overflow-hidden bg-white shadow-sm w-fit">
                 <button
-                  onClick={(e) => { setQty((q) => Math.max(1, q - 1)); bumpButton(e.currentTarget); }}
-                  className="w-11 h-11 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
+                  onClick={decrementQty}
+                  disabled={qty <= 1}
+                  aria-label="Decrease quantity"
+                  className={`w-11 h-full flex items-center justify-center transition-all duration-200 ${
+                    qty <= 1
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 cursor-pointer"
+                  }`}
                 >
                   <FiMinus size={16} />
                 </button>
-                <span className="min-w-[45px] h-11 flex items-center justify-center border-x border-gray-300 text-sm font-semibold text-gray-900">
+                <span
+                  ref={qtyValueRef}
+                  className="min-w-[45px] h-full flex items-center justify-center border-x border-gray-300 text-sm font-semibold text-gray-900 tabular-nums"
+                >
                   {qty}
                 </span>
                 <button
-                  onClick={(e) => { setQty((q) => q + 1); bumpButton(e.currentTarget); }}
-                  className="w-11 h-11 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
+                  onClick={incrementQty}
+                  aria-label="Increase quantity"
+                  className="w-11 h-full flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-200 cursor-pointer"
                 >
                   <FiPlus size={16} />
                 </button>
               </div>
 
-              {/* Add to Cart — fires fly-to-cart animation */}
-              <button
-                onClick={(e) => {
-                  bumpButton(e.currentTarget);
-                  flyToCart({
-                    image: images[mainImg],
-                    name: product.title,
-                    buttonEl: e.currentTarget,
-                  });
-                }}
-                className="flex cursor-pointer items-center gap-2 bg-[#0061C2] hover:bg-[#0052A6] text-white text-sm font-medium px-5 py-3 rounded-xl transition-colors active:scale-95 duration-300"
-              >
-                <ShoppingCart size={16} />
-                Add to Cart
-              </button>
+              {/* Add to Cart + Buy Now */}
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <button
+                  onClick={(e) => {
+                    bumpButton(e.currentTarget);
+                    flyToCart({
+                      image: images[mainImg],
+                      buttonEl: e.currentTarget,
+                    });
+                  }}
+                  className="flex-1 sm:flex-none h-11 cursor-pointer items-center justify-center gap-2 bg-[#0061C2] hover:bg-[#0052A6] text-white text-sm font-medium px-6 rounded-xl transition-colors active:scale-95 duration-200 flex"
+                >
+                  <ShoppingCart size={16} />
+                  Add to Cart
+                </button>
 
-              {/* Wishlist */}
-              <button
-                onClick={(e) => bumpButton(e.currentTarget)}
-                className="flex items-center cursor-pointer gap-2 border border-gray-300 hover:border-gray-500 text-gray-700 hover:text-gray-900 text-sm font-medium px-5 py-3 rounded-xl transition-all active:scale-95 duration-200"
-              >
-                <Heart size={16} />
-                Add to Wishlist
-              </button>
+                <button
+                  onClick={(e) => handleBuyNow}
+                  className="flex-1 sm:flex-none h-11 cursor-pointer items-center justify-center gap-2 bg-[#0061C2] hover:bg-[#0052A6] text-white text-sm font-medium px-6 rounded-xl transition-colors active:scale-95 duration-200 flex"
+                >
+                  Buy Now
+                </button>
+              </div>
             </div>
           </div>
         </div>

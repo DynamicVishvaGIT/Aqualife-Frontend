@@ -15,6 +15,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import SearchOverlay from "./SearchOverlay";
 import AccountDropdown from "./AccountDropdown";
+import { useLogout } from "../features/hooks/authHooks";
 
 const NAV_LINKS = [
   { label: "Water Purifiers", to: "/water-purifiers" },
@@ -35,12 +36,19 @@ const MOBILE_NAV_LINKS = [
   { label: "Blogs", to: "/blogs" },
 ];
 
-export default function Navbar({ cartCount = 0, isLoggedIn = true }) {
+export default function Navbar({ cartCount = 0 }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { mutate: logout } = useLogout();
+  const handleLogout = () => {
+    logout(undefined, {
+      onSuccess: () => navigate("/"),
+    });
+  };
 
   /* ── refs ── */
   const utilBarRef = useRef(null);
@@ -119,11 +127,7 @@ export default function Navbar({ cartCount = 0, isLoggedIn = true }) {
     }
   }, [scrolled]);
 
-  /* ── drawer GSAP + scroll lock ──
-     Merged into ONE effect so the scroll lock is released only after the
-     CLOSE animation finishes (onComplete), instead of unlocking the instant
-     `mobileOpen` flips to false. That mismatch was what caused the icon row
-     to visibly "bounce" right/left while the drawer was still animating out. */
+  /* ── drawer GSAP + scroll lock ── */
   useEffect(() => {
     const overlay = overlayRef.current;
     const drawer = drawerRef.current;
@@ -135,8 +139,6 @@ export default function Navbar({ cartCount = 0, isLoggedIn = true }) {
       window.innerWidth - document.documentElement.clientWidth;
 
     if (mobileOpen) {
-      // Lock immediately on open — no visual cost since the drawer/overlay
-      // are already animating in and mask any reflow.
       document.body.style.overflow = "hidden";
       document.body.style.paddingRight = `${scrollBarWidth}px`;
 
@@ -167,7 +169,6 @@ export default function Navbar({ cartCount = 0, isLoggedIn = true }) {
     } else {
       gsap
         .timeline({
-          // Only unlock scroll once the drawer has fully slid off-screen.
           onComplete: () => {
             document.body.style.overflow = "";
             document.body.style.paddingRight = "";
@@ -194,7 +195,6 @@ export default function Navbar({ cartCount = 0, isLoggedIn = true }) {
     }
 
     return () => {
-      // Safety net: never leave the page scroll-locked if this unmounts mid-animation.
       document.body.style.overflow = "";
       document.body.style.paddingRight = "";
     };
@@ -206,9 +206,7 @@ export default function Navbar({ cartCount = 0, isLoggedIn = true }) {
   const HERO_PAGES = ["/", "/about-us"];
   const hasHeroBanner = HERO_PAGES.includes(location.pathname);
 
-  // white text only on hero pages, and only while still over the hero (not scrolled)
   const isWhiteText = hasHeroBanner && !scrolled;
-  // solid white header background once scrolled, OR always on non-hero pages
   const showSolidHeader = scrolled || !hasHeroBanner;
 
   return (
@@ -308,7 +306,6 @@ export default function Navbar({ cartCount = 0, isLoggedIn = true }) {
                       }`}
                     >
                       {link.label}
-                      {/* center-out underline */}
                       <span
                         className={`absolute -bottom-0.5 h-[2px] rounded-full
                           transition-all duration-300 ease-out
@@ -351,7 +348,7 @@ export default function Navbar({ cartCount = 0, isLoggedIn = true }) {
                 {/* Account — signup / login / profile dropdown */}
                 <AccountDropdown
                   isWhiteText={isWhiteText}
-                  isLoggedIn={isLoggedIn}
+                  onLogout={handleLogout}
                 />
 
                 {/* Divider */}
@@ -364,6 +361,7 @@ export default function Navbar({ cartCount = 0, isLoggedIn = true }) {
                 {/* Cart */}
                 <button
                   onClick={() => navigate("/cart")}
+                    id="navbar-cart-desktop"
                   aria-label="Cart"
                   className={`relative p-1.5 rounded-lg transition-all duration-200 cursor-pointer active:scale-95
       [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-110
@@ -401,6 +399,7 @@ export default function Navbar({ cartCount = 0, isLoggedIn = true }) {
               </button>
               <button
                 aria-label="Cart"
+                  id="navbar-cart-mobile"
                 className="relative p-1 rounded-lg transition-all hover:bg-white/10 active:scale-90"
                 onClick={() => navigate("/cart")}
               >
@@ -415,7 +414,7 @@ export default function Navbar({ cartCount = 0, isLoggedIn = true }) {
               {/* Account — signup / login / profile dropdown */}
               <AccountDropdown
                 isWhiteText={isWhiteText}
-                isLoggedIn={isLoggedIn}
+                onLogout={handleLogout}
               />
               <button
                 aria-label="Open menu"

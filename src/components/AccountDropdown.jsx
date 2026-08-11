@@ -1,32 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
-import { User, LogIn, UserCircle2, LogOut } from "lucide-react";
+import { User, LogIn, UserCircle2 } from "lucide-react";
+import {useAuth} from "../context/AuthProvider" 
 
-/**
- * AccountDropdown
- *
- * Desktop (hover-capable pointers): hover opens the menu after a short
- * intent delay; leaving closes it after a short grace delay so the
- * cursor can travel from the icon to the panel without it snapping shut.
- * Touch devices: opens/closes on tap only.
- *
- * Menu content depends on `isLoggedIn`:
- *  - Logged out → Login
- *  - Logged in  → Profile, Logout
- *
- * Props:
- *  - isWhiteText: bool — match the header's icon color over hero vs white bg
- *  - isLoggedIn:  bool — flips between the logged-out and logged-in menu
- *  - onLogout:    fn   — optional callback fired when "Logout" is clicked
- */
-export default function AccountDropdown({
-  isWhiteText = false,
-  isLoggedIn = false,
-  onLogout,
-}) {
+export default function AccountDropdown({ isWhiteText = false }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+
+  console.log("user",isAuthenticated)
+  console.log("user",user)
 
   const wrapperRef = useRef(null);
   const panelRef = useRef(null);
@@ -177,19 +162,25 @@ export default function AccountDropdown({
     navigate(path);
   };
 
-  const handleLogout = () => {
-    closeMenu();
-    if (onLogout) onLogout();
-    else navigate("/");
-  };
 
-  const menuItems = isLoggedIn
-    ? [
-        { icon: UserCircle2, label: "Profile", onClick: () => go("/profile") },
-        { icon: UserCircle2, label: "Wishlist", onClick: () => go("/wishlist") },
-        { icon: UserCircle2, label: "Orders", onClick: () => go("/wishlist") },
-      ]
-    : [{ icon: LogIn, label: "Login", onClick: () => go("/login") }];
+  // While the session check is still resolving, don't commit to either
+  // menu — showing "Login" here is what caused the flash for users who
+  // turn out to be authenticated once getCurrentUser resolves.
+  const menuItems = isLoading
+    ? []
+    : isAuthenticated
+      ? [
+          { icon: UserCircle2, label: "Profile", onClick: () => go("/profile") },
+          { icon: UserCircle2, label: "Wishlist", onClick: () => go("/wishlist") },
+          { icon: UserCircle2, label: "Orders", onClick: () => go("/orders") },
+        ]
+      : [{ icon: LogIn, label: "Login", onClick: () => go("/login") }];
+
+  const headerLabel = isLoading
+    ? "..."
+    : isAuthenticated
+      ? `Hello ${user?.name || "Aqua User"}`
+      : "Hello Aqua User";
 
   return (
     <div
@@ -240,25 +231,29 @@ export default function AccountDropdown({
                 <User size={16} className="text-white" />
               </div>
               <span className="text-sm font-semibold select-none text-[#191919] truncate">
-                {isLoggedIn ? "Hello Aqua User" : "Hello Aqua User"}
+                {headerLabel}
               </span>
             </div>
 
             <div className="py-2">
-              {menuItems.map(({ icon: Icon, label, onClick }) => (
-                <button
-                  key={label}
-                  ref={addItemRef}
-                  role="menuitem"
-                  onClick={onClick}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-[#191919]
-                    cursor-pointer transition-colors duration-150
-                    hover:bg-blue-50 hover:text-[#0061C2] active:scale-[0.98]"
-                >
-                  <Icon size={17} className="text-[#0061C2] shrink-0" />
-                  {label}
-                </button>
-              ))}
+              {isLoading ? (
+                <div className="px-4 py-3 text-sm text-slate-400">Loading…</div>
+              ) : (
+                menuItems.map(({ icon: Icon, label, onClick }) => (
+                  <button
+                    key={label}
+                    ref={addItemRef}
+                    role="menuitem"
+                    onClick={onClick}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-[#191919]
+                      cursor-pointer transition-colors duration-150
+                      hover:bg-blue-50 hover:text-[#0061C2] active:scale-[0.98]"
+                  >
+                    <Icon size={17} className="text-[#0061C2] shrink-0" />
+                    {label}
+                  </button>
+                ))
+              )}
             </div>
           </div>
         </>

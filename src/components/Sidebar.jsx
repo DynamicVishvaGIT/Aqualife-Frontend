@@ -8,6 +8,8 @@ import {
   Receipt,
   ClipboardList
 } from "lucide-react";
+import { useAuth } from "../context/AuthProvider";
+import { useLogout } from "../features/hooks/authHooks";
 
 const BRAND = "#0061C2";
 
@@ -19,6 +21,21 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
   const itemsRef = useRef([]);
   const indicatorRef = useRef(null);
   const navButtonRefs = useRef({});
+
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { mutate: logout, isPending: loggingOut } = useLogout();
+
+const handleLogout = () => {
+  logout(undefined, {
+    onSuccess: () => {
+      navigate("/");
+    },
+    onError: (error) => {
+      console.error("Logout failed:", error);
+    },
+  });
+};
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -94,9 +111,6 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     { key: "track", label: "Track Status" },
   ];
 
-    const navigate = useNavigate();
-  
-
   return (
     <aside ref={sidebarRef} style={{ opacity: 0 }}>
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-shadow duration-300 hover:shadow-md">
@@ -125,7 +139,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           </div>
           <div>
             <p className="text-xs text-gray-400 leading-none mb-0.5">Hello,</p>
-            <p className="text-sm font-semibold text-gray-800">Om Shinde</p>
+            <p className="text-sm font-semibold text-gray-800">{user?.name || "Aqua User"}</p>
           </div>
         </div>
 
@@ -214,9 +228,12 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         </div>
 
         {/* Log Out */}
-        <div
+        <button
+          type="button"
           ref={addItem}
-          className="flex items-center gap-3 px-5 py-4 border-t border-gray-100 cursor-pointer group"
+          disabled={loggingOut}
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-5 py-4 border-t border-gray-100 cursor-pointer group disabled:opacity-60 disabled:cursor-not-allowed"
           onMouseEnter={(e) => handleHover(e, true)}
           onMouseLeave={(e) => handleHover(e, false)}
         >
@@ -236,9 +253,9 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
             </svg>
           </div>
           <span className="text-sm font-semibold text-gray-800 group-hover:text-red-500 transition-colors">
-            Log Out
+            {loggingOut ? "Logging out..." : "Log Out"}
           </span>
-        </div>
+        </button>
       </div>
     </aside>
   );

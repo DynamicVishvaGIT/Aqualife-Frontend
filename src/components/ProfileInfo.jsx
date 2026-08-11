@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { useAuth } from "../context/AuthProvider";
+import { useUpdateProfile } from "../features/hooks/authHooks";
 
 const BRAND = "#0061C2";
 const BRAND_DARK = "#004a94";
@@ -8,17 +10,17 @@ const prefersReducedMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MOBILE_RE = /^[6-9]\d{9}$/;
 
 const ProfileInfo = () => {
   const containerRef = useRef(null);
   const sectionRefs = useRef([]);
 
+  const { user } = useAuth();
+  const { mutate: updateProfile, isPending: saving } = useUpdateProfile();
+
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
+    name: "",
     email: "",
-    mobile: "",
     gender: "male",
   });
 
@@ -32,6 +34,16 @@ const ProfileInfo = () => {
   });
 
   const [errors, setErrors] = useState({ email: "", mobile: "" });
+
+  // sync local form once user loads / changes (login, refetch, etc.)
+  useEffect(() => {
+    if (!user) return;
+    setForm((prev) => ({
+      ...prev,
+      name: user.name || "",
+      email: user.email || "",
+    }));
+  }, [user]);
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -112,36 +124,57 @@ const ProfileInfo = () => {
 
   const savePersonal = (e) => {
     bumpButton(e.currentTarget);
-    if (!draft.firstName.trim() || !draft.lastName.trim()) return;
-    setForm((prev) => ({
-      ...prev,
-      firstName: draft.firstName.trim(),
-      lastName: draft.lastName.trim(),
-      gender: draft.gender,
-    }));
-    setEditing((prev) => ({ ...prev, personal: false }));
+    const name = draft.name.trim();
+    if (!name) return;
+
+    updateProfile(
+      { name },
+      {
+        onSuccess: () => {
+          setForm((prev) => ({ ...prev, name, gender: draft.gender }));
+          setEditing((prev) => ({ ...prev, personal: false }));
+        },
+        onError: (err) => {
+          setErrors((prev) => ({
+            ...prev,
+            email: err?.response?.data?.error || "Failed to save, try again",
+          }));
+        },
+      }
+    );
   };
 
   const saveEmail = (e) => {
     bumpButton(e.currentTarget);
-    if (!EMAIL_RE.test(draft.email.trim())) {
+    const email = draft.email.trim();
+    if (!EMAIL_RE.test(email)) {
       setErrors((prev) => ({ ...prev, email: "Enter a valid email address" }));
       return;
     }
-    setForm((prev) => ({ ...prev, email: draft.email.trim() }));
-    setErrors((prev) => ({ ...prev, email: "" }));
-    setEditing((prev) => ({ ...prev, email: false }));
+
+    updateProfile(
+      { email },
+      {
+        onSuccess: () => {
+          setForm((prev) => ({ ...prev, email }));
+          setErrors((prev) => ({ ...prev, email: "" }));
+          setEditing((prev) => ({ ...prev, email: false }));
+        },
+        onError: (err) => {
+          setErrors((prev) => ({
+            ...prev,
+            email: err?.response?.data?.error || "Failed to save, try again",
+          }));
+        },
+      }
+    );
   };
 
   const saveMobile = (e) => {
     bumpButton(e.currentTarget);
-    if (!MOBILE_RE.test(draft.mobile.trim())) {
-      setErrors((prev) => ({ ...prev, mobile: "Enter a valid 10-digit mobile number" }));
-      return;
-    }
-    setForm((prev) => ({ ...prev, mobile: draft.mobile.trim() }));
-    setErrors((prev) => ({ ...prev, mobile: "" }));
-    setEditing((prev) => ({ ...prev, mobile: false }));
+    // Backend has no mobile-update route yet (PUT /auth/profile only
+    // accepts name/email) — surface that instead of pretending it saved.
+    setErrors((prev) => ({ ...prev, mobile: "Mobile number update isn't supported yet" }));
   };
 
   return (
@@ -163,11 +196,12 @@ const ProfileInfo = () => {
                 </button>
                 <button
                   type="button"
+                  disabled={saving}
                   className={editButtonClass}
-                  style={{ color: BRAND }}
+                  style={{ color: BRAND, opacity: saving ? 0.6 : 1 }}
                   onClick={savePersonal}
                 >
-                  Save
+                  {saving ? "Saving..." : "Save"}
                 </button>
               </div>
             ) : (
@@ -182,41 +216,22 @@ const ProfileInfo = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-            <div>
-              <label htmlFor="firstName" className="sr-only">
-                First name
-              </label>
-              <input
-                id="firstName"
-                type="text"
-                value={editing.personal ? draft.firstName : form.firstName}
-                disabled={!editing.personal}
-                placeholder="First name"
-                onChange={(e) =>
-                  setDraft((prev) => ({ ...prev, firstName: e.target.value }))
-                }
-                className={inputClass(editing.personal)}
-                {...focusHandlers}
-              />
-            </div>
-            <div>
-              <label htmlFor="lastName" className="sr-only">
-                Last name
-              </label>
-              <input
-                id="lastName"
-                type="text"
-                value={editing.personal ? draft.lastName : form.lastName}
-                disabled={!editing.personal}
-                placeholder="Last name"
-                onChange={(e) =>
-                  setDraft((prev) => ({ ...prev, lastName: e.target.value }))
-                }
-                className={inputClass(editing.personal)}
-                {...focusHandlers}
-              />
-            </div>
+          <div className="mb-5">
+            <label htmlFor="name" className="sr-only">
+              Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={editing.personal ? draft.name : form.name}
+              disabled={!editing.personal}
+              placeholder="Full name"
+              onChange={(e) =>
+                setDraft((prev) => ({ ...prev, name: e.target.value }))
+              }
+              className={inputClass(editing.personal)}
+              {...focusHandlers}
+            />
           </div>
 
           <div>
@@ -269,8 +284,14 @@ const ProfileInfo = () => {
                 >
                   Cancel
                 </button>
-                <button type="button" className={editButtonClass} style={{ color: BRAND }} onClick={saveEmail}>
-                  Save
+                <button
+                  type="button"
+                  disabled={saving}
+                  className={editButtonClass}
+                  style={{ color: BRAND, opacity: saving ? 0.6 : 1 }}
+                  onClick={saveEmail}
+                >
+                  {saving ? "Saving..." : "Save"}
                 </button>
               </div>
             ) : (
@@ -343,15 +364,9 @@ const ProfileInfo = () => {
             type="tel"
             inputMode="numeric"
             maxLength={10}
-            value={editing.mobile ? draft.mobile : form.mobile}
-            disabled={!editing.mobile}
-            onChange={(e) =>
-              setDraft((prev) => ({
-                ...prev,
-                mobile: e.target.value.replace(/\D/g, "").slice(0, 10),
-              }))
-            }
-            className={inputClass(editing.mobile)}
+            value={user?.mobile || ""}
+            disabled
+            className={inputClass(false)}
             placeholder="Mobile Number"
             {...focusHandlers}
           />

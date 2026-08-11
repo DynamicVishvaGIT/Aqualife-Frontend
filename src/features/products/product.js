@@ -3,6 +3,8 @@ import axiosInstance from "../../api/axiosInstance";
 // Categories
 export const getCategories = async () => {
   const { data } = await axiosInstance.get("/categories");
+  console.log("categories",data)
+
   return data;
 };
 
@@ -11,6 +13,8 @@ export const getProducts = async (params) => {
   const { data } = await axiosInstance.get("/products", {
     params,
   });
+
+  console.log("products",data)
 
   return data;
 };

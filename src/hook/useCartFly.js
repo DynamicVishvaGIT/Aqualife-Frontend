@@ -109,7 +109,7 @@ export default function useCartFly() {
     imgWrap.appendChild(img);
 
     const pill = document.createElement("div");
-    pill.textContent = name.length > 18 ? name.slice(0, 18) + "…" : name;
+    pill.textContent = "Added to Cart";
     pill.style.cssText = `
       background: #0061C2;
       color: #fff;
@@ -135,7 +135,6 @@ export default function useCartFly() {
     const curveY = -220;      // more negative = higher arc
 
     const popDur = 0.45 * speed;
-    const flightDur = 1.5 * speed;
 
     const tl = gsap.timeline({
       onComplete: () => {
@@ -187,39 +186,23 @@ export default function useCartFly() {
         clone.style.pointerEvents = "auto";
       }
     });
-
+ 
     // Pop up from button
     tl.fromTo(clone, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: popDur, ease: "back.out(2.5)" });
 
-    // Curved arc flight, image + text stay fully visible until the final approach:
-    // 1) rise-and-curve away from the button
-    // 2) glide toward the cart, still fully visible
-    // 3) shrink + fade only in the last beat, right as it reaches the icon
     tl.to(clone, {
       x: curveX,
       y: curveY,
       scale: 0.95,
-      rotation: 10,
-      duration: flightDur * 0.35,
+      duration: 0.40,
       ease: "power2.out",
     })
       .to(clone, {
-        x: dx * 0.85,
-        y: dy + curveY * 0.15,
-        scale: 0.75,
-        rotation: -6,
-        duration: flightDur * 0.4,
+        x: dx ,
+        y: dy ,
         ease: "power1.inOut",
       })
-      .to(clone, {
-        x: dx,
-        y: dy,
-        scale: 0.25,
-        opacity: 0,
-        rotation: 0,
-        duration: flightDur * 0.25,
-        ease: "power3.in",
-      });
+    
 
     // ── Interactivity on the flying clone ────────────────────────────────
     const pause = () => {

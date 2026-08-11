@@ -31,6 +31,11 @@ export default function Signup() {
   const navigate = useNavigate();
   const { mutate: sendLoginOtp, isPending: loginPending } = useSendLoginOtp();
 
+  const baseURL = import.meta.env.VITE_API_BASE_URL;
+
+
+  console.log("base_url",baseURL);
+
   /* ── Mount animation ── */
   useEffect(() => {
     const ctx = gsap.context(() => {

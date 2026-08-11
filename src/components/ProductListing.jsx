@@ -1,83 +1,17 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { SlidersHorizontal, ChevronDown, ChevronRight, X } from "lucide-react";
-import product1 from "../assets/Purifier_1.png";
-import product2 from "../assets/Purifier_2.png";
-import product3 from "../assets/Purifier_3.png";
-import product4 from "../assets/Purifier_4.png";
 import { WaterButton } from "../components/WaterButton";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import FilterDrawer, { FILTER_GROUPS } from "../components/FilterDrawer";
 import SortModal from "../components/SortModal";
+import { useCategories, useProducts } from "../features/hooks/productHooks";
 
 gsap.registerPlugin(ScrollTrigger);
 
 /* ── Brand color ── */
 const BRAND = "#1A6FC4";
-
-/* ── Category tabs ── */
-const CATEGORIES = [
-  { label: "All",           img: product1 },
-  { label: "Just Launched", img: product2 },
-  { label: "Copper Range",  img: product3 },
-  { label: "UV",            img: product4 },
-  { label: "RO",            img: product2 },
-];
-
-/* ── Mock products ── */
-const PRODUCTS = [
-  {
-    id: 1,
-    image: product1,
-    badge: "New launch",
-    name: "Venus",
-    description: "UV+UF+Copper & zinc water purifier",
-    price: 28999,
-    mrp: 39000,
-    discount: 25,
-  },
-  {
-    id: 2,
-    image: product2,
-    badge: null,
-    name: "Venus",
-    description: "UV+UF+Copper & zinc water purifier",
-    price: 28999,
-    mrp: 39000,
-    discount: 25,
-  },
-  {
-    id: 3,
-    image: product3,
-    badge: null,
-    name: "Venus",
-    description: "UV+UF+Copper & zinc water purifier",
-    price: 28999,
-    mrp: 39000,
-    discount: 25,
-  },
-  {
-    id: 4,
-    image: product4,
-    badge: null,
-    name: "Venus",
-    description: "UV+UF+Copper & zinc water purifier",
-    price: 28999,
-    mrp: 39000,
-    discount: 25,
-  },
-  {
-    id: 5,
-    image: product1,
-    badge: null,
-    name: "Venus Pro",
-    description: "UV+UF+Copper & zinc water purifier",
-    price: 32999,
-    mrp: 44000,
-    discount: 25,
-  },
-];
 
 // [fix1] expanded to match FilterDrawer's full key set
 const emptyFilters = {
@@ -88,6 +22,8 @@ const emptyFilters = {
   tds:          [],
   capacity:     [],
 };
+
+const PAGE_SIZE = 12;
 
 /* ── Product card ── */
 function ProductCard({ product, setCardRef }) {
@@ -134,7 +70,7 @@ function ProductCard({ product, setCardRef }) {
     <div
       ref={cardRef}
       className="bg-white cursor-pointer rounded-2xl border border-slate-100 p-3 sm:p-5 flex flex-col h-full select-none justify-between"
-      onClick={() => navigate("/product-details")}
+      onClick={() => navigate(`/product-details/${product.slug || product.id}`)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -164,17 +100,21 @@ function ProductCard({ product, setCardRef }) {
 
         <div ref={priceRef} className="mb-3 sm:mb-4">
           <p className="text-lg sm:text-[22px] font-bold text-slate-900 leading-none mb-1">
-            ₹{product.price.toLocaleString("en-IN")}
+            ₹{Number(product.price || 0).toLocaleString("en-IN")}
           </p>
-          <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-[11px] sm:text-[13px]">
-            <span className="text-slate-400">MRP</span>
-            <span className="text-slate-400 line-through">
-              ₹{product.mrp.toLocaleString("en-IN")}
-            </span>
-            <span className="text-green-500 font-semibold whitespace-nowrap">
-              ({product.discount}% OFF)
-            </span>
-          </div>
+          {product.mrp ? (
+            <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-[11px] sm:text-[13px]">
+              <span className="text-slate-400">MRP</span>
+              <span className="text-slate-400 line-through">
+                ₹{Number(product.mrp).toLocaleString("en-IN")}
+              </span>
+              {product.discount ? (
+                <span className="text-green-500 font-semibold whitespace-nowrap">
+                  ({product.discount}% OFF)
+                </span>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -201,11 +141,12 @@ function ProductCard({ product, setCardRef }) {
 export default function WaterPurifierListing() {
   const [activeCategory, setActiveCategory] = useState("All");
 
-  /* ── Filter + sort state ── */
+  /* ── Filter + sort + pagination state ── */
   const [filters,    setFilters]    = useState(emptyFilters);
   const [sortBy,     setSortBy]     = useState("popularity");
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen,   setSortOpen]   = useState(false);
+  const [page,       setPage]       = useState(1);
   const sortBtnRef = useRef(null);
 
   const activeFilterCount = Object.values(filters).reduce((sum, arr) => sum + arr.length, 0);
@@ -215,9 +156,73 @@ export default function WaterPurifierListing() {
       ...prev,
       [groupKey]: prev[groupKey].filter((v) => v !== value),
     }));
+    setPage(1);
   };
 
-  const clearAllFilters = () => setFilters(emptyFilters);
+  const clearAllFilters = () => {
+    setFilters(emptyFilters);
+    setPage(1);
+  };
+
+  /* ── Categories: live from API ── */
+  const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
+
+  // Backend categories + a synthetic "All" tab up front. Assumes each
+  // category looks like { id, name, slug, image }.
+  const categories = useMemo(() => {
+    const apiCategories = categoriesData?.categories || categoriesData || [];
+    return [{ label: "All", slug: "all", img: null }, ...apiCategories.map((c) => ({
+      label: c.name,
+      slug: c.slug,
+      img: c.image,
+    }))];
+  }, [categoriesData]);
+
+  /* ── Products: live from API, driven by category/filters/sort/page ── */
+  const activeCategorySlug = useMemo(() => {
+    const found = categories.find((c) => c.label === activeCategory);
+    return found && found.slug !== "all" ? found.slug : undefined;
+  }, [categories, activeCategory]);
+
+  const queryParams = useMemo(() => {
+    const p = {
+      page,
+      pageSize: PAGE_SIZE,
+      sort: sortBy,
+    };
+    if (activeCategorySlug) p.category = activeCategorySlug;
+    Object.entries(filters).forEach(([key, values]) => {
+      if (values.length) p[key] = values.join(",");
+    });
+    return p;
+  }, [page, sortBy, activeCategorySlug, filters]);
+
+  const { data: productsData, isLoading: productsLoading, isFetching: productsFetching } =
+    useProducts(queryParams);
+
+  // Assumes backend returns { products: [...], total } — adjust here if
+  // the actual shape differs.
+  const pageProducts = productsData?.products || (Array.isArray(productsData) ? productsData : []);
+  const total = productsData?.total ?? pageProducts.length;
+
+  // Accumulate pages for "View more results" instead of replacing.
+  const [accumulatedProducts, setAccumulatedProducts] = useState([]);
+  useEffect(() => {
+    if (!pageProducts.length && page === 1) {
+      setAccumulatedProducts([]);
+      return;
+    }
+    setAccumulatedProducts((prev) =>
+      page === 1 ? pageProducts : [...prev, ...pageProducts],
+    );
+  }, [productsData]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reset to page 1 whenever category/filters/sort change.
+  useEffect(() => {
+    setPage(1);
+  }, [activeCategory, sortBy, filters]);
+
+  const hasMore = accumulatedProducts.length < total;
 
   /* ── Category tab animation refs ── */
   const tabRefs      = useRef({});
@@ -247,12 +252,12 @@ export default function WaterPurifierListing() {
         { scale: 1.15, duration: 0.2, yoyo: true, repeat: 1, ease: "power1.inOut" },
       );
     }
-  }, [activeCategory]);
+  }, [activeCategory, categories]);
 
   /* ── Scroll-triggered staggered reveal: Category tabs ── */
   useEffect(() => {
     const tabs     = tabRefs.current;
-    const elements = CATEGORIES.map((cat) => tabs[cat.label]).filter(Boolean);
+    const elements = categories.map((cat) => tabs[cat.label]).filter(Boolean);
     if (!elements.length) return;
 
     const ctx = gsap.context(() => {
@@ -275,7 +280,7 @@ export default function WaterPurifierListing() {
     });
 
     return () => ctx.revert();
-  }, []);
+  }, [categories]);
 
   /* ── Product grid refs ── */
   const cardRefs = useRef([]);
@@ -318,7 +323,7 @@ export default function WaterPurifierListing() {
     });
 
     return () => ctx.revert();
-  }, [activeCategory]);
+  }, [accumulatedProducts]);
 
   return (
     <div className="min-h-screen bg-[#fff7f6]">
@@ -329,37 +334,43 @@ export default function WaterPurifierListing() {
             ref={containerRef}
             className="relative flex items-end justify-start sm:justify-center gap-3 sm:gap-8 overflow-x-auto scrollbar-hide unique-scroll-container"
           >
-            {CATEGORIES.map((cat) => {
-              const active = activeCategory === cat.label;
-              return (
-                <button
-                  key={cat.label}
-                  ref={(el) => (tabRefs.current[cat.label] = el)}
-                  onClick={() => setActiveCategory(cat.label)}
-                  className={`flex flex-col items-center gap-1.5 pt-4 sm:pt-7 cursor-pointer shrink-0
-                  border-b-2 sm:border-b-3 duration-500 hover:scale-105 min-w-[90px] sm:min-w-[120px]
-                  2xl:min-w-[160px] border-transparent`}
-                >
-                  <div
-                    ref={(el) => (iconRefs.current[cat.label] = el)}
-                    className="w-12 sm:w-16 h-14 sm:h-20 flex items-end justify-center"
+            {categoriesLoading ? (
+              <div className="py-6 text-sm text-slate-400">Loading categories…</div>
+            ) : (
+              categories.map((cat) => {
+                const active = activeCategory === cat.label;
+                return (
+                  <button
+                    key={cat.label}
+                    ref={(el) => (tabRefs.current[cat.label] = el)}
+                    onClick={() => setActiveCategory(cat.label)}
+                    className={`flex flex-col items-center gap-1.5 pt-4 sm:pt-7 cursor-pointer shrink-0
+                    border-b-2 sm:border-b-3 duration-500 hover:scale-105 min-w-[90px] sm:min-w-[120px]
+                    2xl:min-w-[160px] border-transparent`}
                   >
-                    <img
-                      loading="lazy"
-                      src={cat.img}
-                      alt={cat.label}
-                      className="max-h-full max-w-full object-contain transition-all duration-200"
-                    />
-                  </div>
-                  <span
-                    className={`text-[12px] sm:text-[13px] font-semibold whitespace-nowrap transition-colors pb-3 sm:pb-4 duration-200
-                    ${active ? "text-[#1A6FC4]" : "text-slate-800 hover:text-slate-600"}`}
-                  >
-                    {cat.label}
-                  </span>
-                </button>
-              );
-            })}
+                    <div
+                      ref={(el) => (iconRefs.current[cat.label] = el)}
+                      className="w-12 sm:w-16 h-14 sm:h-20 flex items-end justify-center"
+                    >
+                      {cat.img && (
+                        <img
+                          loading="lazy"
+                          src={cat.img}
+                          alt={cat.label}
+                          className="max-h-full max-w-full object-contain transition-all duration-200"
+                        />
+                      )}
+                    </div>
+                    <span
+                      className={`text-[12px] sm:text-[13px] font-semibold whitespace-nowrap transition-colors pb-3 sm:pb-4 duration-200
+                      ${active ? "text-[#1A6FC4]" : "text-slate-800 hover:text-slate-600"}`}
+                    >
+                      {cat.label}
+                    </span>
+                  </button>
+                );
+              })
+            )}
 
             <div
               ref={indicatorRef}
@@ -457,28 +468,38 @@ export default function WaterPurifierListing() {
         )}
 
         {/* Product grid */}
-        <div
-          ref={gridRef}
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-5"
-        >
-          {PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} setCardRef={addCardRef} />
-          ))}
-        </div>
+        {productsLoading && page === 1 ? (
+          <div className="py-16 text-center text-sm text-slate-400">Loading products…</div>
+        ) : accumulatedProducts.length === 0 ? (
+          <div className="py-16 text-center text-sm text-slate-400">No products found.</div>
+        ) : (
+          <div
+            ref={gridRef}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-5"
+          >
+            {accumulatedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} setCardRef={addCardRef} />
+            ))}
+          </div>
+        )}
 
         {/* Count + Load more */}
         <div className="mt-8 sm:mt-12 flex flex-col items-center gap-3">
           <p className="text-xs sm:text-sm text-slate-500">
-            Showing {PRODUCTS.length} of 49 results
+            Showing {accumulatedProducts.length} of {total} results
           </p>
-          <button
-            className="flex items-center gap-2 px-8 sm:px-10 py-2.5 sm:py-3.5 rounded-full border cursor-pointer
-            font-semibold text-xs sm:text-sm transition-all duration-200 active:scale-95"
-            style={{ borderColor: BRAND, color: BRAND }}
-          >
-            View more results
-            <ChevronRight size={14} />
-          </button>
+          {hasMore && (
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={productsFetching}
+              className="flex items-center gap-2 px-8 sm:px-10 py-2.5 sm:py-3.5 rounded-full border cursor-pointer
+              font-semibold text-xs sm:text-sm transition-all duration-200 active:scale-95 disabled:opacity-60"
+              style={{ borderColor: BRAND, color: BRAND }}
+            >
+              {productsFetching ? "Loading..." : "View more results"}
+              <ChevronRight size={14} />
+            </button>
+          )}
         </div>
       </div>
 

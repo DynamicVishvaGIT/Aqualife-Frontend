@@ -5,6 +5,7 @@ import {
     resendOtp,
     getCurrentUser,
     logoutUser,
+    updateProfile,
 } from "../auth/auth";
 
 
@@ -42,9 +43,22 @@ export const useCurrentUser = () => {
         queryFn: getCurrentUser,
         retry: false,
         staleTime: 1000 * 60 * 5,
-        select: (data) => data.user,
     });
 };
+
+
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateProfile,
+    onSuccess: (data) => {
+      // backend returns { message, user } — sync it straight into the cache
+      queryClient.setQueryData(["currentUser"], data.user);
+    },
+  });
+};
+
 
 export const useLogout = () => {
     const queryClient = useQueryClient();

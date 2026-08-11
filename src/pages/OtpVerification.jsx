@@ -2,10 +2,11 @@
 import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import sideBanner from "../assets/side_banner.png";
-// import { useResendOtp, useVerifyOtp } from "../features/auth/hooks/authHooks";
 
 import { useLocation, useNavigate } from "react-router-dom";
-// import { useVerifyOtp, useResendOtp } from "../features/auth/hooks/useAuth";
+import { useResendOtp, useVerifyOtp } from "../features/hooks/authHooks";
+import { useAuth } from "../context/AuthProvider";
+import { useSweetAlert } from "../context/SweetAlertProvider";
 
 const OTP_LENGTH = 4;
 const BRAND = "#1A6FC4";
@@ -30,19 +31,22 @@ export default function OtpVerification() {
   const submitRef = useRef(null);
   const firstInputRef = useRef(null);
 
-  // const { state } = useLocation();
+  const { state } = useLocation();
   const navigate = useNavigate();
-  // const mobile = state?.mobile;
+  const mobile = state?.mobile;
+
+  const { refetchUser } = useAuth();
+  const sweetAlert = useSweetAlert();
 
   // redirect back if someone lands here directly without a mobile number
-  // useEffect(() => {
-  //   if (!mobile) navigate("/login", { replace: true });
-  // }, [mobile, navigate]);
+  useEffect(() => {
+    if (!mobile) navigate("/login", { replace: true });
+  }, [mobile, navigate]);
 
-  // const { mutate: verifyOtp, isPending: verifying } = useVerifyOtp();
-  // const { mutate: resendOtpMutation, isPending: resending } = useResendOtp();
+  const { mutate: verifyOtp, isPending: verifying } = useVerifyOtp();
+  const { mutate: resendOtpMutation, isPending: resending } = useResendOtp();
 
-  const PHONE = "+91-8345678930";
+  const PHONE = mobile;
 
   /* ── countdown ── */
   useEffect(() => {
@@ -160,32 +164,6 @@ export default function OtpVerification() {
     return () => clearTimeout(t);
   }, [success, navigate]);
 
-  // const handleSubmit = () => {
-  //   setSubmitted(true);
-  //   const code = otp.join("");
-  //   if (code.length < OTP_LENGTH) {
-  //     setError(`Please enter all ${OTP_LENGTH} digits.`);
-  //     triggerShake();
-  //     return;
-  //   }
-  //   pressBtn();
-  //   verifyOtp(
-  //     { mobile, otp: code },
-  //     {
-  //       onSuccess: () => {
-  //         setSuccess(true);
-  //         setError("");
-  //       },
-  //       onError: (err) => {
-  //         setError(err?.response?.data?.message || "Incorrect OTP. Please try again.");
-  //         triggerShake();
-  //         setOtp(Array(OTP_LENGTH).fill(""));
-  //         inputRefs.current[0]?.focus();
-  //       },
-  //     }
-  //   );
-  // };
-
   const handleSubmit = () => {
     setSubmitted(true);
     const code = otp.join("");
@@ -195,48 +173,50 @@ export default function OtpVerification() {
       return;
     }
     pressBtn();
-    if (code === "1234") {
-      setSuccess(true);
-      setError("");
-    } else {
-      setError("Incorrect OTP. Please try again.");
-      triggerShake();
-      setOtp(Array(OTP_LENGTH).fill(""));
-      inputRefs.current[0]?.focus();
-    }
-  };
+    verifyOtp(
+      { mobile, otp: code },
+      {
+        onSuccess: async (data) => {
+          await refetchUser();
+          setSuccess(true);
+          setError("");
 
-  // const handleResend = () => {
-  //   if (!canResend) return;
-  //   resendOtpMutation(mobile, {
-  //     onSuccess: () => {
-  //       setOtp(Array(OTP_LENGTH).fill(""));
-  //       setError("");
-  //       setSuccess(false);
-  //       setSubmitted(false);
-  //       setResent(true);
-  //       setTimer(30);
-  //       setCanResend(false);
-  //       inputRefs.current[0]?.focus();
-  //       setTimeout(() => setResent(false), 3000);
-  //     },
-  //     onError: (err) => {
-  //       setError(err?.response?.data?.message || "Failed to resend OTP");
-  //     },
-  //   });
-  // };
+          // data.user comes straight from the verify-otp response, so we
+          // don't have to wait on the refetch to know who just logged in.
+          const name = data?.user?.name;
+          sweetAlert?.success({
+            title: name ? `Welcome back, ${name}!` : "Welcome to Aqualife!",
+            text: "You're logged in successfully.",
+          });
+        },
+        onError: (err) => {
+          setError(err?.response?.data?.message || "Incorrect OTP. Please try again.");
+          triggerShake();
+          setOtp(Array(OTP_LENGTH).fill(""));
+          inputRefs.current[0]?.focus();
+        },
+      }
+    );
+  };
 
   const handleResend = () => {
     if (!canResend) return;
-    setOtp(Array(OTP_LENGTH).fill(""));
-    setError("");
-    setSuccess(false);
-    setSubmitted(false);
-    setResent(true);
-    setTimer(30);
-    setCanResend(false);
-    inputRefs.current[0]?.focus();
-    setTimeout(() => setResent(false), 3000);
+    resendOtpMutation(mobile, {
+      onSuccess: () => {
+        setOtp(Array(OTP_LENGTH).fill(""));
+        setError("");
+        setSuccess(false);
+        setSubmitted(false);
+        setResent(true);
+        setTimer(30);
+        setCanResend(false);
+        inputRefs.current[0]?.focus();
+        setTimeout(() => setResent(false), 3000);
+      },
+      onError: (err) => {
+        setError(err?.response?.data?.message || "Failed to resend OTP");
+      },
+    });
   };
 
   const filled = otp.filter(Boolean).length;
@@ -257,14 +237,6 @@ export default function OtpVerification() {
 
   return (
     <>
-      {/*
-        ── Full-viewport wrapper ──
-        On phones the 80px navbar assumption can be too tall (many mobile navbars
-        are ~64px). We keep the 80px offset for md+ (matches the desktop navbar)
-        but fall back to a safer 64px subtraction on small screens, and always
-        allow the wrapper itself to scroll as a last resort so nothing is ever
-        clipped on very short viewports (e.g. landscape phones).
-      */}
       <div
         className="primary-container flex items-center justify-center overflow-y-auto overflow-x-hidden"
         style={{
@@ -272,7 +244,6 @@ export default function OtpVerification() {
           minHeight: "calc(100dvh - 80px)",
         }}
       >
-        {/* ── Inner flex column on mobile, row from md up ── */}
         <div
           ref={containerRef}
           className="w-full min-h-[calc(100dvh-80px)] md:h-full flex flex-col md:flex-row"
@@ -436,22 +407,7 @@ export default function OtpVerification() {
                   )}
                 </div>
 
-                {/* submit */}
-                <button
-                  ref={submitRef}
-                  onClick={handleSubmit}
-                  className="w-full py-3 sm:py-3.5 rounded-lg text-white font-semibold text-sm sm:text-base"
-                  style={{
-                    backgroundColor: isComplete ? BRAND : `${BRAND}70`,
-                    cursor: isComplete ? "pointer" : "not-allowed",
-                  }}
-                  onMouseEnter={isComplete ? btnEnter : undefined}
-                  onMouseLeave={isComplete ? btnLeave : undefined}
-                >
-                  Submit
-                </button>
-
-                {/* submit with API (swap in when ready):
+                {/* submit with API */}
                 <button
                   ref={submitRef}
                   onClick={handleSubmit}
@@ -465,25 +421,11 @@ export default function OtpVerification() {
                   onMouseLeave={isComplete ? btnLeave : undefined}
                 >
                   {verifying ? "Verifying..." : "Submit"}
-                </button> */}
+                </button>
 
                 {/* resend */}
                 <p className="text-center text-sm text-gray-500 -mt-2">
                   Did Not Receive Verification Code?{" "}
-                  {canResend ? (
-                    <button
-                      onClick={handleResend}
-                      className="font-bold"
-                      style={{ color: ORANGE }}
-                    >
-                      Resend OTP
-                    </button>
-                  ) : (
-                    <span className="font-medium text-gray-400">
-                      Resend in {timer}s
-                    </span>
-                  )}
-                  {/* resend with API (swap in when ready):
                   {canResend ? (
                     <button
                       onClick={handleResend}
@@ -497,7 +439,7 @@ export default function OtpVerification() {
                     <span className="font-medium text-gray-400">
                       Resend in {timer}s
                     </span>
-                  )} */}
+                  )}
                 </p>
               </div>
             )}

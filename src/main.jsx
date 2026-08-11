@@ -6,6 +6,9 @@ import App from "./App";
 import "./App.css";
 import { registerSW } from "virtual:pwa-register";
 
+import { SweetAlertProvider } from "./context/SweetAlertProvider";
+import { AuthProvider } from "./context/AuthProvider";
+
 // Register Service Worker
 registerSW({ immediate: true });
 
@@ -21,15 +24,15 @@ const queryClient = new QueryClient({
 });
 
 function Root() {
-  const [loading, setLoading] = useState(true);
-
   return (
     <QueryClientProvider client={queryClient}>
-   
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      
+      <BrowserRouter>
+        <SweetAlertProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </SweetAlertProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }
