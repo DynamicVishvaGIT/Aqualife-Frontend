@@ -10,6 +10,7 @@ import ro_img_3 from "../assets/ro_bg_2.png";
 import PdfDownloadSection from "../components/DownloadPdf";
 import FaqSection from "../components/FaqSection";
 import WaterPurifierInfo from "../components/WaterPurifierInfo";
+import EnquireModal from "../components/EnquireModal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -69,7 +70,7 @@ const defaultCardsData = [
 /* ─────────────────────────────────────────────
    INDUSTRIAL SECTION
 ───────────────────────────────────────────── */
-function IndustrialWaterPurificationSection({ cardsData = defaultCardsData }) {
+function IndustrialWaterPurificationSection({ cardsData = defaultCardsData, onEnquireClick }) {
   return (
     <section className="bg-white py-10 sm:py-12 md:py-14">
       <div className="primary-container w-full">
@@ -82,6 +83,12 @@ function IndustrialWaterPurificationSection({ cardsData = defaultCardsData }) {
         {cardsData.map((item, i) => {
           const style = CARD_STYLES[i % CARD_STYLES.length];
           const card = { ...item, ...style };
+
+          const handleEnquireClick = () => {
+            if (onEnquireClick) {
+              onEnquireClick(card.title);
+            }
+          };
 
           return (
             <div
@@ -132,7 +139,10 @@ function IndustrialWaterPurificationSection({ cardsData = defaultCardsData }) {
                   >
                     {card.description}
                   </p>
-                  <button className="mt-3 sm:mt-4 px-4 sm:px-5 py-2 sm:py-2.5 bg-[#0061C2] text-white text-xs sm:text-sm font-semibold rounded-full transition-colors hover:bg-[#004e9c]">
+                  <button 
+                    className="mt-3 sm:mt-4 px-4 sm:px-5 py-2 sm:py-2.5 bg-[#0061C2] text-white text-xs sm:text-sm font-semibold rounded-full transition-colors hover:bg-[#004e9c]"
+                    onClick={handleEnquireClick}
+                  >
                     {card.buttonText}
                   </button>
                 </div>
@@ -370,6 +380,20 @@ const ROPlant = () => {
   const heroDescRef = useRef(null);
   const breadcrumbRef = useRef(null);
 
+  // Modal state
+  const [isEnquireOpen, setIsEnquireOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const openEnquireModal = (productName = "Industrial RO Plant") => {
+    setSelectedProduct(productName);
+    setIsEnquireOpen(true);
+  };
+
+  const closeEnquireModal = () => {
+    setIsEnquireOpen(false);
+    setTimeout(() => setSelectedProduct(null), 300);
+  };
+
   useEffect(() => {
     if (prefersReducedMotion()) return;
 
@@ -460,6 +484,13 @@ const ROPlant = () => {
               >
                 {heroData.description}
               </p>
+              {/* Hero Enquiry Button */}
+              <button
+                onClick={() => openEnquireModal("Industrial RO Plant")}
+                className="mt-5 sm:mt-6 px-6 sm:px-8 py-2.5 sm:py-3 bg-[#0061C2] text-white text-sm sm:text-base font-semibold rounded-full transition-colors hover:bg-[#004e9c]"
+              >
+                Enquire Now
+              </button>
             </div>
           </div>
         </div>
@@ -484,17 +515,23 @@ const ROPlant = () => {
         </p>
       </div>
 
-      <IndustrialWaterPurificationSection />
+      <IndustrialWaterPurificationSection onEnquireClick={openEnquireModal} />
       <FiltrationModuleSection />
 
       <WaterPurifierInfo
-        // image={ro_img_1}
         content={roInfoContent}
         cards={roInfoCards}
       />
 
       <PdfDownloadSection />
       <FaqSection />
+
+      {/* Enquiry Modal */}
+      <EnquireModal
+        isOpen={isEnquireOpen}
+        onClose={closeEnquireModal}
+        productName={selectedProduct}
+      />
     </section>
   );
 };

@@ -4,21 +4,18 @@ import Breadcrumb from "../components/Breadcrumb";
 import coller1 from "../assets/water-cooler_1.png";
 import coller2 from "../assets/water-cooler_2.png";
 import coller3 from "../assets/water-cooler_3.png";
-import coller4 from "../assets/water-cooler_2.png";
 import { WaterButton } from "../components/WaterButton";
 import { useNavigate } from "react-router-dom";
-import { ShieldCheck, Droplets, Database } from "lucide-react";
 import gsap from "gsap";
-
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import coolerPeople from "../assets/water_cooler_banner_1.jpg";
 import coolerSchool from "../assets/water_cooler_banner_2.jpg";
 import { ChevronDown } from "lucide-react";
 import WaterPurifierInfo from "../components/WaterPurifierInfo";
+import EnquireModal from "../components/EnquireModal";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Respect users who've asked for less motion
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -39,7 +36,7 @@ const PRODUCTS = [
     id: 2,
     image: coller2,
     badge: null,
-    name: "Venus",
+    name: "Mars",
     description: "UV+UF+Copper & zinc water purifier",
     price: 28999,
     mrp: 39000,
@@ -49,7 +46,7 @@ const PRODUCTS = [
     id: 3,
     image: coller3,
     badge: null,
-    name: "Venus",
+    name: "Jupiter",
     description: "UV+UF+Copper & zinc water purifier",
     price: 28999,
     mrp: 39000,
@@ -59,7 +56,7 @@ const PRODUCTS = [
     id: 4,
     image: coller2,
     badge: null,
-    name: "Venus",
+    name: "Saturn",
     description: "UV+UF+Copper & zinc water purifier",
     price: 28999,
     mrp: 39000,
@@ -105,7 +102,6 @@ const COOLER_FEATURES = [
   },
 ];
 
-// table data
 const SPECS = [
   { label: "Model", value: "20/40/80/150/200 Ltr" },
   { label: "Storage Capacity", value: "20/40/80/150/200" },
@@ -116,16 +112,18 @@ const SPECS = [
   { label: "No. of Faucets", value: "2" },
   { label: "Tank Cleaning/ Remote", value: "Provided" },
   { label: "Compressor Watt", value: "2.0 Wat" },
-  { label: "Compressor", value: "Hematic with suction gas cooled motor with overloaded protector" },
+  {
+    label: "Compressor",
+    value:
+      "Hematic with suction gas cooled motor with overloaded protector",
+  },
   { label: "Condenser Fan", value: "Propeller Type" },
-  // additional rows revealed by "Show More"
   { label: "Refrigerant", value: "R134a (Eco-friendly)" },
   { label: "Body Material", value: "Mild Steel with Powder Coating" },
   { label: "Net Weight", value: "32 Kg" },
   { label: "Warranty", value: "1 Year Comprehensive" },
 ];
 
-/* ── Why you need a water cooler + How to choose (content only, icons untouched) ── */
 const waterCoolerContent = {
   eyebrow: "Why Choose a Water Cooler",
   heroTitle: "Why Do You Need a Water Purifier?",
@@ -140,8 +138,6 @@ const waterCoolerContent = {
   sectionSubtitle: "",
 };
 
-// only reusing the icons already defined in WaterPurifierInfo's ICON_MAP:
-// Droplet, Waves, Layers, Users — nothing new added there
 const waterCoolerCards = [
   {
     icon: "Users",
@@ -171,7 +167,7 @@ const waterCoolerCards = [
 ];
 
 /* ── Product card ── */
-function ProductCard({ product, setCardRef }) {
+function ProductCard({ product, setCardRef, onEnquireClick }) {
   const navigate = useNavigate();
   const cardRef = useRef(null);
   const imgRef = useRef(null);
@@ -200,15 +196,20 @@ function ProductCard({ product, setCardRef }) {
     gsap.to(imgRef.current, { scale: 1, duration: 0.3, ease: "power2.out" });
   };
 
+  const handleEnquireClick = () => {
+    if (onEnquireClick) {
+      onEnquireClick(product);
+    }
+  };
+
   return (
     <div
       ref={cardRef}
       className="bg-white cursor-pointer rounded-2xl border border-slate-100 p-3 sm:p-5 flex flex-col h-full select-none justify-between"
-      onClick={() => navigate("/product-details")}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="relative  bg-white rounded-xl flex items-center justify-center h-25 sm:h-52 mb-3 sm:mb-4 overflow-hidden">
+      <div className="relative bg-white rounded-xl flex items-center justify-center h-25 sm:h-52 mb-3 sm:mb-4 overflow-hidden">
         {product.badge && (
           <span className="absolute top-1.5 left-1.5 z-10 bg-slate-100 text-slate-500 text-[10px] sm:text-[11px] font-medium px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
             {product.badge}
@@ -247,30 +248,23 @@ function ProductCard({ product, setCardRef }) {
         </div>
       </div>
 
-      {/* Action row — optimized touch target sizing on mobile */}
+      {/* Action row */}
       <div className="flex gap-1 mt-auto">
         <WaterButton
           variant="primary"
           className="flex-1 py-1 px-3 sm:py-2.5 text-[11px] sm:text-sm"
+          onClick={handleEnquireClick}
         >
-          Book Demo
+          Enquiry Now
         </WaterButton>
-
-        <button
-          className="flex-1 text-slate-500 text-[8px] sm:text-sm border border-[#F0F3F6]
-          rounded-full cursor-pointer hover:text-blue-600 hover:border-[#155DFC] font-medium transition-colors
-          py-1 sm:py-2.5 px-2 sm:px-3"
-        >
-          View Detail
-        </button>
       </div>
     </div>
   );
 }
 
+/* ── Spec table ── */
 const VISIBLE_COUNT = 11;
 
-// table
 const ProductSpecTable = ({
   title = "Water Cooler – Inbuilt RO and UV Water Purifier",
   subtitle = "Available Capacity: 20 / 40 / 80 / 150 / 200 Ltr.",
@@ -313,7 +307,6 @@ const ProductSpecTable = ({
   return (
     <section ref={sectionRef} className="bg-[#FFFFFF] py-8 sm:py-10">
       <div className="primary-container">
-        {/* Heading */}
         <h2 className="heading text-xl sm:text-2xl lg:text-[28px] font-bold text-[#191919] leading-tight">
           {title}
         </h2>
@@ -321,7 +314,6 @@ const ProductSpecTable = ({
           {subtitle}
         </p>
 
-        {/* Spec rows */}
         <div className="mt-5 sm:mt-6">
           {visibleSpecs.map((spec, idx) => (
             <div
@@ -339,7 +331,6 @@ const ProductSpecTable = ({
           ))}
         </div>
 
-        {/* Show more / less */}
         {hasMore && (
           <button
             type="button"
@@ -360,24 +351,39 @@ const ProductSpecTable = ({
   );
 };
 
+/* ── Page ── */
 const WaterCooler = () => {
   const sectionRef = useRef(null);
-  const imageRef = useRef(null);
   const pinRef = useRef(null);
-
-  const headingRef = useRef(null);
   const productHeadingRef = useRef(null);
   const productGridRef = useRef(null);
   const featureHeadingRef = useRef(null);
   const featuresWrapRef = useRef(null);
   const splitImgWrapRef = useRef(null);
+  const heroWrapRef = useRef(null);
+  const heroImgRef = useRef(null);
 
   const cardRefs = useRef([]);
   const addCardRef = (el) => {
     if (el && !cardRefs.current.includes(el)) cardRefs.current.push(el);
   };
 
-  // Pin animation (unchanged)
+  // Modal state
+  const [isEnquireOpen, setIsEnquireOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const openEnquireModal = (product = null) => {
+    setSelectedProduct(product);
+    setIsEnquireOpen(true);
+  };
+
+  const closeEnquireModal = () => {
+    setIsEnquireOpen(false);
+    // Delay clearing selected product to allow for smooth transition
+    setTimeout(() => setSelectedProduct(null), 300);
+  };
+
+  // Pin animation
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const mm = gsap.matchMedia();
@@ -388,7 +394,11 @@ const WaterCooler = () => {
           pin: pinRef.current,
           start: "top top-=130",
           end: () =>
-            `+=${sectionRef.current.offsetHeight - pinRef.current.offsetHeight - 100}`,
+            `+=${
+              sectionRef.current.offsetHeight -
+              pinRef.current.offsetHeight -
+              100
+            }`,
           pinSpacing: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -396,14 +406,13 @@ const WaterCooler = () => {
       });
 
       ScrollTrigger.refresh();
-
       return () => mm.revert();
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
-  /* ── Product section: heading + grid reveal ── */
+  /* Product heading + grid reveal */
   useEffect(() => {
     const ctx = gsap.context(() => {
       if (productHeadingRef.current) {
@@ -448,24 +457,18 @@ const WaterCooler = () => {
     return () => ctx.revert();
   }, []);
 
-  /* ── Experience section: heading + feature cards + pinned image ── */
-  const heroWrapRef = useRef(null);
-  const heroImgRef = useRef(null);
-
+  /* Hero image zoom-in */
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-
-      tl.fromTo(
+      gsap.timeline({ defaults: { ease: "power3.out" } }).fromTo(
         heroImgRef.current,
         { scale: 1.15 },
         { scale: 1, duration: 1.6 }
       );
     }, heroWrapRef);
 
-    // Safety net: recalc ScrollTrigger positions once everything (fonts/images) has settled
     const onLoad = () => ScrollTrigger.refresh();
     window.addEventListener("load", onLoad);
 
@@ -480,10 +483,7 @@ const WaterCooler = () => {
       {/* Hero Banner */}
       <div
         ref={heroWrapRef}
-        className="relative w-full overflow-hidden
-      aspect-[4/5]
-      sm:aspect-[16/10]
-      lg:aspect-[1440/572]"
+        className="relative w-full overflow-hidden aspect-[4/5] sm:aspect-[16/10] lg:aspect-[1440/572]"
       >
         <img
           src={banner1}
@@ -491,8 +491,6 @@ const WaterCooler = () => {
           alt="Water Cooler Banner"
           className="absolute inset-0 w-full h-full object-cover"
         />
-
-        {/* Breadcrumb */}
         <div className="absolute top-2 lg:top-14 left-0 w-full z-10">
           <div className="primary-container">
             <Breadcrumb />
@@ -500,10 +498,9 @@ const WaterCooler = () => {
         </div>
       </div>
 
-      {/* water cooler */}
+      {/* Product listing */}
       <section className="bg-[#FFFFFF] py-10 sm:py-12">
         <div className="primary-container">
-          {/* Heading */}
           <div
             ref={productHeadingRef}
             className="w-full mb-10 flex flex-col items-center justify-center"
@@ -511,14 +508,12 @@ const WaterCooler = () => {
             <h2 className="heading text-2xl lg:text-4xl font-semibold text-[#191919]">
               Aqualife Water Cooler
             </h2>
-
             <p className="mt-3 text-[gray] text-[11px] lg:text-sm">
               Choose Water Cooler that best suits your needs & budget
             </p>
           </div>
         </div>
 
-        {/* Product grid — 2 columns on mobile, scaling up smoothly */}
         <div className="bg-[#F6FAFF] py-10 sm:py-12">
           <div className="primary-container">
             <div
@@ -526,7 +521,12 @@ const WaterCooler = () => {
               className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-5"
             >
               {PRODUCTS.map((product) => (
-                <ProductCard key={product.id} product={product} setCardRef={addCardRef} />
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  setCardRef={addCardRef}
+                  onEnquireClick={openEnquireModal}
+                />
               ))}
             </div>
           </div>
@@ -549,13 +549,10 @@ const WaterCooler = () => {
             </p>
           </div>
 
-          {/* Content */}
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
-            {/* Left Cards */}
             <div ref={featuresWrapRef} className="order-2 lg:order-1 space-y-6">
               {COOLER_FEATURES.map((feature) => (
-                <div
-                  key={feature.id}
+                <div                  key={feature.id}
                   className={`rounded-3xl p-6 lg:p-8 ${feature.bg}`}
                 >
                   <h3 className="heading text-lg font-semibold text-[#191919]">
@@ -568,7 +565,6 @@ const WaterCooler = () => {
               ))}
             </div>
 
-            {/* Right Image */}
             <div className="order-1 lg:order-2">
               <div ref={pinRef} className="flex justify-center">
                 <img
@@ -584,22 +580,20 @@ const WaterCooler = () => {
         </div>
       </section>
 
+      {/* Split images */}
       <section className="bg-white">
         <div ref={splitImgWrapRef} className="grid grid-cols-1 md:grid-cols-2">
-          {/* Left */}
           <div className="overflow-hidden h-[350px] sm:h-[400px] md:h-[420px] lg:h-[600px] 2xl:h-[950px]">
             <img
-            loading="lazy"
+              loading="lazy"
               src={coolerPeople}
               alt="Office Water Cooler"
               className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             />
           </div>
-
-          {/* Right */}
           <div className="overflow-hidden h-[350px] sm:h-[400px] md:h-[420px] lg:h-[600px] 2xl:h-[950px]">
             <img
-            loading="lazy"
+              loading="lazy"
               src={coolerSchool}
               alt="School Water Cooler"
               className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
@@ -610,11 +604,16 @@ const WaterCooler = () => {
 
       <ProductSpecTable />
 
-      {/* Why you need a water cooler + How to choose */}
       <WaterPurifierInfo
-        // image={coller1}
         content={waterCoolerContent}
         cards={waterCoolerCards}
+      />
+
+      {/* Enquiry Modal */}
+      <EnquireModal
+        isOpen={isEnquireOpen}
+        onClose={closeEnquireModal}
+        productName={selectedProduct?.name}
       />
     </main>
   );

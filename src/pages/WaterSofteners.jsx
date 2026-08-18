@@ -11,6 +11,8 @@ import FaqSection from "../components/FaqSection";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import WaterPurifierInfo from "../components/WaterPurifierInfo";
+import { WaterButton } from "../components/WaterButton";
+import EnquireModal from "../components/EnquireModal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -152,6 +154,7 @@ function SoftenerAqualifetSection() {
           <p className="mt-4 text-sm text-gray-500 leading-relaxed max-w-4xl mx-auto">
             {sectionData.description[1]}
           </p>
+          
         </div>
 
         {/* ---------- Sub-heading ---------- */}
@@ -248,7 +251,8 @@ function CheckIcon() {
   );
 }
 
-function WhyChooseAqualife() {
+// Accepts onEnquireClick so this section can trigger the modal owned by the parent
+function WhyChooseAqualife({ onEnquireClick }) {
   const sectionRef = useRef(null);
   const imgRef = useRef(null);
   const headingRef = useRef(null);
@@ -391,6 +395,14 @@ function WhyChooseAqualife() {
                 </li>
               ))}
             </ul>
+
+        <WaterButton
+          variant="primary"
+          className="flex-1 ml-5 mt-3 py-1 px-3 sm:py-2.5 text-[11px] sm:text-sm"
+          onClick={onEnquireClick}
+        >
+          Enquiry Now
+        </WaterButton>
           </div>
         </div>
       </div>
@@ -726,6 +738,11 @@ const WaterSofteners = () => {
   const heroTitleRef = useRef(null);
   const heroDescRef = useRef(null);
 
+  // Modal state lives here so both "Enquiry Now" buttons (hero + WhyChooseAqualife) can open it
+  const [isEnquireOpen, setIsEnquireOpen] = useState(false);
+  const openEnquireModal = () => setIsEnquireOpen(true);
+  const closeEnquireModal = () => setIsEnquireOpen(false);
+
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
 
@@ -816,6 +833,13 @@ lg:aspect-[1440/700]"
               >
                 {pageData.hero.description}
               </p>
+              <WaterButton
+                variant="primary"
+                className="flex-1 py-1 px-3 mt-5 ml-2 sm:py-2.5 text-[11px] sm:text-sm"
+                onClick={openEnquireModal}
+              >
+                Enquiry Now
+              </WaterButton>
             </div>
           </div>
         </div>
@@ -823,18 +847,21 @@ lg:aspect-[1440/700]"
 
       {/* Other Sections */}
       <SoftenerAqualifetSection />
-      <WhyChooseAqualife />
+      <WhyChooseAqualife onEnquireClick={openEnquireModal} />
       <AutoTechnicalSpecification />
 
       {/* What is hard water + How to choose */}
       <WaterPurifierInfo
-        // image={softer_img_1}
+        // image={softer_img_1
         content={softenerInfoContent}
         cards={softenerInfoCards}
       />
 
       <DownloadPdf />
       <FaqSection />
+
+      {/* Enquiry Modal */}
+      <EnquireModal isOpen={isEnquireOpen} onClose={closeEnquireModal} />
     </div>
   );
 };

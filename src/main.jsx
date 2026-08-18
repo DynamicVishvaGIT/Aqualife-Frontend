@@ -4,13 +4,9 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 import "./App.css";
-import { registerSW } from "virtual:pwa-register";
 
 import { SweetAlertProvider } from "./context/SweetAlertProvider";
 import { AuthProvider } from "./context/AuthProvider";
-
-// Register Service Worker
-registerSW({ immediate: true });
 
 // Create Query Client only once
 const queryClient = new QueryClient({
